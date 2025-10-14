@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cogmatiq: Automated Intelligence</title>
+    <meta name="description" content="Cogmatiq provides instant, expert answers from your business data. Turn your documents into an expert AI assistant.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Applying our custom font and color palette */
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #1A1D24; /* Deep Space */
+            color: #E0E0E0; /* Starlight */
+        }
+        .accent-text {
+            color: #00C2B8; /* Cyber Teal */
+        }
+        .accent-bg {
+            background-color: #00C2B8; /* Cyber Teal */
+        }
+        .accent-bg:hover {
+            background-color: #00A39A; /* A slightly darker teal for hover */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="text-center max-w-2xl mx-auto p-8">
+        
+        <div class="mb-8">
+            <h1 class="text-5xl font-extrabold tracking-tight">Cogmatiq</h1>
+        </div>
+
+        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+            Instant, Expert Answers from Your Business Data.
+        </h2>
+
+        <p class="text-lg text-gray-400 mb-8">
+            We're building the first true AI assistant for small businesses. Turn your documents, handbooks, and internal knowledge into an expert that's available 24/7.
+        </p>
+
+        <form action="https://formspree.io/f/xanplkjw" method="POST" class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
+            <input 
+                type="email" 
+                name="email"
+                placeholder="Enter your email to get notified" 
+                required
+                class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00C2B8]">
+            <button 
+                type="submit" 
+                class="accent-bg text-white font-bold p-4 rounded-md transition-colors duration-300">
+                Notify Me
+            </button>
+        </form>
+
+    </div>
+
+</body>
+</html>
