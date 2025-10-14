@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cogmatiq: Automated Intelligence</title>
-    <meta name="description" content="Cogmatiq provides instant, expert answers from your business data. Turn your documents into an expert AI assistant.">
+    <title>Cogmatiq: Your Proactive Knowledge Partner</title>
+    <meta name="description" content="Cogmatiq is building a proactive AI partner to unify your personal knowledge, reduce cognitive load, and automate your digital life. Join us.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Applying our custom font and color palette */
+        /* Applying our "Deep Dive" palette and Manrope font */
         body {
             font-family: 'Manrope', sans-serif;
             background-color: #1A1D24; /* Deep Space */
@@ -26,41 +26,60 @@
             background-color: #00C2B8; /* Cyber Teal */
         }
         .accent-bg:hover {
-            background-color: #00A39A; /* A slightly darker teal for hover */
+            background-color: #00A39A; /* A slightly darker teal for hover effect */
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div class="text-center max-w-2xl mx-auto p-8">
+    <div class="text-center max-w-3xl mx-auto">
         
         <div class="mb-8">
             <h1 class="text-5xl font-extrabold tracking-tight">Cogmatiq</h1>
+            <p class="accent-text font-bold mt-2">Your Proactive Knowledge Partner</p>
         </div>
 
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
-            Instant, Expert Answers from Your Business Data.
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
+            Stop Searching. <br> Start <span class="accent-text">Activating</span> Your Knowledge.
         </h2>
 
-        <p class="text-lg text-gray-400 mb-8">
-            We're building the first true AI assistant for small businesses. Turn your documents, handbooks, and internal knowledge into an expert that's available 24/7.
+        <p class="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
+            We're building a true AI teammate that unifies your scattered notes, documents, and emails, and proactively automates your work.
         </p>
 
-        <form action="https://formspree.io/f/xanplkjw" method="POST" class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
+        <form action="YOUR_FORMSPREE_ENDPOINT" method="POST" class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto mb-12">
             <input 
                 type="email" 
                 name="email"
-                placeholder="Enter your email to get notified" 
+                placeholder="your-email@domain.com" 
                 required
-                class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00C2B8]">
+                class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00C2B8] text-center md:text-left">
             <button 
                 type="submit" 
-                class="accent-bg text-white font-bold p-4 rounded-md transition-colors duration-300">
-                Notify Me
+                class="accent-bg text-white font-bold py-4 px-6 rounded-md transition-colors duration-300">
+                Join the Waitlist
             </button>
         </form>
+        
+        <div class="border-t border-gray-800 pt-8">
+            <h3 class="text-xl font-bold mb-4 accent-text">Our Vision</h3>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                We're all drowning in digital information. Cogmatiq is being built to solve this. Our ultimate goal is an AI partner that reduces your cognitive load and anticipates your needs, starting with mastering your documents and evolving into a fully proactive teammate. Join us on the journey.
+            </p>
+        </div>
 
     </div>
+
+    <footer class="absolute bottom-0 left-0 w-full p-6">
+        <div class="flex justify-center items-center gap-6">
+            <a href="https://x.com/cogmatiq" target="_blank" class="text-gray-500 hover:accent-text transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+            </a>
+            <a href="YOUR_LINKEDIN_COMPANY_PAGE_URL" target="_blank" class="text-gray-500 hover:accent-text transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+            </a>
+        </div>
+    </footer>
 
 </body>
 </html>
