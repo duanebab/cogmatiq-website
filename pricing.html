@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade to Pro - Cogmatiq</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        .accent-text { color: #00B5AD; }
+        .accent-bg { background-color: #00B5AD; }
+        .accent-bg:hover { background-color: #009A94; }
+    </style>
+</head>
+<body class="w-full">
+
+    <header class="py-4 px-8 flex justify-between items-center border-b border-gray-700">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <span class="text-2xl font-bold text-white">Cogmatiq</span>
+        </a>
+    </header>
+
+    <main class="py-12 px-4">
+        <div class="max-w-md mx-auto text-center bg-gray-800/30 p-8 rounded-lg">
+            <h1 class="text-3xl font-extrabold mb-2">Upgrade to Cogmatiq Pro</h1>
+            <p class="text-gray-400 mb-6">Unlock the full power of your personal AI.</p>
+
+            <div class="text-5xl font-bold mb-4">
+                $10<span class="text-lg font-medium text-gray-400">/month</span>
+            </div>
+
+            <ul class="text-left space-y-3 mb-8">
+                <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited Document Analysis</li>
+                <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Persistent Chat History</li>
+                <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority Support</li>
+            </ul>
+
+            <button id="upgrade-button" class="w-full accent-bg text-white font-bold py-3 px-4 rounded-md text-lg transition-colors duration-300">Upgrade Now</button>
+            <p id="message" class="mt-4 text-sm text-red-400"></p>
+        </div>
+    </main>
+
+    <script>
+        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        const API_ENDPOINT = 'https://api.cogmatiq.com/create-checkout-session';
+        const upgradeButton = document.getElementById('upgrade-button');
+        const messageEl = document.getElementById('message');
+
+        // Security Check: Ensure user is logged in
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (!session) {
+                window.location.href = '/login.html';
+            }
+        });
+
+        upgradeButton.addEventListener('click', async () => {
+            messageEl.textContent = 'Redirecting to checkout...';
+            
+            // Get the user's auth token
+            const { data, error } = await supabaseClient.auth.getSession();
+            if (error || !data.session) {
+                messageEl.textContent = 'Error: You must be logged in.';
+                return;
+            }
+            const token = data.session.access_token;
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Could not create checkout session.');
+                }
+                
+                const { url } = await response.json();
+                // Redirect user to Stripe's secure checkout page
+                window.location.href = url;
+
+            } catch (err) {
+                messageEl.textContent = `Error: ${err.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
