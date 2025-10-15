@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In - Cogmatiq</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        .accent-text { color: #00B5AD; }
+        .accent-bg { background-color: #00B5AD; }
+        .accent-bg:hover { background-color: #009A94; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md">
+        <a href="/" class="flex items-center justify-center gap-3 mb-8 transition-opacity hover:opacity-80">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <span class="text-2xl font-bold text-white">Cogmatiq</span>
+        </a>
+
+        <div class="bg-gray-800/30 p-8 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-6">Welcome Back</h1>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+                    <input type="email" id="email" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+                    <input type="password" id="password" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                </div>
+                <div>
+                    <button type="submit" class="w-full accent-bg text-white font-bold py-3 px-4 rounded-md transition-colors duration-300">Log In</button>
+                </div>
+            </form>
+            <p id="message" class="mt-4 text-center text-sm text-red-400"></p>
+            <p class="mt-6 text-center text-sm text-gray-400">
+                Don't have an account? <a href="/signup.html" class="accent-text font-medium hover:underline">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        const form = document.getElementById('login-form');
+        const messageEl = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            messageEl.textContent = '';
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                messageEl.textContent = `Error: ${error.message}`;
+            } else {
+                // On successful login, redirect to a dashboard page
+                window.location.href = '/dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>
