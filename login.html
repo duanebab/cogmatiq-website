@@ -50,28 +50,29 @@
     </div>
 
     <script>
-        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
-        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+    // FIX: Use a different name for the client instance
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        const form = document.getElementById('login-form');
-        const messageEl = document.getElementById('message');
+    const form = document.getElementById('login-form');
+    const messageEl = document.getElementById('message');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            messageEl.textContent = '';
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageEl.textContent = '';
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        // FIX: Use the new 'supabaseClient' variable
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            if (error) {
-                messageEl.textContent = `Error: ${error.message}`;
-            } else {
-                // On successful login, redirect to a dashboard page
-                window.location.href = '/dashboard.html';
-            }
-        });
-    </script>
+        if (error) {
+            messageEl.textContent = `Error: ${error.message}`;
+        } else {
+            window.location.href = '/dashboard.html';
+        }
+    });
+</script>
 </body>
 </html>

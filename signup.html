@@ -49,32 +49,32 @@
         </div>
     </div>
 
-    <script>
-        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
-        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+   <script>
+    const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+    // FIX: Use a different name for the client instance
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        const form = document.getElementById('signup-form');
-        const messageEl = document.getElementById('message');
+    const form = document.getElementById('signup-form');
+    const messageEl = document.getElementById('message');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            messageEl.textContent = '';
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageEl.textContent = '';
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
 
-            const { data, error } = await supabase.auth.signUp({ email, password });
-
-            if (error) {
-                messageEl.textContent = `Error: ${error.message}`;
-                messageEl.classList.add('text-red-400');
-            } else {
-                messageEl.textContent = 'Success! Please check your email for a confirmation link.';
-                messageEl.classList.remove('text-red-400');
-                messageEl.classList.add('text-green-400');
-                form.reset();
-            }
-        });
-    </script>
+        if (error) {
+            messageEl.textContent = `Error: ${error.message}`;
+            messageEl.classList.add('text-red-400');
+        } else {
+            messageEl.textContent = 'Success! Please check your email for a confirmation link.';
+            messageEl.classList.remove('text-red-400');
+            messageEl.classList.add('text-green-400');
+            form.reset();
+        }
+    });
+</script>
 </body>
 </html>
