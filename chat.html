@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with your AI - Cogmatiq</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #2C3E50; /* Dark Slate */
+            color: #FDFEFE; /* Off-White */
+        }
+        .accent-text { color: #00B5AD; }
+        .accent-bg { background-color: #00B5AD; }
+        .accent-bg:hover { background-color: #009A94; }
+        /* Custom scrollbar for a better look */
+        #chat-container::-webkit-scrollbar { width: 8px; }
+        #chat-container::-webkit-scrollbar-track { background: #2C3E50; }
+        #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        #chat-container::-webkit-scrollbar-thumb:hover { background: #6181a3; }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <header class="py-4 px-8 border-b border-gray-700">
+        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <span class="text-2xl font-bold text-white">Cogmatiq</span>
+        </a>
+    </header>
+
+    <main class="flex-grow flex flex-col p-4 md:p-8 max-w-4xl w-full mx-auto">
+        <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6">
+            <div class="flex items-start gap-3">
+                <div class="accent-bg p-2 rounded-full">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <div class="bg-gray-700 rounded-lg p-4 max-w-lg">
+                    <p>I have analyzed your document. Ask me anything about its content.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <form id="chat-form" class="flex items-center gap-4">
+                <input 
+                    type="text" 
+                    id="message-input"
+                    placeholder="Ask a question..." 
+                    required
+                    autocomplete="off"
+                    class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                <button 
+                    type="submit" 
+                    class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                </button>
+            </form>
+        </div>
+    </main>
+    
+    <script>
+        const API_ENDPOINT = 'https://api.cogmatiq.com/query';
+
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        
+        // 1. Get the session ID from the URL
+        const params = new URLSearchParams(window.location.search);
+        const clientSessionId = params.get('session_id');
+
+        if (!clientSessionId) {
+            // If no session ID, redirect back to home
+            window.location.href = '/';
+        }
+
+        // 2. Handle form submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = messageInput.value.trim();
+            if (!question) return;
+
+            // Display user message and clear input
+            addMessage(question, 'user');
+            messageInput.value = '';
+
+            // Display "thinking" indicator
+            const thinkingMessage = addMessage('...', 'ai');
+            
+            const formData = new FormData();
+            formData.append('question', question);
+            formData.append('client_id', clientSessionId);
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('The API returned an error.');
+                }
+                const data = await response.json();
+                
+                // Update "thinking" message with the actual answer
+                thinkingMessage.querySelector('p').textContent = data.answer;
+
+            } catch (error) {
+                thinkingMessage.querySelector('p').textContent = 'Sorry, something went wrong. Please try again.';
+            }
+        });
+
+        // 3. Function to add messages to the UI
+        function addMessage(text, sender) {
+            const messageElement = document.createElement('div');
+            
+            if (sender === 'user') {
+                messageElement.className = 'flex justify-end';
+                messageElement.innerHTML = `
+                    <div class="accent-bg rounded-lg p-4 max-w-lg">
+                        <p>${text}</p>
+                    </div>
+                `;
+            } else { // AI message
+                messageElement.className = 'flex items-start gap-3';
+                messageElement.innerHTML = `
+                    <div class="bg-gray-700 p-2 rounded-full">
+                         <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4 max-w-lg">
+                        <p class="animate-pulse">Thinking...</p>
+                    </div>
+                `;
+                 // We will update the inner text of this 'p' tag with the real response
+            }
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Auto-scroll to bottom
+            return messageElement;
+        }
+
+    </script>
+</body>
+</html>
