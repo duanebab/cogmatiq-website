@@ -33,14 +33,17 @@
     </header>
 
     <main class="py-12 px-4">
-        <div class="max-w-3xl mx-auto text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-4">Welcome to Your Dashboard</h1>
-            <p class="text-gray-300 md:text-lg mb-8">Ready to create your next AI expert? Upload your document below to get started.</p>
-            
-            <div id="drop-zone" class="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center cursor-pointer hover:border-accent-text hover:bg-gray-800/20 transition-all">
-                <p id="drop-zone-text" class="text-gray-400">Drag & Drop Your PDF Here, or Click to Select</p>
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold">Your Documents</h1>
+                <button id="upload-button" class="accent-bg text-white font-bold py-2 px-5 rounded-lg text-sm transition-transform transform hover:scale-105 inline-block">
+                    + Upload New
+                </button>
             </div>
-            <p id="error-message" class="text-red-400 mt-4 font-bold hidden"></p>
+            
+            <div id="document-list" class="space-y-4">
+                <p id="loading-text" class="text-gray-400">Loading your documents...</p>
+            </div>
         </div>
     </main>
     
@@ -51,70 +54,99 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
         
+        const uploadButton = document.getElementById('upload-button');
+        const fileInput = document.getElementById('file-input');
+        const documentList = document.getElementById('document-list');
+        const loadingText = document.getElementById('loading-text');
         const logoutButton = document.getElementById('logout-button');
 
-        // --- SECURITY CHECK ---
-        // This checks the user's login state
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            if (!session) {
-                // If no session (user is not logged in), redirect to login page
+        let userToken = null;
+
+        // --- SECURITY & DATA FETCHING ---
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                userToken = session.access_token;
+                fetchDocuments();
+            } else {
                 window.location.href = '/login.html';
             }
         });
 
-        // --- LOGOUT FUNCTIONALITY ---
+        async function fetchDocuments() {
+            if (!userToken) return;
+            
+            try {
+                const response = await fetch('https://api.cogmatiq.com/documents', {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch documents.');
+                
+                const documents = await response.json();
+                loadingText.classList.add('hidden');
+                
+                if (documents.length === 0) {
+                    documentList.innerHTML = '<p class="text-gray-400 text-center py-8">You haven\'t uploaded any documents yet. Click "Upload New" to get started.</p>';
+                } else {
+                    documentList.innerHTML = ''; // Clear loading text
+                    documents.forEach(doc => {
+                        const docElement = document.createElement('div');
+                        docElement.className = 'bg-gray-800/30 p-4 rounded-lg flex justify-between items-center';
+                        docElement.innerHTML = `
+                            <div>
+                                <p class="font-bold text-white">${doc.file_name}</p>
+                                <p class="text-xs text-gray-400">Uploaded on: ${new Date(doc.created_at).toLocaleDateString()}</p>
+                            </div>
+                            <a href="/chat.html?session_id=${doc.id}" class="text-sm font-semibold accent-text hover:underline">Open Chat</a>
+                        `;
+                        documentList.appendChild(docElement);
+                    });
+                }
+            } catch (error) {
+                loadingText.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // --- LOGOUT ---
         logoutButton.addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
-            // Redirect to homepage after logout
             window.location.href = '/';
         });
 
-        // --- FILE UPLOAD LOGIC (moved from index.html) ---
-        const API_ENDPOINT = 'https://api.cogmatiq.com/upload';
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const dropZoneText = document.getElementById('drop-zone-text');
-        const errorMessage = document.getElementById('error-message');
-
-        const selectFile = () => fileInput.click();
-        dropZone.addEventListener('click', selectFile);
-
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-accent-text', 'bg-gray-800/20'); });
-        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-accent-text', 'bg-gray-800/20'); });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-accent-text', 'bg-gray-800/20');
-            if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
-        });
+        // --- FILE UPLOAD LOGIC ---
+        uploadButton.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length) handleFileUpload(fileInput.files[0]);
         });
-
+        
         const handleFileUpload = async (file) => {
-            if (file.type !== 'application/pdf') { showError('Only PDF files are accepted.'); return; }
-            showLoadingState();
-            const clientSessionId = crypto.randomUUID();
+            if (!userToken) { alert('Authentication error. Please log in again.'); return; }
+            if (file.type !== 'application/pdf') { alert('Only PDF files are accepted.'); return; }
+
+            uploadButton.textContent = 'Uploading...';
+            uploadButton.disabled = true;
+
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('client_id', clientSessionId);
 
             try {
-                const response = await fetch(API_ENDPOINT, { method: 'POST', body: formData });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'File processing failed.');
-                }
-                window.location.href = `/chat.html?session_id=${clientSessionId}`;
+                const response = await fetch('https://api.cogmatiq.com/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` },
+                    body: formData
+                });
+                if (!response.ok) throw new Error('Upload failed.');
+                
+                // Refresh the document list to show the new file
+                fetchDocuments();
+
             } catch (error) {
-                showError(error.message);
-                resetDropZone();
+                alert(`Error: ${error.message}`);
+            } finally {
+                uploadButton.textContent = '+ Upload New';
+                uploadButton.disabled = false;
+                fileInput.value = ''; // Reset file input
             }
         };
-
-        const showLoadingState = () => { dropZoneText.textContent = 'Analyzing...'; /* ... */ };
-        const showError = (message) => { errorMessage.textContent = `Error: ${message}`; /* ... */ };
-        const resetDropZone = () => { dropZoneText.textContent = 'Drag & Drop...'; /* ... */ };
-
     </script>
 </body>
 </html>
