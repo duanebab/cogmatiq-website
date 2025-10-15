@@ -11,36 +11,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer data-domain="cogmatiq.com" src="https://plausible.io/js/script.js"></script>
 
     <style>
-        body {
-            font-family: 'Manrope', sans-serif;
-            background-color: #2C3E50; /* Dark Slate */
-            color: #FDFEFE; /* Off-White */
-        }
+        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
         .section-padding { padding: 4rem 1.5rem; }
         @media (min-width: 768px) { .section-padding { padding: 6rem 2rem; } }
     </style>
-
-    <!-- Privacy-friendly analytics by Plausible -->
-<script async src="https://plausible.io/js/pa-gEeQyOjJtxHzu7XqfX_Tc.js"></script>
-<script>
-  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-  plausible.init()
-</script>
-
 </head>
 <body class="w-full">
 
-       <header class="py-6 px-8 flex justify-between items-center">
+    <header class="py-6 px-8 flex justify-between items-center">
         <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-80">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div class="flex items-center gap-4">
+        <div id="auth-links" class="flex items-center gap-4">
             <a href="/login.html" class="text-gray-300 font-medium hover:text-white transition-colors">Log In</a>
             <a href="/signup.html" class="accent-bg text-white font-bold py-2 px-4 rounded-md transition-colors duration-300">Sign Up</a>
         </div>
@@ -151,6 +141,7 @@
 
         const handleFileUpload = async (file) => {
             if (file.type !== 'application/pdf') { showError('Only PDF files are accepted.'); return; }
+            if (window.plausible) { window.plausible('Document-Upload-Started'); }
             showLoadingState();
             const clientSessionId = crypto.randomUUID();
             const formData = new FormData();
@@ -184,6 +175,26 @@
             dropZone.classList.remove('animate-pulse');
             fileInput.value = '';
         };
+    </script>
+    
+    <script>
+        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const authLinksContainer = document.getElementById('auth-links');
+
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                authLinksContainer.innerHTML = `
+                    <a href="/dashboard.html" class="accent-bg text-white font-bold py-2 px-4 rounded-md transition-colors duration-300">Go to Dashboard</a>
+                `;
+            } else {
+                authLinksContainer.innerHTML = `
+                    <a href="/login.html" class="text-gray-300 font-medium hover:text-white transition-colors">Log In</a>
+                    <a href="/signup.html" class="accent-bg text-white font-bold py-2 px-4 rounded-md transition-colors duration-300">Sign Up</a>
+                `;
+            }
+        });
     </script>
 </body>
 </html>
