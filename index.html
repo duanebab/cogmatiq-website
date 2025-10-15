@@ -34,7 +34,8 @@
         </a>
     </header>
 
-    <main class="pb-24"> <section class="text-center section-padding pt-16 md:pt-24">
+    <main class="pb-24">
+        <section class="text-center section-padding pt-16 md:pt-24">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">Stop Searching. Start Knowing.</h1>
                 <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -85,18 +86,9 @@
             <div class="max-w-4xl mx-auto text-center">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12">Three Steps to Instant Knowledge.</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 accent-text">1. Upload Your Document</h3>
-                        <p class="text-gray-400">Securely drag and drop or select the PDF you want to master.</p>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 accent-text">2. We Engineer Your AI</h3>
-                        <p class="text-gray-400">Our system analyzes and transforms the content into your private cognitive model.</p>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 accent-text">3. Ask Anything</h3>
-                        <p class="text-gray-400">Receive your private chat interface and start getting instant answers.</p>
-                    </div>
+                    <div><h3 class="text-xl font-bold mb-2 accent-text">1. Upload Your Document</h3><p class="text-gray-400">Securely drag and drop or select the PDF you want to master.</p></div>
+                    <div><h3 class="text-xl font-bold mb-2 accent-text">2. We Engineer Your AI</h3><p class="text-gray-400">Our system analyzes and transforms the content into your private cognitive model.</p></div>
+                    <div><h3 class="text-xl font-bold mb-2 accent-text">3. Ask Anything</h3><p class="text-gray-400">Receive your private chat interface and start getting instant answers.</p></div>
                 </div>
             </div>
         </section>
@@ -115,21 +107,71 @@
 
     <footer class="fixed bottom-0 left-0 w-full p-6 bg-gray-900/30 backdrop-blur-sm">
         <div class="flex justify-center items-center gap-6">
-            <a href="https://x.com/cogmatiq" target="_blank" class="text-gray-500 hover:accent-text transition-colors">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
-            </a>
-            <a href="https://www.linkedin.com/company/cogmatiq" target="_blank" class="text-gray-500 hover:accent-text transition-colors">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
-            </a>
+            <a href="https://x.com/cogmatiq" target="_blank" class="text-gray-500 hover:accent-text transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
+            <a href="https://www.linkedin.com/company/cogmatiq" target="_blank" class="text-gray-500 hover:accent-text transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg></a>
         </div>
     </footer>
 
     <input type="file" id="file-input" class="hidden" accept=".pdf">
 
     <script>
-        // (JavaScript remains unchanged)
         const API_ENDPOINT = 'https://api.cogmatiq.com/upload';
-        // ... all the script logic from before
+        const uploadButtonHero = document.getElementById('upload-button-hero');
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const dropZoneText = document.getElementById('drop-zone-text');
+        const errorMessage = document.getElementById('error-message');
+
+        const selectFile = () => fileInput.click();
+        uploadButtonHero.addEventListener('click', selectFile);
+        dropZone.addEventListener('click', selectFile);
+
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-accent-text', 'bg-gray-800/20'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-accent-text', 'bg-gray-800/20'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-accent-text', 'bg-gray-800/20');
+            if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) handleFileUpload(fileInput.files[0]);
+        });
+
+        const handleFileUpload = async (file) => {
+            if (file.type !== 'application/pdf') { showError('Only PDF files are accepted.'); return; }
+            showLoadingState();
+            const clientSessionId = crypto.randomUUID();
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('client_id', clientSessionId);
+
+            try {
+                const response = await fetch(API_ENDPOINT, { method: 'POST', body: formData });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'File processing failed.');
+                }
+                window.location.href = `chat.html?session_id=${clientSessionId}`;
+            } catch (error) {
+                showError(error.message);
+                resetDropZone();
+            }
+        };
+
+        const showLoadingState = () => {
+            dropZoneText.textContent = 'Analyzing... This may take a moment.';
+            dropZone.classList.add('animate-pulse');
+            errorMessage.classList.add('hidden');
+        };
+        const showError = (message) => {
+            errorMessage.textContent = `Error: ${message}`;
+            errorMessage.classList.remove('hidden');
+        };
+        const resetDropZone = () => {
+            dropZoneText.textContent = 'Drag & Drop Your PDF Here, or Click to Select';
+            dropZone.classList.remove('animate-pulse');
+            fileInput.value = '';
+        };
     </script>
 </body>
 </html>
