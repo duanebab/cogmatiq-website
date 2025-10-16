@@ -21,25 +21,15 @@
         #chat-container::-webkit-scrollbar-track { background: #2C3E50; }
         #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
         #chat-container::-webkit-scrollbar-thumb:hover { background: #6181a3; }
-        /* Style for rendered markdown */
         .prose { color: #FDFEFE; }
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
         .prose strong { font-weight: 800; }
     </style>
-
-    
-    <!-- Privacy-friendly analytics by Plausible -->
-<script async src="https://plausible.io/js/pa-gEeQyOjJtxHzu7XqfX_Tc.js"></script>
-<script>
-  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-  plausible.init()
-</script>
-
 </head>
 <body class="flex flex-col h-screen">
 
     <header class="py-4 px-8 border-b border-gray-700">
-        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-80">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
@@ -52,7 +42,7 @@
                      <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-4 max-w-lg">
-                    <p>I have analyzed your document. Ask me anything about its content.</p>
+                    <p>I have analyzed your knowledge base. Ask me anything about its content.</p>
                 </div>
             </div>
         </div>
@@ -75,10 +65,16 @@
         const messageInput = document.getElementById('message-input');
         const submitButton = document.getElementById('submit-button');
         
-        const params = new URLSearchParams(window.location.search);
-        const clientSessionId = params.get('session_id');
+        function getClientId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('kb_id') || params.get('session_id') || null;
+        }
+        
+        const clientId = getClientId();
 
-        if (!clientSessionId) { window.location.href = '/'; }
+        if (!clientId) {
+            window.location.href = '/dashboard.html';
+        }
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -93,7 +89,7 @@
             
             const formData = new FormData();
             formData.append('question', question);
-            formData.append('client_id', clientSessionId);
+            formData.append('client_id', clientId);
 
             try {
                 const response = await fetch(API_ENDPOINT, { method: 'POST', body: formData });
@@ -143,7 +139,7 @@
             const copyButton = element.querySelector('.copy-button');
 
             typingIndicator.classList.add('hidden');
-            responseContent.innerHTML = marked.parse(text); // Render markdown
+            responseContent.innerHTML = marked.parse(text);
             responseContent.classList.remove('hidden');
             copyButton.classList.remove('hidden');
         }
@@ -155,7 +151,6 @@
                 setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
             });
         }
-
     </script>
 </body>
 </html>
