@@ -26,9 +26,9 @@
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-6">
             <span id="sub-status-badge" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full"></span>
-            <a href="/pricing.html" class="accent-bg text-white font-bold py-2 px-4 rounded-md text-sm transition-colors duration-300">Upgrade</a>
+            <a href="/account.html" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">My Account</a>
             <button id="logout-button" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Log Out</button>
         </div>
     </header>
@@ -80,7 +80,6 @@
 
         async function fetchInitialData() {
             if (!userToken) return;
-            // Fetch both documents and subscription status in parallel
             const [docsRes, subRes] = await Promise.all([
                 fetch('https://api.cogmatiq.com/documents', { headers: { 'Authorization': `Bearer ${userToken}` } }),
                 fetch('https://api.cogmatiq.com/subscription-status', { headers: { 'Authorization': `Bearer ${userToken}` } })
@@ -125,7 +124,7 @@
                 let statusHTML = '';
                 if (doc.status === 'processing') {
                     statusHTML = `<span class="text-xs font-semibold text-yellow-400 animate-pulse">Processing...</span>`;
-                    pollDocumentStatus(doc.id); // Start polling for this document
+                    pollDocumentStatus(doc.id);
                 } else {
                     statusHTML = `<a href="/chat.html?session_id=${doc.id}" class="text-sm font-semibold accent-text hover:underline">Open Chat</a>`;
                 }
@@ -155,10 +154,9 @@
                         }
                     }
                 } catch (error) {
-                    // Stop polling on error
                     clearInterval(interval);
                 }
-            }, 5000); // Poll every 5 seconds
+            }, 5000);
         }
 
         logoutButton.addEventListener('click', async () => { await supabaseClient.auth.signOut(); });
@@ -189,7 +187,6 @@
                 
                 if (!response.ok) throw new Error('Upload failed.');
                 
-                // Optimistically update UI by re-fetching all data
                 fetchInitialData();
 
             } catch (error) {
