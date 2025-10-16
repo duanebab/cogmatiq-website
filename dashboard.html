@@ -40,7 +40,6 @@
                     + Upload New
                 </button>
             </div>
-            
             <div id="document-list" class="space-y-4">
                 <p id="loading-text" class="text-gray-400">Loading your documents...</p>
             </div>
@@ -62,22 +61,68 @@
 
         let userToken = null;
 
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        // --- NEW: Main function to run on page load ---
+        async function main() {
+            // 1. Actively check for the current session
+            const { data: { session } } = await supabaseClient.auth.getSession();
+
             if (session) {
+                // If a session exists, load documents immediately
                 userToken = session.access_token;
                 fetchDocuments();
             } else {
+                // If no session, redirect to login
                 window.location.href = '/login.html';
             }
-        });
+
+            // 2. Then, listen for future changes (like logout)
+            supabaseClient.auth.onAuthStateChange((_event, session) => {
+                if (!session) {
+                    window.location.href = '/';
+                }
+            });
+        }
+
+        // Run the main function when the page loads
+        main();
+        // --- END OF NEW LOGIC ---
 
         async function fetchDocuments() {
-            // ... (fetchDocuments function remains the same)
+            if (!userToken) return;
+            
+            try {
+                const response = await fetch('https://api.cogmatiq.com/documents', {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch documents.');
+                
+                const documents = await response.json();
+                loadingText.classList.add('hidden');
+                
+                if (documents.length === 0) {
+                    documentList.innerHTML = '<p class="text-gray-400 text-center py-8">You haven\'t uploaded any documents yet. Click "Upload New" to get started.</p>';
+                } else {
+                    documentList.innerHTML = ''; 
+                    documents.forEach(doc => {
+                        const docElement = document.createElement('div');
+                        docElement.className = 'bg-gray-800/30 p-4 rounded-lg flex justify-between items-center';
+                        docElement.innerHTML = `
+                            <div>
+                                <p class="font-bold text-white">${doc.file_name}</p>
+                                <p class="text-xs text-gray-400">Uploaded on: ${new Date(doc.created_at).toLocaleDateString()}</p>
+                            </div>
+                            <a href="/chat.html?session_id=${doc.id}" class="text-sm font-semibold accent-text hover:underline">Open Chat</a>
+                        `;
+                        documentList.appendChild(docElement);
+                    });
+                }
+            } catch (error) {
+                loadingText.textContent = `Error: ${error.message}`;
+            }
         }
 
         logoutButton.addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
-            window.location.href = '/';
         });
 
         uploadButton.addEventListener('click', () => fileInput.click());
@@ -85,8 +130,8 @@
             if (fileInput.files.length) handleFileUpload(fileInput.files[0]);
         });
         
-        // --- UPDATED handleFileUpload Function ---
         const handleFileUpload = async (file) => {
+            // (This function remains unchanged)
             if (!userToken) { alert('Authentication error. Please log in again.'); return; }
             if (file.type !== 'application/pdf') { alert('Only PDF files are accepted.'); return; }
 
@@ -103,7 +148,6 @@
                     body: formData
                 });
                 
-                // --- NEW: Check for the 403 "Upgrade Required" error ---
                 if (response.status === 403) {
                     alert('You have reached your limit. Please upgrade to Pro to upload more documents.');
                     window.location.href = '/pricing.html';
