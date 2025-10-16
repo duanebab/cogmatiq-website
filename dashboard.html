@@ -27,7 +27,8 @@
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-4">
-            <a href="/pricing.html" class="accent-bg text-white font-bold py-2 px-4 rounded-md text-sm transition-colors duration-300">Upgrade to Pro</a>
+            <span id="sub-status-badge" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full"></span>
+            <a href="/pricing.html" class="accent-bg text-white font-bold py-2 px-4 rounded-md text-sm transition-colors duration-300">Upgrade</a>
             <button id="logout-button" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Log Out</button>
         </div>
     </header>
@@ -40,6 +41,7 @@
                     + Upload New
                 </button>
             </div>
+            
             <div id="document-list" class="space-y-4">
                 <p id="loading-text" class="text-gray-400">Loading your documents...</p>
             </div>
@@ -58,82 +60,113 @@
         const documentList = document.getElementById('document-list');
         const loadingText = document.getElementById('loading-text');
         const logoutButton = document.getElementById('logout-button');
+        const subStatusBadge = document.getElementById('sub-status-badge');
 
         let userToken = null;
 
-        // --- NEW: Main function to run on page load ---
         async function main() {
-            // 1. Actively check for the current session
             const { data: { session } } = await supabaseClient.auth.getSession();
-
             if (session) {
-                // If a session exists, load documents immediately
                 userToken = session.access_token;
-                fetchDocuments();
+                fetchInitialData();
             } else {
-                // If no session, redirect to login
                 window.location.href = '/login.html';
             }
-
-            // 2. Then, listen for future changes (like logout)
             supabaseClient.auth.onAuthStateChange((_event, session) => {
-                if (!session) {
-                    window.location.href = '/';
-                }
+                if (!session) { window.location.href = '/'; }
             });
         }
-
-        // Run the main function when the page loads
         main();
-        // --- END OF NEW LOGIC ---
 
-        async function fetchDocuments() {
+        async function fetchInitialData() {
             if (!userToken) return;
+            // Fetch both documents and subscription status in parallel
+            const [docsRes, subRes] = await Promise.all([
+                fetch('https://api.cogmatiq.com/documents', { headers: { 'Authorization': `Bearer ${userToken}` } }),
+                fetch('https://api.cogmatiq.com/subscription-status', { headers: { 'Authorization': `Bearer ${userToken}` } })
+            ]);
+
+            if (!docsRes.ok || !subRes.ok) {
+                loadingText.textContent = 'Error: Failed to load dashboard data.';
+                return;
+            }
+
+            const documents = await docsRes.json();
+            const subStatus = await subRes.json();
             
-            try {
-                const response = await fetch('https://api.cogmatiq.com/documents', {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-                if (!response.ok) throw new Error('Failed to fetch documents.');
-                
-                const documents = await response.json();
-                loadingText.classList.add('hidden');
-                
-                if (documents.length === 0) {
-                    documentList.innerHTML = '<p class="text-gray-400 text-center py-8">You haven\'t uploaded any documents yet. Click "Upload New" to get started.</p>';
-                } else {
-                    documentList.innerHTML = ''; 
-                    documents.forEach(doc => {
-                        const docElement = document.createElement('div');
-                        docElement.className = 'bg-gray-800/30 p-4 rounded-lg flex justify-between items-center';
-                        docElement.innerHTML = `
-                            <div>
-                                <p class="font-bold text-white">${doc.file_name}</p>
-                                <p class="text-xs text-gray-400">Uploaded on: ${new Date(doc.created_at).toLocaleDateString()}</p>
-                            </div>
-                            <a href="/chat.html?session_id=${doc.id}" class="text-sm font-semibold accent-text hover:underline">Open Chat</a>
-                        `;
-                        documentList.appendChild(docElement);
-                    });
-                }
-            } catch (error) {
-                loadingText.textContent = `Error: ${error.message}`;
+            renderSubscriptionStatus(subStatus.is_pro);
+            renderDocumentList(documents);
+        }
+
+        function renderSubscriptionStatus(isPro) {
+            if (isPro) {
+                subStatusBadge.textContent = 'Pro Member';
+                subStatusBadge.className = 'text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-green-500 text-white';
+            } else {
+                subStatusBadge.textContent = 'Free Tier';
+                subStatusBadge.className = 'text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-gray-600 text-gray-200';
             }
         }
 
-        logoutButton.addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-        });
+        function renderDocumentList(documents) {
+            loadingText.classList.add('hidden');
+            documentList.innerHTML = '';
+            
+            if (documents.length === 0) {
+                documentList.innerHTML = '<p class="text-gray-400 text-center py-8">You haven\'t uploaded any documents yet. Click "Upload New" to get started.</p>';
+                return;
+            }
 
+            documents.forEach(doc => {
+                const docElement = document.createElement('div');
+                docElement.className = 'bg-gray-800/30 p-4 rounded-lg flex justify-between items-center';
+                docElement.id = `doc-${doc.id}`;
+
+                let statusHTML = '';
+                if (doc.status === 'processing') {
+                    statusHTML = `<span class="text-xs font-semibold text-yellow-400 animate-pulse">Processing...</span>`;
+                    pollDocumentStatus(doc.id); // Start polling for this document
+                } else {
+                    statusHTML = `<a href="/chat.html?session_id=${doc.id}" class="text-sm font-semibold accent-text hover:underline">Open Chat</a>`;
+                }
+
+                docElement.innerHTML = `
+                    <div>
+                        <p class="font-bold text-white">${doc.file_name}</p>
+                        <p class="text-xs text-gray-400">Uploaded: ${new Date(doc.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div>${statusHTML}</div>
+                `;
+                documentList.appendChild(docElement);
+            });
+        }
+        
+        async function pollDocumentStatus(docId) {
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`https://api.cogmatiq.com/documents/${docId}`, { headers: { 'Authorization': `Bearer ${userToken}` } });
+                    if (!res.ok) return;
+                    const doc = await res.json();
+                    if (doc.status === 'ready') {
+                        clearInterval(interval);
+                        const docElement = document.getElementById(`doc-${docId}`);
+                        if (docElement) {
+                             docElement.querySelector('div:last-child').innerHTML = `<a href="/chat.html?session_id=${doc.id}" class="text-sm font-semibold accent-text hover:underline">Open Chat</a>`;
+                        }
+                    }
+                } catch (error) {
+                    // Stop polling on error
+                    clearInterval(interval);
+                }
+            }, 5000); // Poll every 5 seconds
+        }
+
+        logoutButton.addEventListener('click', async () => { await supabaseClient.auth.signOut(); });
         uploadButton.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length) handleFileUpload(fileInput.files[0]);
-        });
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFileUpload(fileInput.files[0]); });
         
         const handleFileUpload = async (file) => {
-            // (This function remains unchanged)
-            if (!userToken) { alert('Authentication error. Please log in again.'); return; }
-            if (file.type !== 'application/pdf') { alert('Only PDF files are accepted.'); return; }
+            if (!userToken || file.type !== 'application/pdf') return;
 
             uploadButton.textContent = 'Uploading...';
             uploadButton.disabled = true;
@@ -154,11 +187,10 @@
                     return;
                 }
                 
-                if (!response.ok) {
-                    throw new Error('Upload failed. Please try again.');
-                }
+                if (!response.ok) throw new Error('Upload failed.');
                 
-                fetchDocuments();
+                // Optimistically update UI by re-fetching all data
+                fetchInitialData();
 
             } catch (error) {
                 alert(`Error: ${error.message}`);
