@@ -54,7 +54,7 @@
         </div>
     </main>
     
-    <input type="file" id="file-input" class="hidden" accept=".pdf">
+    <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.txt,.md,.epub">
 
     <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4">
         <div class="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-lg">
@@ -251,7 +251,7 @@
                     body: JSON.stringify({ document_ids: selectedDocs })
                 });
                 addDocModal.classList.add('hidden');
-                fetchKnowledgeBases();
+                fetchInitialData();
             } catch (error) {
                 alert('Failed to link documents.');
             }
@@ -266,7 +266,7 @@
                     headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: kbName })
                 });
-                fetchKnowledgeBases();
+                fetchInitialData();
             } catch (error) {
                 alert('Failed to create knowledge base.');
             }
@@ -307,7 +307,7 @@
             xhr.onload = () => {
                 progressText.textContent = 'Upload complete. Processing...';
                 if (xhr.status === 200) {
-                    fetchKnowledgeBases();
+                    fetchInitialData();
                 } else if (xhr.status === 403) {
                     alert('You have reached your limit. Please upgrade to Pro to upload more documents.');
                     window.location.href = '/pricing.html';
