@@ -3,163 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Cogmatiq</title>
-    <meta name="description" content="Sign in to your Cogmatiq account to access your AI-powered knowledge bases and manage your documents securely.">
-    
+    <title>Log In - Cogmatiq</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
+        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
-        .section-padding { padding: 5rem 2rem; }
-        @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
-        .animate-fade-in { animation: fadeIn 1s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
-        .hover-scale { transition: transform 0.3s ease; }
-        .hover-scale:hover { transform: scale(1.05); }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-dark animate-fade-in">
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-md">
-        <a href="/" class="flex items-center justify-center gap-3 mb-8 transition-opacity hover:opacity-90">
-            <img src="/logo.png" alt="Cogmatiq Logo" class="w-8 h-8 object-contain hover-scale">
+        <a href="/" class="flex items-center justify-center gap-3 mb-8 transition-opacity hover:opacity-80">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
 
-        <div class="card p-8 rounded-lg shadow-lg">
+        <div class="bg-gray-800/30 p-8 rounded-lg shadow-lg">
             <h1 class="text-2xl font-bold text-center mb-6">Welcome Back</h1>
             <form id="login-form" class="space-y-6">
                 <div>
-                    <label for="email" class="block text-sm font-semibold text-gray-400">Email</label>
-                    <input type="email" id="email" required class="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                    <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+                    <input type="email" id="email" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                 </div>
                 <div>
-                    <label for="password" class="block text-sm font-semibold text-gray-400">Password</label>
-                    <input type="password" id="password" required class="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                    <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+                    <input type="password" id="password" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                 </div>
                 <div>
-                    <button type="submit" id="login-button" class="w-full accent-bg text-white font-semibold py-3 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Sign In</button>
+                    <button type="submit" class="w-full accent-bg text-white font-bold py-3 px-4 rounded-md transition-colors duration-300">Log In</button>
                 </div>
             </form>
             <p id="message" class="mt-4 text-center text-sm text-red-400"></p>
-            <div id="resend-email" class="mt-4 text-center hidden">
-                <p class="text-sm text-gray-400 mb-2">Email not verified? <button id="resend-button" class="accent-text font-semibold hover:underline">Resend Confirmation Email</button></p>
-            </div>
             <p class="mt-6 text-center text-sm text-gray-400">
-                Don't have an account? <a href="/signup.html" class="accent-text font-semibold hover:underline">Sign Up</a>
-            </p>
-            <p class="mt-2 text-center text-sm text-gray-400">
-                Forgot your password? <a href="/reset-password.html" class="accent-text font-semibold hover:underline">Reset Password</a>
+                Don't have an account? <a href="/signup.html" class="accent-text font-medium hover:underline">Sign Up</a>
             </p>
         </div>
     </div>
 
     <script>
-        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeXZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+    // FIX: Use a different name for the client instance
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        const form = document.getElementById('login-form');
-        const messageEl = document.getElementById('message');
-        const loginButton = document.getElementById('login-button');
-        const resendEmailDiv = document.getElementById('resend-email');
-        const resendButton = document.getElementById('resend-button');
+    const form = document.getElementById('login-form');
+    const messageEl = document.getElementById('message');
 
-        // Enable login button once Supabase client is initialized
-        loginButton.disabled = false;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageEl.textContent = '';
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            messageEl.textContent = '';
-            resendEmailDiv.classList.add('hidden');
-            loginButton.disabled = true;
+        // FIX: Use the new 'supabaseClient' variable
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-                if (error) {
-                    console.error('Supabase Auth Error:', {
-                        message: error.message,
-                        code: error.code,
-                        status: error.status,
-                        email: email
-                    });
-
-                    let userMessage = 'An error occurred. Please try again.';
-                    if (error.code === 'invalid_credentials') {
-                        userMessage = 'Invalid email or password. Please check your credentials.';
-                    } else if (error.code === 'email_not_confirmed') {
-                        userMessage = 'Please verify your email address before signing in.';
-                        resendEmailDiv.classList.remove('hidden');
-                    } else if (error.status === 401) {
-                        userMessage = 'Unauthorized: Invalid credentials or account not found.';
-                    }
-                    messageEl.textContent = userMessage;
-                    loginButton.disabled = false;
-                    return;
-                }
-
-                console.log('Login successful:', { userId: data.user.id, email: data.user.email });
-                window.location.href = '/dashboard.html';
-            } catch (err) {
-                console.error('Unexpected Error:', err);
-                messageEl.textContent = 'Unexpected error. Please try again later.';
-                loginButton.disabled = false;
-            }
-        });
-
-        resendButton.addEventListener('click', async () => {
-            const email = document.getElementById('email').value.trim();
-            if (!email) {
-                messageEl.textContent = 'Please enter your email to resend the confirmation.';
-                return;
-            }
-
-            resendButton.disabled = true;
-            messageEl.textContent = 'Sending confirmation email...';
-
-            try {
-                const { error } = await supabaseClient.auth.resend({
-                    type: 'signup',
-                    email: email
-                });
-
-                if (error) {
-                    console.error('Resend Confirmation Error:', {
-                        message: error.message,
-                        code: error.code,
-                        status: error.status
-                    });
-                    messageEl.textContent = `Error: ${error.message}`;
-                    resendButton.disabled = false;
-                    return;
-                }
-
-                messageEl.textContent = 'Confirmation email sent! Please check your inbox.';
-                messageEl.classList.remove('text-red-400');
-                messageEl.classList.add('text-green-400');
-                resendButton.disabled = false;
-            } catch (err) {
-                console.error('Unexpected Resend Error:', err);
-                messageEl.textContent = 'Unexpected error sending confirmation email.';
-                resendButton.disabled = false;
-            }
-        });
-    </script>
+        if (error) {
+            messageEl.textContent = `Error: ${error.message}`;
+        } else {
+            window.location.href = '/dashboard.html';
+        }
+    });
+</script>
 </body>
 </html>
