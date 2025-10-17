@@ -134,7 +134,7 @@
                     : '<li class="text-gray-500">No documents yet.</li>';
 
                 const kbElement = document.createElement('div');
-                kbElement.className = 'bg-gray-800/30 p-6 rounded-lg';
+                kbElement.className = 'bg-gray-800/30 p-6 rounded-lg group';
                 kbElement.innerHTML = `
                     <div class="flex justify-between items-center mb-4">
                         <div>
@@ -142,6 +142,7 @@
                             <p class="text-xs text-gray-400">Created: ${new Date(kb.created_at).toLocaleDateString()}</p>
                         </div>
                         <div class="flex items-center gap-4">
+                            <button class="text-sm font-semibold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteKnowledgeBase('${kb.id}')">Delete Base</button>
                             <button class="text-sm font-semibold accent-text hover:underline" onclick="triggerFileUpload('${kb.id}')">+ Add Document</button>
                             <a href="/chat.html?kb_id=${kb.id}" class="text-sm font-bold accent-bg text-white py-2 px-4 rounded-md">Open Chat</a>
                         </div>
@@ -164,7 +165,22 @@
                         headers: { 'Authorization': `Bearer ${userToken}` }
                     });
                     if (!response.ok) throw new Error('Failed to delete document.');
-                    
+                    fetchInitialData();
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                }
+            }
+        }
+        
+        async function deleteKnowledgeBase(kbId) {
+            if (!userToken) return;
+            if (confirm('Are you sure you want to delete this Knowledge Base? The documents inside will not be deleted.')) {
+                try {
+                    const response = await fetch(`https://api.cogmatiq.com/knowledgebases/${kbId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${userToken}` }
+                    });
+                    if (!response.ok) throw new Error('Failed to delete knowledge base.');
                     fetchInitialData();
                 } catch (error) {
                     alert(`Error: ${error.message}`);
@@ -198,19 +214,15 @@
 
         const handleFileUpload = (file, kbId) => {
             if (!userToken || !kbId) return;
-
             progressContainer.classList.remove('hidden');
             progressText.classList.remove('hidden');
             progressText.textContent = `Uploading ${file.name}...`;
             progressBar.style.width = '0%';
-
             const formData = new FormData();
             formData.append('file', file);
-
             const xhr = new XMLHttpRequest();
             xhr.open('POST', `https://api.cogmatiq.com/knowledgebases/${kbId}/documents`, true);
             xhr.setRequestHeader('Authorization', `Bearer ${userToken}`);
-
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
                     const percentComplete = Math.round((event.loaded / event.total) * 100);
@@ -218,7 +230,6 @@
                     progressText.textContent = `Uploading... ${percentComplete}%`;
                 }
             };
-
             xhr.onload = () => {
                 progressText.textContent = 'Upload complete. Processing...';
                 if (xhr.status === 200) {
@@ -231,12 +242,10 @@
                 }
                 setTimeout(resetUploadUI, 2000);
             };
-
             xhr.onerror = () => {
                 alert('A network error occurred.');
                 resetUploadUI();
             };
-
             xhr.send(formData);
         };
 
