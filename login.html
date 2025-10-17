@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - Cogmatiq</title>
-    <meta name="description" content="Sign in to your Cogmatiq account to access your AI-powered knowledge bases and manage your documents securely.">
-    
+    <meta name="description" content="Sign in to your Cogmatiq account to access your AI-powered knowledge bases and manage your documents securely as of 02:57 PM CDT, Friday, October 17, 2025.">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
@@ -21,6 +21,7 @@
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
         .card { background: #1F2A44; border: 1px solid #2D3748; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .hidden { display: none; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
@@ -43,10 +44,14 @@
                     <input type="password" id="password" required class="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                 </div>
                 <div>
-                    <button type="submit" class="w-full accent-bg text-white font-bold py-3 px-4 rounded-md hover:opacity-90 transition-colors duration-300">Log In</button>
+                    <button type="submit" id="login-button" class="w-full accent-bg text-white font-bold py-3 px-4 rounded-md hover:opacity-90 transition-colors duration-300">Log In</button>
                 </div>
             </form>
             <p id="message" class="mt-4 text-center text-sm text-red-400"></p>
+            <div id="resend-email" class="hidden mt-4 text-center">
+                <p class="text-sm text-gray-400">Didn't receive a confirmation email?</p>
+                <button id="resend-button" class="mt-2 accent-bg text-white font-semibold py-1 px-3 rounded-md hover:opacity-90 transition-colors duration-300">Resend Confirmation</button>
+            </div>
             <p class="mt-6 text-center text-sm text-gray-400">
                 Don't have an account? <a href="/signup.html" class="accent-text font-semibold hover:underline">Sign Up</a>
             </p>
@@ -58,7 +63,7 @@
 
     <script>
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeXZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeXZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA9NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         const form = document.getElementById('login-form');
