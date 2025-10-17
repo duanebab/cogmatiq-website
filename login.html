@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - Cogmatiq</title>
-    <meta name="description" content="Sign in to your Cogmatiq account to access your AI-powered knowledge bases and manage your documents securely as of 02:57 PM CDT, Friday, October 17, 2025.">
+    <meta name="description" content="Sign in to your Cogmatiq account to access your AI-powered knowledge bases and manage your documents securely as of 03:14 PM CDT, Friday, October 17, 2025.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,8 +63,10 @@
 
     <script>
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeXZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA9NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeXZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        console.log('Supabase Client Initialized with Anon Key:', supabaseAnonKey.substring(0, 10) + '...'); // Debug API key (partial for security)
 
         const form = document.getElementById('login-form');
         const messageEl = document.getElementById('message');
@@ -72,7 +74,6 @@
         const resendEmailDiv = document.getElementById('resend-email');
         const resendButton = document.getElementById('resend-button');
 
-        // Enable login button once Supabase client is initialized
         loginButton.disabled = false;
 
         form.addEventListener('submit', async (e) => {
@@ -103,6 +104,8 @@
                         resendEmailDiv.classList.remove('hidden');
                     } else if (error.status === 401) {
                         userMessage = 'Unauthorized: Invalid credentials or account not found.';
+                    } else if (error.message === 'No API key found in request') {
+                        userMessage = 'Internal error: Missing API key. Please contact support.';
                     }
                     messageEl.textContent = userMessage;
                     loginButton.disabled = false;
