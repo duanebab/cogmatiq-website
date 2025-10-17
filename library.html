@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Library - Cogmatiq</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        .accent-text { color: #00B5AD; }
+        .accent-bg { background-color: #00B5AD; }
+        .accent-bg:hover { background-color: #009A94; }
+    </style>
+</head>
+<body class="w-full">
+
+    <header class="py-4 px-8 flex justify-between items-center border-b border-gray-700">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <span class="text-2xl font-bold text-white">Cogmatiq</span>
+        </a>
+        <div class="flex items-center gap-6">
+            <a href="/dashboard.html" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
+            <button id="logout-button" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Log Out</button>
+        </div>
+    </header>
+
+    <main class="py-12 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl md:text-4xl font-bold mb-8">Document Library</h1>
+            
+            <div id="library-list" class="space-y-4">
+                <p id="loading-text" class="text-gray-400">Loading your documents...</p>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        const libraryList = document.getElementById('library-list');
+        const loadingText = document.getElementById('loading-text');
+        const logoutButton = document.getElementById('logout-button');
+
+        let userToken = null;
+
+        async function main() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                userToken = session.access_token;
+                fetchLibraryDocuments();
+            } else {
+                window.location.href = '/login.html';
+            }
+        }
+        main();
+
+        async function fetchLibraryDocuments() {
+            if (!userToken) return;
+            try {
+                const response = await fetch('https://api.cogmatiq.com/documents', {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch documents.');
+                
+                const documents = await response.json();
+                loadingText.classList.add('hidden');
+                renderLibraryList(documents);
+            } catch (error) {
+                loadingText.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function renderLibraryList(documents) {
+            libraryList.innerHTML = '';
+            if (documents.length === 0) {
+                libraryList.innerHTML = '<p class="text-gray-400 text-center py-8">Your library is empty. Go to your dashboard to upload a document.</p>';
+                return;
+            }
+            documents.forEach(doc => {
+                const docElement = document.createElement('div');
+                docElement.className = 'bg-gray-800/30 p-4 rounded-lg flex justify-between items-center';
+                docElement.innerHTML = `
+                    <div>
+                        <p class="font-bold text-white">${doc.file_name}</p>
+                        <p class="text-xs text-gray-400">Uploaded: ${new Date(doc.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <button onclick="deleteDocument('${doc.id}')" class="text-red-500 hover:text-red-400 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
+                    </button>
+                `;
+                libraryList.appendChild(docElement);
+            });
+        }
+        
+        async function deleteDocument(docId) {
+            if (!userToken) return;
+            if (confirm('Are you sure you want to permanently delete this document? This will remove it from ALL knowledge bases.')) {
+                try {
+                    const response = await fetch(`https://api.cogmatiq.com/documents/${docId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${userToken}` }
+                    });
+                    if (!response.ok) throw new Error('Failed to delete document.');
+                    fetchLibraryDocuments();
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                }
+            }
+        }
+
+        logoutButton.addEventListener('click', async () => { await supabaseClient.auth.signOut(); window.location.href = '/'; });
+    </script>
+</body>
+</html>
