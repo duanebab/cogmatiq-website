@@ -4,41 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cogmatiq</title>
+    <meta name="description" content="Manage your AI-powered knowledge bases with Cogmatiq. Create, organize, and query documents for actionable insights.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
+        .section-padding { padding: 5rem 2rem; }
+        @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
+        .animate-fade-in { animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .card { background: #1F2A44; border: 1px solid #2D3748; }
     </style>
 </head>
 <body class="w-full">
 
-    <header class="py-4 px-8 flex justify-between items-center border-b border-gray-700">
-        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+    <header class="py-6 px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
+        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-90">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
-            <span id="sub-status-badge" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full"></span>
-            <a href="/library.html" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Document Library</a>
-            <a href="/account.html" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">My Account</a>
-            <button id="logout-button" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Log Out</button>
+            <span id="sub-status-badge" class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full"></span>
+            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Document Library</a>
+            <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">My Account</a>
+            <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
 
-    <main class="py-12 px-4">
-        <div class="max-w-4xl mx-auto">
+    <main class="section-padding pt-24 animate-fade-in">
+        <div class="max-w-5xl mx-auto">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold">Your Knowledge Bases</h1>
-                <button id="create-kb-button" class="accent-bg text-white font-bold py-2 px-5 rounded-lg text-sm transition-transform transform hover:scale-105 inline-block">
+                <button id="create-kb-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale">
                     + Create New Base
                 </button>
             </div>
@@ -48,21 +59,21 @@
             </div>
             <p id="progress-text" class="text-center text-sm text-gray-400 mb-4 hidden"></p>
             
-            <div id="kb-list" class="space-y-4">
-                <p id="loading-text" class="text-gray-400">Loading your knowledge bases...</p>
+            <div id="kb-list" class="space-y-6">
+                <p id="loading-text" class="text-gray-400 text-center">Loading your knowledge bases...</p>
             </div>
         </div>
     </main>
     
     <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.txt,.md,.epub">
 
-    <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-lg">
-            <h2 class="text-xl font-bold mb-4">Add Documents to Knowledge Base</h2>
+    <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-20">
+        <div class="card rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h2 class="text-xl font-semibold mb-4">Add Documents to Knowledge Base</h2>
             <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border-y border-gray-700 py-4 my-4"></div>
             <div class="flex justify-end gap-4 mt-4">
-                <button id="modal-cancel-button" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
-                <button id="modal-add-button" class="accent-bg text-white font-bold py-2 px-4 rounded-md">Add Selected</button>
+                <button id="modal-cancel-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500">Cancel</button>
+                <button id="modal-add-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale">Add Selected</button>
             </div>
         </div>
     </div>
@@ -127,11 +138,11 @@
 
         function renderSubscriptionStatus(isPro) {
             if (isPro) {
-                subStatusBadge.textContent = 'Pro Member';
-                subStatusBadge.className = 'text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-green-500 text-white';
+                subStatusBadge.textContent = 'Pro Plan';
+                subStatusBadge.className = 'text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50';
             } else {
-                subStatusBadge.textContent = 'Free Tier';
-                subStatusBadge.className = 'text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-gray-600 text-gray-200';
+                subStatusBadge.textContent = 'Free Plan';
+                subStatusBadge.className = 'text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-gray-600/20 text-gray-400 border border-gray-600/50';
             }
         }
 
@@ -148,37 +159,35 @@
                         let statusHTML = '';
                         if (doc.status === 'processing') {
                             statusHTML = `<span class="text-xs font-semibold text-yellow-400 animate-pulse">Processing...</span>`;
-                            // --- THIS IS THE NEW LINE ---
-                            pollDocumentStatus(doc.id); // Start polling for this document
+                            pollDocumentStatus(doc.id);
                         } else {
-                            statusHTML = `<button onclick="deleteDocument('${doc.id}')" class="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            statusHTML = `<button onclick="deleteDocument('${doc.id}')" class="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
                                           </button>`;
                         }
-                        // --- THIS LI IS UPDATED TO INCLUDE AN ID ---
-                        return `<li id="doc-${doc.id}" class="flex justify-between items-center group py-1">
+                        return `<li id="doc-${doc.id}" class="flex justify-between items-center group py-1 text-sm text-gray-400">
                                     <span>- ${doc.file_name}</span>
                                     <div class="doc-status">${statusHTML}</div>
                                 </li>`;
                     }).join('') 
-                    : '<li class="text-gray-500">No documents yet.</li>';
+                    : '<li class="text-gray-500 text-sm">No documents yet.</li>';
 
                 const kbElement = document.createElement('div');
-                kbElement.className = 'bg-gray-800/30 p-6 rounded-lg group';
+                kbElement.className = 'card p-6 rounded-lg hover:shadow-lg transition-shadow group';
                 kbElement.innerHTML = `
                     <div class="flex justify-between items-center mb-4">
                         <div>
-                            <h3 class="text-xl font-bold text-white">${kb.name}</h3>
+                            <h3 class="text-xl font-semibold text-white">${kb.name}</h3>
                         </div>
                         <div class="flex items-center gap-4">
-                             <button class="text-sm font-semibold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteKnowledgeBase('${kb.id}')">Delete Base</button>
+                            <button class="text-sm font-semibold text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteKnowledgeBase('${kb.id}')">Delete Base</button>
                             <button class="text-sm font-semibold accent-text hover:underline" onclick="openAddDocumentModal('${kb.id}')">+ Add Document</button>
-                            <a href="/chat.html?kb_id=${kb.id}" class="text-sm font-bold accent-bg text-white py-2 px-4 rounded-md">Open Chat</a>
+                            <a href="/chat.html?kb_id=${kb.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale">Open Chat</a>
                         </div>
                     </div>
                     <div class="border-t border-gray-700 pt-4">
                         <h4 class="text-sm font-semibold text-gray-400 mb-2">Documents:</h4>
-                        <ul class="space-y-1 text-sm">${docListHTML}</ul>
+                        <ul class="space-y-1">${docListHTML}</ul>
                     </div>
                 `;
                 kbList.appendChild(kbElement);
@@ -199,7 +208,7 @@
                         if (docElement) {
                              const statusDiv = docElement.querySelector('.doc-status');
                              if (statusDiv) {
-                                statusDiv.innerHTML = `<button onclick="deleteDocument('${doc.id}')" class="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                statusDiv.innerHTML = `<button onclick="deleteDocument('${doc.id}')" class="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
                                                     </button>`;
                              }
@@ -208,7 +217,7 @@
                 } catch (error) {
                     clearInterval(interval);
                 }
-            }, 5000); // Poll every 5 seconds
+            }, 5000);
         }
         
         async function deleteDocument(docId) {
@@ -245,17 +254,17 @@
         
         async function openAddDocumentModal(kbId) {
             currentKbId = kbId;
-            modalDocList.innerHTML = '<p>Loading library...</p>';
+            modalDocList.innerHTML = '<p class="text-gray-400">Loading library...</p>';
             addDocModal.classList.remove('hidden');
 
             const response = await fetch('https://api.cogmatiq.com/documents', { headers: { 'Authorization': `Bearer ${userToken}` } });
             const allDocs = await response.json();
 
             if (allDocs.length === 0) {
-                modalDocList.innerHTML = '<p>Your document library is empty. Click "Upload New Document" to add one.</p>';
+                modalDocList.innerHTML = '<p class="text-gray-400 text-center">Your document library is empty. Click "Upload New Document" to add one.</p>';
             } else {
                 modalDocList.innerHTML = allDocs.map(doc => `
-                    <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-700 cursor-pointer">
+                    <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-700/50 cursor-pointer">
                         <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text">
                         <span>${doc.file_name}</span>
                     </label>
@@ -264,7 +273,7 @@
 
             const uploadOption = document.createElement('div');
             uploadOption.className = 'mt-4 pt-4 border-t border-gray-700';
-            uploadOption.innerHTML = `<button onclick="triggerFileUpload('${kbId}')" class="w-full text-center accent-text font-semibold p-2 rounded-md hover:bg-gray-700">... or Upload a New Document</button>`;
+            uploadOption.innerHTML = `<button onclick="triggerFileUpload('${kbId}')" class="w-full text-center accent-text font-semibold p-2 rounded-md hover:bg-gray-700/50">Upload New Document</button>`;
             modalDocList.appendChild(uploadOption);
         }
 
@@ -278,7 +287,7 @@
             if (selectedDocs.length === 0) {
                 addDocModal.classList.add('hidden');
                 return;
-            };
+            }
 
             try {
                 await fetch(`https://api.cogmatiq.com/knowledgebases/${currentKbId}/link`, {

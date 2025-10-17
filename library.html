@@ -1,43 +1,54 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document Library - Cogmatiq</title>
+    <meta name="description" content="Access and manage your document library on Cogmatiq. Organize and delete uploaded files for your AI knowledge bases.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
+        .section-padding { padding: 5rem 2rem; }
+        @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
+        .animate-fade-in { animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .card { background: #1F2A44; border: 1px solid #2D3748; }
     </style>
 </head>
 <body class="w-full">
 
-    <header class="py-4 px-8 flex justify-between items-center border-b border-gray-700">
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+    <header class="py-6 px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
-            <a href="/dashboard.html" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
-            <button id="logout-button" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Log Out</button>
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
+            <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
 
-    <main class="py-12 px-4">
-        <div class="max-w-4xl mx-auto">
+    <main class="section-padding pt-24 animate-fade-in">
+        <div class="max-w-5xl mx-auto">
             <h1 class="text-3xl md:text-4xl font-bold mb-8">Document Library</h1>
             
             <div id="library-list" class="space-y-4">
-                <p id="loading-text" class="text-gray-400">Loading your documents...</p>
+                <p id="loading-text" class="text-gray-400 text-center">Loading your documents...</p>
             </div>
         </div>
     </main>
@@ -88,13 +99,13 @@
             }
             documents.forEach(doc => {
                 const docElement = document.createElement('div');
-                docElement.className = 'bg-gray-800/30 p-4 rounded-lg flex justify-between items-center';
+                docElement.className = 'card p-4 rounded-lg flex justify-between items-center hover:shadow-lg transition-shadow';
                 docElement.innerHTML = `
                     <div>
-                        <p class="font-bold text-white">${doc.file_name}</p>
+                        <p class="font-semibold text-white">${doc.file_name}</p>
                         <p class="text-xs text-gray-400">Uploaded: ${new Date(doc.created_at).toLocaleDateString()}</p>
                     </div>
-                    <button onclick="deleteDocument('${doc.id}')" class="text-red-500 hover:text-red-400 transition-colors">
+                    <button onclick="deleteDocument('${doc.id}')" class="text-red-400 hover:text-red-300 transition-colors">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
                     </button>
                 `;

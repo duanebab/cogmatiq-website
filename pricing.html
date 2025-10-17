@@ -4,34 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upgrade to Pro - Cogmatiq</title>
+    <meta name="description" content="Upgrade to Cogmatiq Pro for unlimited document analysis, persistent chat history, and priority support.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
+        .section-padding { padding: 5rem 2rem; }
+        @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
+        .animate-fade-in { animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .card { background: #1F2A44; border: 1px solid #2D3748; }
     </style>
 </head>
 <body class="w-full">
 
-    <header class="py-4 px-8 flex justify-between items-center border-b border-gray-700">
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+    <header class="py-6 px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
+        <div class="flex items-center gap-6">
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
+        </div>
     </header>
 
-    <main class="py-12 px-4">
-        <div class="max-w-md mx-auto text-center bg-gray-800/30 p-8 rounded-lg">
+    <main class="section-padding pt-24 bg-gradient-dark animate-fade-in">
+        <div class="max-w-md mx-auto text-center card p-8 rounded-lg">
             <h1 class="text-3xl font-extrabold mb-2">Upgrade to Cogmatiq Pro</h1>
-            <p class="text-gray-400 mb-6">Unlock the full power of your personal AI.</p>
+            <p class="text-gray-400 mb-6">Unlock unlimited access to your AI-powered knowledge platform.</p>
 
             <div class="text-5xl font-bold mb-4">
                 $10<span class="text-lg font-medium text-gray-400">/month</span>
@@ -43,7 +57,7 @@
                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority Support</li>
             </ul>
 
-            <button id="upgrade-button" class="w-full accent-bg text-white font-bold py-3 px-4 rounded-md text-lg transition-colors duration-300">Upgrade Now</button>
+            <button id="upgrade-button" class="w-full accent-bg text-white font-semibold py-3 px-4 rounded-md text-lg hover-scale">Upgrade Now</button>
             <p id="message" class="mt-4 text-sm text-red-400"></p>
         </div>
     </main>
@@ -57,7 +71,6 @@
         const upgradeButton = document.getElementById('upgrade-button');
         const messageEl = document.getElementById('message');
 
-        // Security Check: Ensure user is logged in
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (!session) {
                 window.location.href = '/login.html';
@@ -67,7 +80,6 @@
         upgradeButton.addEventListener('click', async () => {
             messageEl.textContent = 'Redirecting to checkout...';
             
-            // Get the user's auth token
             const { data, error } = await supabaseClient.auth.getSession();
             if (error || !data.session) {
                 messageEl.textContent = 'Error: You must be logged in.';
@@ -88,7 +100,6 @@
                 }
                 
                 const { url } = await response.json();
-                // Redirect user to Stripe's secure checkout page
                 window.location.href = url;
 
             } catch (err) {

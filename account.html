@@ -4,47 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account - Cogmatiq</title>
+    <meta name="description" content="Securely manage your Cogmatiq account and subscription. Access advanced AI-powered knowledge base features.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
+        .section-padding { padding: 5rem 2rem; }
+        @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
+        .animate-fade-in { animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .card { background: #1F2A44; border: 1px solid #2D3748; }
     </style>
 </head>
 <body class="w-full">
 
-    <header class="py-4 px-8 flex justify-between items-center border-b border-gray-700">
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+    <header class="py-6 px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div>
-            <button id="logout-button" class="text-gray-300 font-medium hover:text-white transition-colors text-sm">Log Out</button>
+        <div class="flex items-center gap-6">
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
+            <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
 
-    <main class="py-12 px-4">
+    <main class="section-padding pt-24 bg-gradient-dark animate-fade-in">
         <div class="max-w-xl mx-auto">
             <h1 class="text-3xl font-bold mb-6">My Account</h1>
-            <div class="bg-gray-800/30 p-8 rounded-lg space-y-4">
+            <div class="card p-8 rounded-lg space-y-6">
                 <div>
-                    <p class="text-sm text-gray-400">Email</p>
-                    <p id="user-email" class="font-semibold">Loading...</p>
+                    <p class="text-sm font-semibold text-gray-400">Email</p>
+                    <p id="user-email" class="font-semibold text-white">Loading...</p>
                 </div>
-                 <div>
-                    <p class="text-sm text-gray-400">Subscription</p>
+                <div>
+                    <p class="text-sm font-semibold text-gray-400">Subscription</p>
                     <p id="sub-status" class="font-semibold">Loading...</p>
                 </div>
                 <div>
-                    <button id="billing-button" class="accent-bg text-white font-bold py-3 px-5 rounded-md text-sm transition-colors duration-300 disabled:opacity-50" disabled>
+                    <button id="billing-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale disabled:opacity-50" disabled>
                         Loading...
                     </button>
                     <p id="message" class="mt-4 text-sm text-red-400"></p>
@@ -55,7 +67,7 @@
 
     <script>
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
         
         const userEmailEl = document.getElementById('user-email');
@@ -85,11 +97,10 @@
             billingButton.disabled = false;
 
             if (data.is_pro) {
-                subStatusEl.textContent = 'Pro Member';
+                subStatusEl.textContent = 'Pro Plan';
                 subStatusEl.classList.add('text-green-400');
                 billingButton.textContent = 'Manage Subscription';
                 
-                // Event listener for Pro users
                 billingButton.addEventListener('click', async () => {
                     messageEl.textContent = 'Redirecting to billing portal...';
                     billingButton.disabled = true;
@@ -107,11 +118,10 @@
                     }
                 });
             } else {
-                subStatusEl.textContent = 'Free Tier';
+                subStatusEl.textContent = 'Free Plan';
                 subStatusEl.classList.add('text-gray-400');
                 billingButton.textContent = 'Upgrade to Pro';
                 
-                // Event listener for Free users
                 billingButton.addEventListener('click', () => {
                     window.location.href = '/pricing.html';
                 });

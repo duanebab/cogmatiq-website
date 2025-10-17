@@ -3,46 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with your AI - Cogmatiq</title>
+    <title>Chat with Your Knowledge Base - Cogmatiq</title>
+    <meta name="description" content="Interact with your AI-powered knowledge base on Cogmatiq. Ask questions and receive precise, source-backed insights from your documents.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #2C3E50; color: #FDFEFE; }
+        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
+        .animate-fade-in { animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .card { background: #1F2A44; border: 1px solid #2D3748; }
         #chat-container::-webkit-scrollbar { width: 8px; }
-        #chat-container::-webkit-scrollbar-track { background: #2C3E50; }
-        #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
-        #chat-container::-webkit-scrollbar-thumb:hover { background: #6181a3; }
-        .prose { color: #FDFEFE; }
+        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
+        #chat-container::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        #chat-container::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+        .prose { color: #E5E7EB; }
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
         .prose strong { font-weight: 800; }
     </style>
 </head>
 <body class="flex flex-col h-screen">
 
-    <header class="py-4 px-8 border-b border-gray-700">
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+    <header class="py-6 px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
+        <div class="flex items-center gap-6">
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
+        </div>
     </header>
 
-    <main class="flex-grow flex flex-col p-4 md:p-8 max-w-4xl w-full mx-auto">
-        <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6">
+    <main class="flex-grow flex flex-col p-4 md:p-8 max-w-5xl w-full mx-auto animate-fade-in">
+        <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6 card p-6 rounded-lg">
             <div class="flex items-start gap-3">
-                <div class="bg-gray-700 p-2 rounded-full">
-                     <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <div class="bg-gray-700/50 p-2 rounded-full">
+                    <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
-                <div class="bg-gray-700 rounded-lg p-4 max-w-lg">
-                    <p>I have analyzed your knowledge base. Ask me anything about its content.</p>
+                <div class="card rounded-lg p-4 max-w-lg">
+                    <p class="text-gray-300">Your knowledge base is ready. Ask any question to extract precise insights from your documents.</p>
                 </div>
             </div>
         </div>
@@ -50,7 +62,7 @@
         <div class="mt-6">
             <form id="chat-form" class="flex items-center gap-4">
                 <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50">
+                <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg hover-scale disabled:opacity-50">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                 </button>
             </form>
@@ -110,14 +122,14 @@
             
             if (sender === 'user') {
                 messageWrapper.className = 'flex justify-end';
-                messageWrapper.innerHTML = `<div class="accent-bg rounded-lg p-4 max-w-lg"><p>${text}</p></div>`;
-            } else { // AI message
+                messageWrapper.innerHTML = `<div class="accent-bg rounded-lg p-4 max-w-lg"><p class="text-white">${text}</p></div>`;
+            } else {
                 messageWrapper.className = 'flex items-start gap-3';
                 messageWrapper.innerHTML = `
-                    <div class="bg-gray-700 p-2 rounded-full">
-                         <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <div class="bg-gray-700/50 p-2 rounded-full">
+                        <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     </div>
-                    <div class="bg-gray-700 rounded-lg p-4 max-w-lg w-full">
+                    <div class="card rounded-lg p-4 max-w-lg w-full">
                         <div class="typing-indicator flex items-center space-x-1">
                             <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
                             <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
