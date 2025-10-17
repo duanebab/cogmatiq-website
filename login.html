@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log In - Cogmatiq</title>
-    <meta name="description" content="Sign in to your Cogmatiq account as of 02:42 PM CDT, Friday, October 17, 2025.">
-
+    <title>Sign In - Cogmatiq</title>
+    <meta name="description" content="Sign in to your Cogmatiq account to access your AI-powered knowledge bases and manage your documents securely.">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <style>
         body { font-family: 'Manrope', sans-serif; background: linear-gradient(to bottom, #1A2533, #111827); color: #E5E7EB; }
@@ -61,20 +63,91 @@
 
         const form = document.getElementById('login-form');
         const messageEl = document.getElementById('message');
+        const loginButton = document.getElementById('login-button');
+        const resendEmailDiv = document.getElementById('resend-email');
+        const resendButton = document.getElementById('resend-button');
+
+        // Enable login button once Supabase client is initialized
+        loginButton.disabled = false;
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             messageEl.textContent = '';
+            resendEmailDiv.classList.add('hidden');
+            loginButton.disabled = true;
 
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            if (error) {
-                messageEl.textContent = `Error: ${error.message}`;
-            } else {
+                if (error) {
+                    console.error('Supabase Auth Error:', {
+                        message: error.message,
+                        code: error.code,
+                        status: error.status,
+                        email: email
+                    });
+
+                    let userMessage = 'An error occurred. Please try again.';
+                    if (error.code === 'invalid_credentials') {
+                        userMessage = 'Invalid email or password. Please check your credentials.';
+                    } else if (error.code === 'email_not_confirmed') {
+                        userMessage = 'Please verify your email address before signing in.';
+                        resendEmailDiv.classList.remove('hidden');
+                    } else if (error.status === 401) {
+                        userMessage = 'Unauthorized: Invalid credentials or account not found.';
+                    }
+                    messageEl.textContent = userMessage;
+                    loginButton.disabled = false;
+                    return;
+                }
+
+                console.log('Login successful:', { userId: data.user.id, email: data.user.email });
                 window.location.href = '/dashboard.html';
+            } catch (err) {
+                console.error('Unexpected Error:', err);
+                messageEl.textContent = 'Unexpected error. Please try again later.';
+                loginButton.disabled = false;
+            }
+        });
+
+        resendButton.addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                messageEl.textContent = 'Please enter your email to resend the confirmation.';
+                return;
+            }
+
+            resendButton.disabled = true;
+            messageEl.textContent = 'Sending confirmation email...';
+
+            try {
+                const { error } = await supabaseClient.auth.resend({
+                    type: 'signup',
+                    email: email
+                });
+
+                if (error) {
+                    console.error('Resend Confirmation Error:', {
+                        message: error.message,
+                        code: error.code,
+                        status: error.status
+                    });
+                    messageEl.textContent = `Error: ${error.message}`;
+                    resendButton.disabled = false;
+                    return;
+                }
+
+                messageEl.textContent = 'Confirmation email sent! Please check your inbox.';
+                messageEl.classList.remove('text-red-400');
+                messageEl.classList.add('text-green-400');
+                resendButton.disabled = false;
+            } catch (err) {
+                console.error('Unexpected Resend Error:', err);
+                messageEl.textContent = 'Unexpected error sending confirmation email.';
+                resendButton.disabled = false;
             }
         });
     </script>
