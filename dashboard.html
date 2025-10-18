@@ -38,7 +38,8 @@
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
-            <span id="sub-status-badge" class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full"></span>
+            <div id="nav-links-container" class="flex items-center gap-6">
+                </div>
             <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Document Library</a>
             <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">My Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
@@ -137,12 +138,22 @@
         }
 
         function renderSubscriptionStatus(isPro) {
+            const navLinksContainer = document.getElementById('nav-links-container');
             if (isPro) {
-                subStatusBadge.textContent = 'Pro Plan';
-                subStatusBadge.className = 'text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50';
+                navLinksContainer.innerHTML = `
+                    <span class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50">
+                        Pro Plan
+                    </span>
+                `;
             } else {
-                subStatusBadge.textContent = 'Free Plan';
-                subStatusBadge.className = 'text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-gray-600/20 text-gray-400 border border-gray-600/50';
+                navLinksContainer.innerHTML = `
+                    <span class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-gray-600/20 text-gray-400 border border-gray-600/50">
+                        Free Plan
+                    </span>
+                    <a href="/pricing.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale">
+                        Upgrade to Pro
+                    </a>
+                `;
             }
         }
 
