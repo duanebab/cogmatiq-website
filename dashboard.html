@@ -4,14 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cogmatiq</title>
-    <meta name="description" content="Manage your AI-powered knowledge bases with Cogmatiq. Create, organize, and query documents for actionable insights.">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <meta name="msapplication-TileColor" content="#1A2533">
-    <meta name="theme-color" content="#1A2533">
+    <meta name="description" content="Manage your AI-powered Cortices with Cogmatiq. Create, organize, and query documents for actionable insights.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,7 +60,7 @@
             </div>
             <p id="progress-text" class="text-center text-sm text-gray-400 mb-4 hidden"></p>
             
-            <div id="kb-list" class="space-y-6">
+            <div id="cortex-list" class="space-y-6">
                 <p id="loading-text" class="text-gray-400 text-center">Loading your Cortices...</p>
             </div>
         </div>
@@ -93,10 +86,10 @@
         
         const createCortexButton = document.getElementById('create-cortex-button');
         const fileInput = document.getElementById('file-input');
-        const cortexList = document.getElementById('kb-list');
+        const cortexList = document.getElementById('cortex-list');
         const loadingText = document.getElementById('loading-text');
         const logoutButton = document.getElementById('logout-button');
-        const subStatusBadge = document.getElementById('sub-status-badge');
+        const navLinksContainer = document.getElementById('nav-links-container');
         const addDocModal = document.getElementById('add-doc-modal');
         const modalDocList = document.getElementById('modal-doc-list');
         const modalCancelButton = document.getElementById('modal-cancel-button');
@@ -106,7 +99,7 @@
         const progressText = document.getElementById('progress-text');
 
         let userToken = null;
-        let currentKbId = null;
+        let currentKbId = null; // Stays as 'currentKbId' internally, simpler not to refactor this one
 
         async function main() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -127,25 +120,28 @@
             loadingText.classList.remove('hidden');
             loadingText.textContent = 'Loading your data...';
             
-            const [kbsRes, subRes] = await Promise.all([
-                fetch('https://api.cogmatiq.com/cortices', { headers: { 'Authorization': `Bearer ${userToken}` } }),
-                fetch('https://api.cogmatiq.com/subscription-status', { headers: { 'Authorization': `Bearer ${userToken}` } })
-            ]);
+            try {
+                const [kbsRes, subRes] = await Promise.all([
+                    fetch('https://api.cogmatiq.com/cortices', { headers: { 'Authorization': `Bearer ${userToken}` } }),
+                    fetch('https://api.cogmatiq.com/subscription-status', { headers: { 'Authorization': `Bearer ${userToken}` } })
+                ]);
 
-            if (!kbsRes.ok || !subRes.ok) {
-                loadingText.textContent = 'Error: Failed to load dashboard data.';
-                return;
+                if (!kbsRes.ok || !subRes.ok) {
+                    loadingText.textContent = 'Error: Failed to load dashboard data.';
+                    return;
+                }
+
+                const cortices = await kbsRes.json();
+                const subStatus = await subRes.json();
+                
+                renderSubscriptionStatus(subStatus.is_pro);
+                renderCortices(cortices);
+            } catch (error) {
+                loadingText.textContent = `Error: ${error.message}`;
             }
-
-            const cortices = await kbsRes.json();
-            const subStatus = await subRes.json();
-            
-            renderSubscriptionStatus(subStatus.is_pro);
-            renderCortices(cortices);
         }
 
         function renderSubscriptionStatus(isPro) {
-            const navLinksContainer = document.getElementById('nav-links-container');
             if (isPro) {
                 navLinksContainer.innerHTML = `
                     <span class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50">
@@ -171,8 +167,8 @@
                 cortexList.innerHTML = '<p class="text-gray-400 text-center py-8">No Cortices yet. Click "Create New Cortex" to get started.</p>';
                 return;
             }
-            cortices.forEach(kb => {
-                const docListHTML = kb.documents.length > 0 
+            cortices.forEach(cortex => {
+                const docListHTML = cortex.documents.length > 0 
                     ? cortex.documents.map(doc => {
                         let statusHTML = '';
                         if (doc.status === 'processing') {
@@ -198,9 +194,9 @@
                             <h3 class="text-xl font-semibold text-white">${cortex.name}</h3>
                         </div>
                         <div class="flex items-center gap-4">
-                            <button class="text-sm font-semibold text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteKnowledgeBase('${cortex.id}')">Delete Cortex</button>
+                             <button class="text-sm font-semibold text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteCortex('${cortex.id}')">Delete Cortex</button>
                             <button class="text-sm font-semibold accent-text hover:underline" onclick="openAddDocumentModal('${cortex.id}')">+ Add Document</button>
-                            <a href="/chat.html?kb_id=${cortex.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale">Open Chat</a>
+                            <a href="/chat.html?cortex_id=${cortex.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale">Open Chat</a>
                         </div>
                     </div>
                     <div class="border-t border-gray-700 pt-4">
@@ -254,7 +250,7 @@
             }
         }
 
-        async function deleteCortex(kbId) {
+        async function deleteCortex(cortexId) {
             if (!userToken) return;
             if (confirm('Are you sure you want to delete this Cortex? The documents inside will not be deleted.')) {
                 try {
@@ -308,7 +304,7 @@
             }
 
             try {
-                await fetch(`https://api.cogmatiq.com/knowledgebases/${currentKbId}/link`, {
+                await fetch(`https://api.cogmatiq.com/cortices/${currentKbId}/link`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ document_ids: selectedDocs })
@@ -356,7 +352,7 @@
             formData.append('file', file);
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', `https://api.cogmatiq.com/knowledgebases/${kbId}/documents`, true);
+            xhr.open('POST', `https://api.cogmatiq.com/cortices/${kbId}/documents`, true);
             xhr.setRequestHeader('Authorization', `Bearer ${userToken}`);
 
             xhr.upload.onprogress = (event) => {
