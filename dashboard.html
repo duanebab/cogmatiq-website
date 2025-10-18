@@ -105,18 +105,35 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 userToken = session.access_token;
-                fetchInitialData();
+                // --- THIS IS THE FIX ---
+                // We no longer call fetchInitialData() here.
+                // We let the onAuthStateChange listener handle all logic.
+                // This ensures we always have a valid session *before* fetching.
             } else {
+                // If there's no session on load, go to login.
                 window.location.href = '/login.html';
             }
+            
+            // This listener is now the single source of truth.
              supabaseClient.auth.onAuthStateChange((_event, session) => {
-                if (!session) { window.location.href = '/'; }
+                if (session) {
+                    // This fires on initial load AND on any auth change.
+                    userToken = session.access_token;
+                    fetchInitialData();
+                } else {
+                    // If session is lost (e.g., logout), redirect.
+                    window.location.href = '/';
+                }
             });
         }
         main();
 
         async function fetchInitialData() {
-            if (!userToken) return;
+            if (!userToken) {
+                loadingText.textContent = 'Error: No user token found.';
+                return;
+            }
+            
             loadingText.classList.remove('hidden');
             loadingText.textContent = 'Loading your data...';
             
@@ -140,7 +157,6 @@
                 loadingText.textContent = `Error: ${error.message}`;
             }
         }
-
         function renderSubscriptionStatus(isPro) {
             if (isPro) {
                 navLinksContainer.innerHTML = `
