@@ -218,15 +218,30 @@
 
     <script>
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+        const supabaseAnonKey = 'eyJhbGciOiJIJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
         const authLinksContainer = document.getElementById('auth-links');
 
         supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session) {
-                authLinksContainer.innerHTML = `<a href="/dashboard.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300">Access Dashboard</a>`;
+                authLinksContainer.innerHTML = `
+                    <a href="/dashboard.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300">Access Dashboard</a>
+                    <button id="logout-button-index" class="text-gray-400 font-medium hover:text-white transition-colors">Sign Out</button>
+                `;
+                
+                const logoutButton = document.getElementById('logout-button-index');
+                if (logoutButton) {
+                    logoutButton.addEventListener('click', async () => {
+                        await supabaseClient.auth.signOut();
+                        // onAuthStateChange will fire again automatically and update the header
+                    });
+                }
             } else {
-                authLinksContainer.innerHTML = `<a href="/login.html" class="text-gray-400 font-medium hover:text-white transition-colors">Sign In</a><a href="/signup.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300">Get Started</a>`;
+                // User is logged out: Show Sign In and Get Started
+                authLinksContainer.innerHTML = `
+                    <a href="/login.html" class="text-gray-400 font-medium hover:text-white transition-colors">Sign In</a>
+                    <a href="/signup.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300">Get Started</a>
+                `;
             }
         });
     </script>
