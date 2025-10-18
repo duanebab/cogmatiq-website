@@ -24,25 +24,34 @@
         .card { background: #1F2A44; border: 1px solid #2D3748; }
 
         #chat-container::-webkit-scrollbar { width: 8px; }
-        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
+        #chat-container::-webkit-scrollbar-track { background: #1A2533; }
         #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
 
         .prose { color: #E5E7EB; }
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
         .prose strong { font-weight: 800; }
 
-        /* NEW Tab Styles */
-        .tab-button {
+        /* NEW Sidebar Styles */
+        .sidebar-button {
             background-color: transparent;
             color: #9CA3AF; /* gray-400 */
-            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s, color 0.2s;
         }
-        .tab-button.active {
-            color: #E5E7EB; /* gray-200 */
-            border-bottom-color: #00B5AD; /* accent-text */
+        .sidebar-button:hover {
+            background-color: #2D3748; /* gray-700 */
+            color: #E5E7EB;
         }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+        .sidebar-button.active {
+            background-color: #1F2A44; /* card bg */
+            color: #E5E7EB;
+        }
+        .panel { display: none; }
+        .panel.active { display: flex; }
         
         #graph-container { width: 100%; height: 100%; min-height: 500px; background-color: #111827; }
     </style>
@@ -59,23 +68,23 @@
         </div>
     </header>
 
-    <main class="flex-grow flex flex-col p-4 md:p-8 max-w-4xl w-full mx-auto pt-32">
-        
-        <div class="card rounded-lg flex-grow flex flex-col overflow-hidden">
-            
-            <div class="border-b border-gray-700">
-                <nav class="flex space-x-4 px-6" aria-label="Tabs">
-                    <button id="chat-tab-button" class="tab-button active font-semibold text-sm py-4">
-                        Chat
-                    </button>
-                    <button id="graph-tab-button" class="tab-button font-semibold text-sm py-4">
-                        Neural Map
-                    </button>
-                </nav>
-            </div>
+    <div class="flex flex-grow pt-24 h-full"> <aside class="w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
+            <nav class="flex flex-col space-y-2">
+                <button id="chat-tab-button" class="sidebar-button active">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    Chat
+                </button>
+                <button id="graph-tab-button" class="sidebar-button">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+                    Neural Map
+                </button>
+            </nav>
+        </aside>
 
-            <div id="chat-panel" class="tab-panel active flex-grow flex flex-col" style="height: 60vh;">
-                <div id="chat-container" class="flex-grow overflow-y-auto p-6 space-y-6">
+        <main class="flex-grow flex flex-col p-8 pl-72 w-full h-full">
+            
+            <div id="chat-panel" class="panel active flex-col flex-grow h-full">
+                <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6">
                     <div class="flex items-start gap-3">
                         <div class="bg-gray-700/50 p-2 rounded-full">
                              <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -85,8 +94,7 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="border-t border-gray-700 p-4">
+                <div class="mt-6">
                     <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                         <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50">
@@ -96,14 +104,14 @@
                 </div>
             </div>
 
-            <div id="graph-panel" class="tab-panel flex-grow" style="height: 60vh;">
-                <div id="graph-container">
+            <div id="graph-panel" class="panel flex-col h-full card rounded-lg overflow-hidden">
+                <div id="graph-container" class="flex-grow">
                     <p id="graph-loading-text" class="text-gray-400 text-center p-10">Loading Neural Map...</p>
                 </div>
             </div>
 
-        </div>
-    </main>
+        </main>
+    </div>
     
     <script>
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
