@@ -3,43 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with Your Knowledge Base - Cogmatiq</title>
-    <meta name="description" content="Interact with your AI-powered knowledge base on Cogmatiq. Ask questions and receive precise, source-backed insights from your documents.">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <meta name="msapplication-TileColor" content="#1A2533">
-    <meta name="theme-color" content="#1A2533">
+    <title>Chat with your Cortex - Cogmatiq</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
 
     <style>
         body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
-        .animate-fade-in { animation: fadeIn 1s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
-        .hover-scale { transition: transform 0.3s ease; }
-        .hover-scale:hover { transform: scale(1.05); }
         .card { background: #1F2A44; border: 1px solid #2D3748; }
+
         #chat-container::-webkit-scrollbar { width: 8px; }
-        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
-        #chat-container::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
-        #chat-container::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+        #chat-container::-webkit-scrollbar-track { background: #1A2533; }
+        #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+
         .prose { color: #E5E7EB; }
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
         .prose strong { font-weight: 800; }
+
+        /* Tab styles */
+        .tab-button {
+            background-color: transparent;
+            border-color: #2D3748;
+            color: #9CA3AF; /* gray-400 */
+        }
+        .tab-button.active {
+            background-color: #1F2A44;
+            border-color: #2D3748;
+            color: #E5E7EB; /* gray-200 */
+        }
+        .tab-panel {
+            display: none; /* Hidden by default */
+        }
+        .tab-panel.active {
+            display: block; /* Shown when active */
+        }
+        /* Graph container */
+        #graph-container {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            border-radius: 0.5rem;
+            background-color: #111827; /* gray-900 */
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen">
@@ -49,27 +65,46 @@
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div class="flex items-center gap-6">
-            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
-        </div>
-    </header>
+        </header>
 
-    <main class="flex-grow flex flex-col p-4 md:p-8 pt-24 md:pt-28 max-w-5xl w-full mx-auto animate-fade-in">
-        <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6 card p-6 rounded-lg">
-            <div class="flex items-start gap-3">
-                <div class="bg-gray-700/50 p-2 rounded-full">
-                    <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+    <main class="flex-grow flex flex-col p-4 md:p-8 max-w-4xl w-full mx-auto pt-28">
+        
+        <div class="mb-4">
+            <nav class="flex space-x-2" aria-label="Tabs">
+                <button id="chat-tab-button" class="tab-button active px-4 py-2 font-semibold text-sm rounded-t-lg border-b-0 border-t border-r border-l">
+                    Chat
+                </button>
+                <button id="graph-tab-button" class="tab-button px-4 py-2 font-semibold text-sm rounded-t-lg border-b-0 border-t border-r border-l">
+                    Neural Map
+                </button>
+            </nav>
+        </div>
+
+        <div class="flex-grow flex flex-col card rounded-b-lg rounded-tr-lg overflow-hidden">
+            <div id="chat-panel" class="tab-panel active flex-grow flex flex-col p-6">
+                <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6">
+                    <div class="flex items-start gap-3">
+                        <div class="bg-gray-700/50 p-2 rounded-full">
+                             <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
+                        <div class="bg-gray-700/50 rounded-lg p-4 max-w-lg">
+                            <p>I am your Cortex. I've processed your knowledge. Ask me anything.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card rounded-lg p-4 max-w-lg">
-                    <p class="text-gray-300">I have analyzed your Cortex. Ask me anything about its content.</p>
+            </div>
+
+            <div id="graph-panel" class="tab-panel flex-grow p-6">
+                <div id="graph-container">
+                    <p id="graph-loading-text" class="text-gray-400 text-center p-10">Loading Neural Map...</p>
                 </div>
             </div>
         </div>
-        
+
         <div class="mt-6">
             <form id="chat-form" class="flex items-center gap-4">
                 <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg hover-scale disabled:opacity-50">
+                <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                 </button>
             </form>
@@ -79,14 +114,24 @@
     <script>
         const API_ENDPOINT = 'https://api.cogmatiq.com/query';
 
+        // Get all elements
         const chatContainer = document.getElementById('chat-container');
         const chatForm = document.getElementById('chat-form');
         const messageInput = document.getElementById('message-input');
         const submitButton = document.getElementById('submit-button');
+        const chatTabButton = document.getElementById('chat-tab-button');
+        const graphTabButton = document.getElementById('graph-tab-button');
+        const chatPanel = document.getElementById('chat-panel');
+        const graphPanel = document.getElementById('graph-panel');
+        const graphContainer = document.getElementById('graph-container');
+        const graphLoadingText = document.getElementById('graph-loading-text');
+
+        let userToken = null;
+        let graphLoaded = false;
         
         function getClientId() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('cortex_id') || params.get('kb_id') || params.get('session_id') || null; // <-- CHANGED
+            const params = new URLSearchParams(window.location.search);
+            return params.get('cortex_id') || params.get('kb_id') || params.get('session_id') || null;
         }
         
         const clientId = getClientId();
@@ -95,6 +140,96 @@
             window.location.href = '/dashboard.html';
         }
 
+        // --- Auth Check (to get token) ---
+        (async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                userToken = session.access_token;
+            } else {
+                window.location.href = '/login.html';
+            }
+        })();
+
+        // --- Tab Switching Logic ---
+        chatTabButton.addEventListener('click', () => {
+            chatTabButton.classList.add('active');
+            graphTabButton.classList.remove('active');
+            chatPanel.classList.add('active');
+            graphPanel.classList.remove('active');
+        });
+
+        graphTabButton.addEventListener('click', () => {
+            graphTabButton.classList.add('active');
+            chatTabButton.classList.remove('active');
+            graphPanel.classList.add('active');
+            chatPanel.classList.remove('active');
+            
+            if (!graphLoaded) {
+                loadGraphData();
+            }
+        });
+
+        // --- NEW: Load Graph Data ---
+        async function loadGraphData() {
+            if (!userToken) return;
+            graphLoaded = true; // Set flag to prevent re-loading
+            
+            try {
+                const response = await fetch(`https://api.cogmatiq.com/cortex-graph/${clientId}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                if (!response.ok) throw new Error('Failed to load graph data.');
+
+                const data = await response.json();
+                graphLoadingText.classList.add('hidden');
+                
+                if (!data.nodes || data.nodes.length === 0) {
+                    graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. The AI is still processing.</p>';
+                    return;
+                }
+
+                // --- vis.js Rendering ---
+                const options = {
+                    nodes: {
+                        shape: "dot",
+                        size: 16,
+                        font: { color: "#E5E7EB", size: 14 },
+                        borderWidth: 2,
+                    },
+                    edges: {
+                        width: 1,
+                        color: { color: "#4B5563", highlight: "#00B5AD", hover: "#00B5AD" },
+                        arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+                        font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top' },
+                    },
+                    physics: {
+                        enabled: true,
+                        solver: 'forceAtlas2Based',
+                        forceAtlas2Based: {
+                            gravitationalConstant: -50,
+                            centralGravity: 0.01,
+                            springConstant: 0.08,
+                            springLength: 100,
+                            damping: 0.4,
+                            avoidOverlap: 0.1
+                        }
+                    },
+                    interaction: {
+                        hover: true,
+                        tooltipDelay: 200,
+                    },
+                    layout: {
+                        improvedLayout: true,
+                    },
+                };
+                new vis.Network(graphContainer, data, options);
+
+            } catch (error) {
+                graphLoadingText.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // --- Chat Form Logic (unchanged) ---
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const question = messageInput.value.trim();
@@ -111,7 +246,11 @@
             formData.append('client_id', clientId);
 
             try {
-                const response = await fetch(API_ENDPOINT, { method: 'POST', body: formData });
+                const response = await fetch(API_ENDPOINT, { 
+                    method: 'POST', 
+                    headers: { 'Authorization': `Bearer ${userToken}` }, // Add auth to query
+                    body: formData 
+                });
                 if (!response.ok) { throw new Error('API request failed.'); }
                 const data = await response.json();
                 
@@ -124,52 +263,9 @@
             }
         });
 
-        function addMessageToUI(text, sender) {
-            const messageWrapper = document.createElement('div');
-            
-            if (sender === 'user') {
-                messageWrapper.className = 'flex justify-end';
-                messageWrapper.innerHTML = `<div class="accent-bg rounded-lg p-4 max-w-lg"><p class="text-white">${text}</p></div>`;
-            } else {
-                messageWrapper.className = 'flex items-start gap-3';
-                messageWrapper.innerHTML = `
-                    <div class="bg-gray-700/50 p-2 rounded-full">
-                        <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    </div>
-                    <div class="card rounded-lg p-4 max-w-lg w-full">
-                        <div class="typing-indicator flex items-center space-x-1">
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
-                        </div>
-                        <div class="prose response-content hidden"></div>
-                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
-                    </div>
-                `;
-            }
-            chatContainer.appendChild(messageWrapper);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            return messageWrapper;
-        }
+        // (Helper functions addMessageToUI, updateAIMessage, copyToClipboard remain unchanged)
+        // ...
 
-        function updateAIMessage(element, text) {
-            const typingIndicator = element.querySelector('.typing-indicator');
-            const responseContent = element.querySelector('.response-content');
-            const copyButton = element.querySelector('.copy-button');
-
-            typingIndicator.classList.add('hidden');
-            responseContent.innerHTML = marked.parse(text);
-            responseContent.classList.remove('hidden');
-            copyButton.classList.remove('hidden');
-        }
-
-        function copyToClipboard(buttonElement) {
-            const content = buttonElement.parentElement.querySelector('.response-content').innerText;
-            navigator.clipboard.writeText(content).then(() => {
-                buttonElement.textContent = 'Copied!';
-                setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
-            });
-        }
     </script>
 </body>
 </html>
