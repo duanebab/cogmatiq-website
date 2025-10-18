@@ -56,9 +56,9 @@
     <main class="section-padding pt-24 animate-fade-in">
         <div class="max-w-5xl mx-auto">
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-3xl md:text-4xl font-bold">Your Knowledge Bases</h1>
-                <button id="create-kb-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale">
-                    + Create New Base
+                <h1 class="text-3xl md:text-4xl font-bold">Your Cortices</h1>
+                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale">
+                    + Create New Cortex
                 </button>
             </div>
 
@@ -68,7 +68,7 @@
             <p id="progress-text" class="text-center text-sm text-gray-400 mb-4 hidden"></p>
             
             <div id="kb-list" class="space-y-6">
-                <p id="loading-text" class="text-gray-400 text-center">Loading your knowledge bases...</p>
+                <p id="loading-text" class="text-gray-400 text-center">Loading your Cortices...</p>
             </div>
         </div>
     </main>
@@ -77,7 +77,7 @@
 
     <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-20">
         <div class="card rounded-lg shadow-xl p-6 w-full max-w-lg">
-            <h2 class="text-xl font-semibold mb-4">Add Documents to Knowledge Base</h2>
+            <h2 class="text-xl font-semibold mb-4">Add Documents to Cortex</h2>
             <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border-y border-gray-700 py-4 my-4"></div>
             <div class="flex justify-end gap-4 mt-4">
                 <button id="modal-cancel-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500">Cancel</button>
@@ -91,9 +91,9 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
         
-        const createKbButton = document.getElementById('create-kb-button');
+        const createCortexButton = document.getElementById('create-cortex-button');
         const fileInput = document.getElementById('file-input');
-        const kbList = document.getElementById('kb-list');
+        const cortexList = document.getElementById('kb-list');
         const loadingText = document.getElementById('loading-text');
         const logoutButton = document.getElementById('logout-button');
         const subStatusBadge = document.getElementById('sub-status-badge');
@@ -128,7 +128,7 @@
             loadingText.textContent = 'Loading your data...';
             
             const [kbsRes, subRes] = await Promise.all([
-                fetch('https://api.cogmatiq.com/knowledgebases', { headers: { 'Authorization': `Bearer ${userToken}` } }),
+                fetch('https://api.cogmatiq.com/cortices', { headers: { 'Authorization': `Bearer ${userToken}` } }),
                 fetch('https://api.cogmatiq.com/subscription-status', { headers: { 'Authorization': `Bearer ${userToken}` } })
             ]);
 
@@ -137,11 +137,11 @@
                 return;
             }
 
-            const knowledgeBases = await kbsRes.json();
+            const cortices = await kbsRes.json();
             const subStatus = await subRes.json();
             
             renderSubscriptionStatus(subStatus.is_pro);
-            renderKnowledgeBases(knowledgeBases);
+            renderCortices(cortices);
         }
 
         function renderSubscriptionStatus(isPro) {
@@ -164,16 +164,16 @@
             }
         }
 
-        function renderKnowledgeBases(kbs) {
+        function renderCortices(cortices) {
             loadingText.classList.add('hidden');
-            kbList.innerHTML = '';
-            if (kbs.length === 0) {
-                kbList.innerHTML = '<p class="text-gray-400 text-center py-8">No knowledge bases yet. Click "Create New Base" to get started.</p>';
+            cortexList.innerHTML = '';
+            if (cortices.length === 0) {
+                cortexList.innerHTML = '<p class="text-gray-400 text-center py-8">No Cortices yet. Click "Create New Cortex" to get started.</p>';
                 return;
             }
-            kbs.forEach(kb => {
+            cortices.forEach(kb => {
                 const docListHTML = kb.documents.length > 0 
-                    ? kb.documents.map(doc => {
+                    ? cortex.documents.map(doc => {
                         let statusHTML = '';
                         if (doc.status === 'processing') {
                             statusHTML = `<span class="text-xs font-semibold text-yellow-400 animate-pulse">Processing...</span>`;
@@ -190,17 +190,17 @@
                     }).join('') 
                     : '<li class="text-gray-500 text-sm">No documents yet.</li>';
 
-                const kbElement = document.createElement('div');
-                kbElement.className = 'card p-6 rounded-lg hover:shadow-lg transition-shadow group';
-                kbElement.innerHTML = `
+                const cortexElement = document.createElement('div');
+                cortexElement.className = 'card p-6 rounded-lg hover:shadow-lg transition-shadow group';
+                cortexElement.innerHTML = `
                     <div class="flex justify-between items-center mb-4">
                         <div>
-                            <h3 class="text-xl font-semibold text-white">${kb.name}</h3>
+                            <h3 class="text-xl font-semibold text-white">${cortex.name}</h3>
                         </div>
                         <div class="flex items-center gap-4">
-                            <button class="text-sm font-semibold text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteKnowledgeBase('${kb.id}')">Delete Base</button>
-                            <button class="text-sm font-semibold accent-text hover:underline" onclick="openAddDocumentModal('${kb.id}')">+ Add Document</button>
-                            <a href="/chat.html?kb_id=${kb.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale">Open Chat</a>
+                            <button class="text-sm font-semibold text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteKnowledgeBase('${cortex.id}')">Delete Cortex</button>
+                            <button class="text-sm font-semibold accent-text hover:underline" onclick="openAddDocumentModal('${cortex.id}')">+ Add Document</button>
+                            <a href="/chat.html?kb_id=${cortex.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale">Open Chat</a>
                         </div>
                     </div>
                     <div class="border-t border-gray-700 pt-4">
@@ -208,7 +208,7 @@
                         <ul class="space-y-1">${docListHTML}</ul>
                     </div>
                 `;
-                kbList.appendChild(kbElement);
+                cortexList.appendChild(cortexElement);
             });
         }
 
@@ -254,15 +254,15 @@
             }
         }
 
-        async function deleteKnowledgeBase(kbId) {
+        async function deleteCortex(kbId) {
             if (!userToken) return;
-            if (confirm('Are you sure you want to delete this Knowledge Base? The documents inside will not be deleted.')) {
+            if (confirm('Are you sure you want to delete this Cortex? The documents inside will not be deleted.')) {
                 try {
-                    const response = await fetch(`https://api.cogmatiq.com/knowledgebases/${kbId}`, {
+                    const response = await fetch(`https://api.cogmatiq.com/cortices/${cortexId}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${userToken}` }
                     });
-                    if (!response.ok) throw new Error('Failed to delete knowledge base.');
+                    if (!response.ok) throw new Error('Failed to delete Cortex.');
                     fetchInitialData();
                 } catch (error) {
                     alert(`Error: ${error.message}`);
@@ -320,18 +320,18 @@
             }
         });
 
-        createKbButton.addEventListener('click', async () => {
-            const kbName = prompt('Enter a name for your new knowledge base:');
-            if (!kbName || !userToken) return;
+        createCortexButton.addEventListener('click', async () => {
+            const cortexName = prompt('Enter a name for your new Cortex:');
+            if (!cortexName || !userToken) return;
             try {
-                await fetch('https://api.cogmatiq.com/knowledgebases', {
+                await fetch('https://api.cogmatiq.com/cortices', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: kbName })
+                    body: JSON.stringify({ name: cortexName })
                 });
                 fetchInitialData();
             } catch (error) {
-                alert('Failed to create knowledge base.');
+                alert('Failed to create Cortex.');
             }
         });
 

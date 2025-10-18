@@ -61,7 +61,7 @@
                     <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
                 <div class="card rounded-lg p-4 max-w-lg">
-                    <p class="text-gray-300">Your knowledge base is ready. Ask any question to extract precise insights from your documents.</p>
+                    <p class="text-gray-300">I have analyzed your Cortex. Ask me anything about its content.</p>
                 </div>
             </div>
         </div>
@@ -85,8 +85,8 @@
         const submitButton = document.getElementById('submit-button');
         
         function getClientId() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('kb_id') || params.get('session_id') || null;
+        const params = new URLSearchParams(window.location.search);
+        return params.get('cortex_id') || params.get('kb_id') || params.get('session_id') || null; // <-- CHANGED
         }
         
         const clientId = getClientId();

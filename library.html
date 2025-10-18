@@ -157,7 +157,7 @@
         
         async function deleteDocument(docId) {
             if (!userToken) return;
-            if (confirm('Are you sure you want to permanently delete this document? This will remove it from ALL knowledge bases.')) {
+            if (confirm('Are you sure you want to permanently delete this document? This will remove it from ALL Cortices.')) {
                 try {
                     const response = await fetch(`https://api.cogmatiq.com/documents/${docId}`, {
                         method: 'DELETE',
