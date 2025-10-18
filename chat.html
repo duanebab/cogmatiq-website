@@ -50,7 +50,7 @@
         </div>
     </header>
 
-    <main class="flex-grow flex flex-col p-4 md:p-8 max-w-4xl w-full mx-auto pt-32">
+    <main class="flex-grow flex flex-col p-4 md:p-8 max-w-4xl w-full mx-auto pt-36">
         
         <div class="mb-4">
             <nav class="flex space-x-2" aria-label="Tabs">
@@ -95,6 +95,7 @@
     </main>
     
     <script>
+        // --- ADDED: Supabase Client Initialization ---
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -125,21 +126,18 @@
             window.location.href = '/dashboard.html';
         }
 
-        // --- UPDATED: Main async function to handle auth ---
-        async function main() {
+        // --- Auth Check (to get token) ---
+        (async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 userToken = session.access_token;
-                // Now that we have the token, attach the event listeners
                 initializeListeners();
             } else {
                 window.location.href = '/login.html';
             }
-        }
-        main(); // Run the app
+        })();
 
         function initializeListeners() {
-            // --- Tab Switching Logic ---
             chatTabButton.addEventListener('click', () => {
                 chatTabButton.classList.add('active');
                 graphTabButton.classList.remove('active');
@@ -158,11 +156,10 @@
                 }
             });
 
-            // --- Chat Form Logic ---
             chatForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const question = messageInput.value.trim();
-                if (!question || !userToken) return; // Check for token
+                if (!question || !userToken) return;
 
                 addMessageToUI(question, 'user');
                 messageInput.value = '';
