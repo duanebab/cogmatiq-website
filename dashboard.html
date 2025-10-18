@@ -232,7 +232,7 @@
                         let statusHTML = '';
                         if (doc.status === 'processing') {
                             statusHTML = `<span class="text-xs font-semibold text-yellow-400 animate-pulse">Processing...</span>`;
-                            pollDocumentStatus(doc.id, cortex.id); // Pass cortex.id
+                            pollDocumentStatus(doc.id, cortex.id);
                         } else {
                             statusHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortex.id}', '${doc.id}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
@@ -452,7 +452,6 @@
                 fetchInitialData();
             } catch (error) {
                 modalUrlMessage.textContent = `Error: ${error.message}`;
-                modalUrlMessage.classList.remove('hidden');
             } finally {
                 modalAddUrlButton.disabled = false;
                 modalAddUrlButton.textContent = 'Add Webpage';
@@ -473,6 +472,11 @@
                 alert('Failed to create Cortex.');
             }
         });
+
+        function triggerFileUpload(kbId) {
+            fileInput.dataset.kbId = kbId;
+            fileInput.click();
+        }
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length) handleFileUpload(fileInput.files[0], fileInput.dataset.kbId);
