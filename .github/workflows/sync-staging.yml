@@ -1,38 +1,18 @@
-name: Sync Develop Branch to Staging Repo
-
-on:
-  push:
-    branches:
-      - develop # Trigger only when develop branch is pushed to
-
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Develop Branch of Main Repo
-        uses: actions/checkout@v4
-        with:
-          ref: develop # Checkout the develop branch that triggered the workflow
-          # Ensure checkout fetches history needed for subsequent git commands if needed
-          # fetch-depth: 0 # Uncomment if full history is needed, usually not for sync
-
-      - name: Setup SSH Agent for Deploy Key
-        uses: webfactory/ssh-agent@v0.9.0 # Action to load SSH key
-        with:
-          ssh-private-key: ${{ secrets.STAGING_SITE_DEPLOY_KEY }} # Use the new secret
-
-      - name: Sync files to Staging Repo
+- name: Sync files to Staging Repo
         run: |
-          # Configure Git user for the commit in the target repo
+          # Configure Git user
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-          # Clone the target repository using SSH
+          # Define clone directory explicitly
+          CLONE_DIR=$(mktemp -d)
+
+          # Clone the target repository using SSH into the temp dir
           # Note: Replace 'duanebab' if your username/org is different
-          git clone git@github.com:duanebab/cogmatiq-staging-site.git ../cogmatiq-staging-site-clone
+          git clone git@github.com:duanebab/cogmatiq-staging-site.git "$CLONE_DIR"
 
           # Go into the cloned repo
-          cd ../cogmatiq-staging-site-clone
+          cd "$CLONE_DIR"
 
           # Make sure we are on the main branch
           git checkout main || git checkout -b main
@@ -41,11 +21,14 @@ jobs:
           # Use find for safer deletion than rm -rf *
           find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} \;
 
-          # Copy new files from the source checkout
-          # Use rsync for efficiency and better handling of files/dirs
-          rsync -av --delete --exclude='.git/' /github/workspace/ ../cogmatiq-staging-site-clone/
+          # --- Revised Sync ---
+          # Sync from the original workspace TO the clone directory
+          # Using GITHUB_WORKSPACE environment variable which is always correct
+          rsync -av --delete --exclude='.git/' --exclude='.github/' "$GITHUB_WORKSPACE/" "$CLONE_DIR/"
+          # Exclude .github dir to avoid copying the workflow files themselves
+          # --- End Revised Sync ---
 
-          # Stage changes, commit, and push
+          # Stage changes, commit, and push (still inside CLONE_DIR)
           git add -A
           # Check if there are changes to commit
           if git diff --staged --quiet; then
