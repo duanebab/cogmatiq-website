@@ -13,17 +13,47 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: develop # Checkout the develop branch that triggered the workflow
+          # Ensure checkout fetches history needed for subsequent git commands if needed
+          # fetch-depth: 0 # Uncomment if full history is needed, usually not for sync
 
-      - name: Push to Staging Repo's Main Branch
-        uses: cpina/github-action-push-to-another-repository@main # Use a dedicated action for this
-        env:
-          # You need a Personal Access Token (PAT) with repo scope
-          # Store this as a Repository Secret named PAT in the 'cogmatiq' repo
-          API_TOKEN_GITHUB: ${{ secrets.PAT }}
+      - name: Setup SSH Agent for Deploy Key
+        uses: webfactory/ssh-agent@v0.9.0 # Action to load SSH key
         with:
-          source-directory: '.' # Copy everything from the root
-          destination-github-username: ${{ github.repository_owner }} # Your GitHub username/org
-          destination-repository-name: 'cogmatiq-staging-site' # The name of the NEW repo
-          target-branch: main # Push to the main branch of the staging repo
-          commit-message: 'Sync from develop branch: ${{ github.event.head_commit.message }}'
-          target-directory: '' # Push to the root of the target repo
+          ssh-private-key: ${{ secrets.STAGING_SITE_DEPLOY_KEY }} # Use the new secret
+
+      - name: Sync files to Staging Repo
+        run: |
+          # Configure Git user for the commit in the target repo
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Clone the target repository using SSH
+          # Note: Replace 'duanebab' if your username/org is different
+          git clone git@github.com:duanebab/cogmatiq-staging-site.git ../cogmatiq-staging-site-clone
+
+          # Go into the cloned repo
+          cd ../cogmatiq-staging-site-clone
+
+          # Make sure we are on the main branch
+          git checkout main || git checkout -b main
+
+          # Remove old files (except .git directory)
+          # Use find for safer deletion than rm -rf *
+          find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} \;
+
+          # Copy new files from the source checkout
+          # Use rsync for efficiency and better handling of files/dirs
+          rsync -av --delete --exclude='.git/' /github/workspace/ ../cogmatiq-staging-site-clone/
+
+          # Stage changes, commit, and push
+          git add -A
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Sync from develop branch: ${{ github.event.head_commit.message }}"
+            git push origin main
+          fi
+        env:
+          # Necessary for ssh-agent to work correctly with git over SSH
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
