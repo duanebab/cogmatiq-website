@@ -1,0 +1,29 @@
+name: Sync Develop Branch to Staging Repo
+
+on:
+  push:
+    branches:
+      - develop # Trigger only when develop branch is pushed to
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Develop Branch of Main Repo
+        uses: actions/checkout@v4
+        with:
+          ref: develop # Checkout the develop branch that triggered the workflow
+
+      - name: Push to Staging Repo's Main Branch
+        uses: cpina/github-action-push-to-another-repository@main # Use a dedicated action for this
+        env:
+          # You need a Personal Access Token (PAT) with repo scope
+          # Store this as a Repository Secret named PAT in the 'cogmatiq' repo
+          API_TOKEN_GITHUB: ${{ secrets.PAT }}
+        with:
+          source-directory: '.' # Copy everything from the root
+          destination-github-username: ${{ github.repository_owner }} # Your GitHub username/org
+          destination-repository-name: 'cogmatiq-staging-site' # The name of the NEW repo
+          target-branch: main # Push to the main branch of the staging repo
+          commit-message: 'Sync from develop branch: ${{ github.event.head_commit.message }}'
+          target-directory: '' # Push to the root of the target repo
