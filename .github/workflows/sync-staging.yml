@@ -1,4 +1,24 @@
-- name: Sync files to Staging Repo
+name: Sync Develop Branch to Staging Repo
+on:
+  push:
+    branches:
+      - develop # Trigger only when develop branch is pushed to
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Develop Branch of Main Repo
+        uses: actions/checkout@v4
+        with:
+          ref: develop # Checkout the develop branch that triggered the workflow
+
+      - name: Setup SSH Agent for Deploy Key
+        uses: webfactory/ssh-agent@v0.9.0 # Action to load SSH key
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SITE_DEPLOY_KEY }} # Use the SSH private key secret
+
+      - name: Sync files to Staging Repo
         run: |
           # Configure Git user
           git config --global user.name 'github-actions[bot]'
@@ -9,33 +29,36 @@
 
           # Clone the target repository using SSH into the temp dir
           # Note: Replace 'duanebab' if your username/org is different
+          echo "Cloning target repository..."
           git clone git@github.com:duanebab/cogmatiq-staging-site.git "$CLONE_DIR"
 
           # Go into the cloned repo
           cd "$CLONE_DIR"
 
-          # Make sure we are on the main branch
+          # Make sure we are on the main branch (create if it doesn't exist remotely initially)
+          echo "Checking out target branch (main)..."
           git checkout main || git checkout -b main
 
           # Remove old files (except .git directory)
-          # Use find for safer deletion than rm -rf *
+          echo "Removing old files from clone..."
           find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} \;
 
-          # --- Revised Sync ---
           # Sync from the original workspace TO the clone directory
-          # Using GITHUB_WORKSPACE environment variable which is always correct
+          echo "Syncing files using rsync..."
           rsync -av --delete --exclude='.git/' --exclude='.github/' "$GITHUB_WORKSPACE/" "$CLONE_DIR/"
-          # Exclude .github dir to avoid copying the workflow files themselves
-          # --- End Revised Sync ---
 
           # Stage changes, commit, and push (still inside CLONE_DIR)
+          echo "Staging changes..."
           git add -A
           # Check if there are changes to commit
           if git diff --staged --quiet; then
-            echo "No changes to commit."
+            echo "No changes detected. Nothing to commit or push."
           else
-            git commit -m "Sync from develop branch: ${{ github.event.head_commit.message }}"
+            echo "Committing changes..."
+            git commit -m "Sync from develop branch: ${{ github.event.head_commit.message }}" --allow-empty # Allow empty commit if only deletions occurred
+            echo "Pushing changes to origin main..."
             git push origin main
+            echo "Push complete."
           fi
         env:
           # Necessary for ssh-agent to work correctly with git over SSH
