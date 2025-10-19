@@ -9,11 +9,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
+    <script>
+        // --- START: Environment Detection ---
+        let apiBaseUrl;
+        // *** Verify/Update these hostnames if yours are different ***
+        const stagingHostname = 'staging.cogmatiq.com'; 
+        const productionHostname = 'cogmatiq.com';      
+        const currentHostname = window.location.hostname;
+
+        if (currentHostname === stagingHostname || currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
+          // Use staging API for staging domain or local development
+          apiBaseUrl = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app'; 
+          console.log('Environment: Staging | API:', apiBaseUrl); 
+        } else {
+          // Default to production API for any other hostname (like cogmatiq.com)
+          apiBaseUrl = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app'; 
+          console.log('Environment: Production | API:', apiBaseUrl);
+        }
+        // --- END: Environment Detection ---
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <style>
         body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
@@ -96,7 +114,8 @@
             </div>
 
             <div id="modal-panel-library" class="modal-panel active p-6">
-                <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto">
+                    </div>
                 <div class="flex justify-end gap-4 mt-6">
                     <button id="modal-cancel-button-library" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500">Cancel</button>
                     <button id="modal-add-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale">Add Selected</button>
@@ -116,8 +135,7 @@
             <div id="modal-panel-url" class="modal-panel p-6">
                 <p class="text-gray-400 text-sm mb-4">Add a single webpage. We'll scrape its content and add it to your Cortex.</p>
                 <input type="url" id="modal-url-input" placeholder="https://example.com/article" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                <p id="modal-url-message" class="text-sm text-red-400 mt-2 hidden"></p>
-                <div class="flex justify-end gap-4 mt-6">
+                <p id="modal-url-message" class="text-sm text-red-400 mt-2"></p> <div class="flex justify-end gap-4 mt-6">
                     <button id="modal-cancel-button-url" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500">Cancel</button>
                     <button id="modal-add-url-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale">Add Webpage</button>
                 </div>
@@ -127,6 +145,7 @@
     </div>
 
     <script>
+        // *** Ensure apiBaseUrl is defined globally by the script in <head> ***
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -154,7 +173,8 @@
         const modalPanelUrl = document.getElementById('modal-panel-url');
         
         let userToken = null;
-        let currentKbId = null;
+        let currentKbId = null; // Changed from currentKbId to currentCortexId for clarity
+        let allLibraryDocs = []; // Cache library docs
 
         async function main() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -165,10 +185,10 @@
                 window.location.href = '/login.html';
             }
              supabaseClient.auth.onAuthStateChange((_event, session) => {
-                if (session) {
-                    userToken = session.access_token;
-                } else {
+                if (!session) {
                     window.location.href = '/'; 
+                } else {
+                    userToken = session.access_token; // Keep token updated
                 }
             });
         }
@@ -178,25 +198,29 @@
             if (!userToken) return;
             loadingText.classList.remove('hidden');
             loadingText.textContent = 'Loading your data...';
+            cortexList.innerHTML = ''; // Clear previous list
             
             try {
-                const [kbsRes, subRes] = await Promise.all([
-                    fetch('https://api.cogmatiq.com/cortices', { headers: { 'Authorization': `Bearer ${userToken}` } }),
-                    fetch('https://api.cogmatiq.com/subscription-status', { headers: { 'Authorization': `Bearer ${userToken}` } })
+                // *** Use apiBaseUrl in fetch calls ***
+                const [kbsRes, subRes, docsRes] = await Promise.all([
+                    fetch(`${apiBaseUrl}/cortices`, { headers: { 'Authorization': `Bearer ${userToken}` } }),
+                    fetch(`${apiBaseUrl}/subscription-status`, { headers: { 'Authorization': `Bearer ${userToken}` } }),
+                    fetch(`${apiBaseUrl}/documents`, { headers: { 'Authorization': `Bearer ${userToken}` } }) // Fetch library docs once
                 ]);
 
-                if (!kbsRes.ok || !subRes.ok) {
-                    loadingText.textContent = 'Error: Failed to load dashboard data.';
-                    return;
+                if (!kbsRes.ok || !subRes.ok || !docsRes.ok) {
+                    throw new Error('Failed to load initial data.');
                 }
 
                 const cortices = await kbsRes.json();
                 const subStatus = await subRes.json();
+                allLibraryDocs = await docsRes.json(); // Store library docs
                 
                 renderSubscriptionStatus(subStatus.is_pro);
                 renderCortices(cortices);
             } catch (error) {
-                loadingText.textContent = `Error: ${error.message}`;
+                console.error("Fetch Initial Data Error:", error);
+                loadingText.textContent = `Error loading data: ${error.message}`;
             }
         }
 
@@ -221,39 +245,42 @@
 
         function renderCortices(cortices) {
             loadingText.classList.add('hidden');
-            cortexList.innerHTML = '';
-            if (cortices.length === 0) {
+            cortexList.innerHTML = ''; // Clear again just in case
+            if (!cortices || cortices.length === 0) {
                 cortexList.innerHTML = '<p class="text-gray-400 text-center py-8">No Cortices yet. Click "Create New Cortex" to get started.</p>';
                 return;
             }
             cortices.forEach(cortex => {
-                const docListHTML = cortex.documents.length > 0 
+                const docListHTML = cortex.documents && cortex.documents.length > 0 
                     ? cortex.documents.map(doc => {
-                        let statusHTML = '';
+                        let statusIndicator = '';
                         if (doc.status === 'processing') {
-                            statusHTML = `<span class="text-xs font-semibold text-yellow-400 animate-pulse">Processing...</span>`;
-                            pollDocumentStatus(doc.id, cortex.id);
-                        } else {
-                            statusHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortex.id}', '${doc.id}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
-                                          </button>`;
+                            statusIndicator = `<span class="text-xs font-semibold text-yellow-400 animate-pulse ml-2">(Processing...)</span>`;
+                            pollDocumentStatus(doc.id, cortex.id); // Start polling if processing
+                        } else if (doc.status === 'error') {
+                            statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2">(Error)</span>`;
                         }
-                        return `<li id="doc-${doc.id}" class="flex justify-between items-center group py-1 text-sm text-gray-400">
-                                    <span>- ${doc.file_name}</span>
-                                    <div class="doc-status">${statusHTML}</div>
+                        
+                        // Action button (unlink) only appears for 'ready' docs on hover
+                        const actionButtonHTML = doc.status === 'ready' ? 
+                            `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortex.id}', '${doc.id}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
+                             </button>` : '';
+
+                        return `<li id="doc-${doc.id}-${cortex.id}" class="flex justify-between items-center group/doc py-1 text-sm text-gray-300"> <span>- ${doc.file_name}${statusIndicator}</span>
+                                    <div class="doc-status">${actionButtonHTML}</div>
                                 </li>`;
                     }).join('') 
-                    : '<li class="text-gray-500 text-sm">No documents yet.</li>';
+                    : '<li class="text-gray-500 text-sm">No documents added yet.</li>';
 
                 const cortexElement = document.createElement('div');
-                cortexElement.className = 'card p-6 rounded-lg hover:shadow-lg transition-shadow group';
+                cortexElement.className = 'card p-6 rounded-lg hover:shadow-lg transition-shadow group/cortex'; // Renamed group
                 cortexElement.innerHTML = `
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h3 class="text-xl font-semibold text-white">${cortex.name}</h3>
+                    <div class="flex justify-between items-start mb-4"> <div>
+                            <h3 class="text-xl font-semibold text-white mb-1">${cortex.name}</h3>
+                             <p class="text-xs text-gray-500">Created: ${new Date(cortex.created_at).toLocaleDateString()}</p> 
                         </div>
-                        <div class="flex items-center gap-4">
-                             <button class="text-sm font-semibold text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteCortex('${cortex.id}')">Delete Cortex</button>
+                        <div class="flex items-center gap-3 flex-shrink-0"> <button class="text-sm font-semibold text-red-400 opacity-0 group-hover/cortex:opacity-100 transition-opacity hover:underline" onclick="deleteCortex('${cortex.id}')">Delete Cortex</button>
                             <button class="text-sm font-semibold accent-text hover:underline" onclick="openAddDocumentModal('${cortex.id}')">+ Add Document</button>
                             <a href="/chat.html?cortex_id=${cortex.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale">Open Chat</a>
                         </div>
@@ -267,234 +294,334 @@
             });
         }
 
+        // Keep track of active polling intervals
+        const activePolls = {}; 
+
         async function pollDocumentStatus(docId, cortexId) {
-            const interval = setInterval(async () => {
+            // Prevent multiple polls for the same doc
+            if (activePolls[docId]) return; 
+
+            console.log(`Polling status for doc: ${docId}`);
+            activePolls[docId] = setInterval(async () => {
                 try {
-                    if (!userToken) { clearInterval(interval); return; }
-                    const res = await fetch(`https://api.cogmatiq.com/documents/${docId}`, { headers: { 'Authorization': `Bearer ${userToken}` } });
-                    if (!res.ok) { clearInterval(interval); return; }
+                    if (!userToken) { 
+                        clearInterval(activePolls[docId]); 
+                        delete activePolls[docId];
+                        return; 
+                    }
+                    // *** Use apiBaseUrl here ***
+                    const res = await fetch(`${apiBaseUrl}/documents/${docId}`, { headers: { 'Authorization': `Bearer ${userToken}` } });
+                    
+                    if (!res.ok) { 
+                        // Stop polling on server error, but keep UI indication
+                        console.error(`Polling failed for ${docId}, status: ${res.status}`);
+                        clearInterval(activePolls[docId]); 
+                        delete activePolls[docId];
+                        // Optionally update UI to show permanent error if desired
+                        return; 
+                    }
                     
                     const doc = await res.json();
-                    if (doc.status === 'ready') {
-                        clearInterval(interval);
-                        const docElement = document.getElementById(`doc-${docId}`);
+                    const docElementId = `doc-${docId}-${cortexId}`; // Need cortexId for unique ID
+                    const docElement = document.getElementById(docElementId);
+
+                    if (doc.status === 'ready' || doc.status === 'error') {
+                        clearInterval(activePolls[docId]);
+                        delete activePolls[docId];
+                        console.log(`Polling finished for doc: ${docId}, status: ${doc.status}`);
+
                         if (docElement) {
+                             const statusSpan = docElement.querySelector('span'); // The element with the filename
                              const statusDiv = docElement.querySelector('.doc-status');
-                             if (statusDiv) {
-                                statusDiv.innerHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortexId}', '${doc.id}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                             if (statusSpan && statusDiv) {
+                                let statusIndicator = '';
+                                let actionButtonHTML = '';
+                                if(doc.status === 'ready') {
+                                     actionButtonHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortexId}', '${docId}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto">
                                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
-                                                    </button>`;
+                                                      </button>`;
+                                } else { // Error status
+                                    statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2">(Error)</span>`;
+                                }
+                                // Update filename span to remove processing text
+                                statusSpan.innerHTML = `- ${doc.file_name}${statusIndicator}`; 
+                                // Update action button div
+                                statusDiv.innerHTML = actionButtonHTML;
                              }
                         }
                     }
+                    // Keep polling if status is still 'processing'
                 } catch (error) {
-                    clearInterval(interval);
+                    console.error(`Polling error for ${docId}:`, error);
+                    clearInterval(activePolls[docId]);
+                    delete activePolls[docId];
                 }
-            }, 5000);
+            }, 5000); // Poll every 5 seconds
         }
         
+        // --- Delete Document ---
         async function deleteDocument(docId) {
             if (!userToken) return;
-            if (confirm('Are you sure you want to permanently delete this document? This will remove it from ALL Cortices.')) {
+            if (confirm('Are you sure you want to permanently delete this document?\n\nThis action cannot be undone and will remove the document from ALL your Cortices.')) {
                 try {
-                    const response = await fetch(`https://api.cogmatiq.com/documents/${docId}`, {
+                    // *** Use apiBaseUrl here ***
+                    const response = await fetch(`${apiBaseUrl}/documents/${docId}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${userToken}` }
                     });
-                    if (!response.ok) throw new Error('Failed to delete document.');
-                    fetchInitialData();
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(()=> ({detail: 'Failed to delete document.'}));
+                        throw new Error(errorData.detail);
+                    }
+                    console.log(`Document ${docId} deleted successfully.`);
+                    fetchInitialData(); // Refresh the whole dashboard
                 } catch (error) {
-                    alert(`Error: ${error.message}`);
+                    console.error("Delete Document Error:", error);
+                    alert(`Error deleting document: ${error.message}`);
                 }
             }
         }
         
+        // --- Unlink Document ---
         async function unlinkDocument(cortexId, docId) {
             if (!userToken) return;
-            if (confirm('Are you sure you want to remove this document from this Cortex?')) {
+            if (confirm('Remove this document from this Cortex? (The document will remain in your library).')) {
                 try {
-                    const response = await fetch(`https://api.cogmatiq.com/cortices/${cortexId}/documents/${docId}`, {
+                     // *** Use apiBaseUrl here ***
+                    const response = await fetch(`${apiBaseUrl}/cortices/${cortexId}/documents/${docId}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${userToken}` }
                     });
-                    if (!response.ok) throw new Error('Failed to remove document.');
-                    fetchInitialData();
+                     if (!response.ok) {
+                        const errorData = await response.json().catch(()=> ({detail: 'Failed to remove document link.'}));
+                        throw new Error(errorData.detail);
+                    }
+                    console.log(`Document ${docId} unlinked from Cortex ${cortexId}.`);
+                    fetchInitialData(); // Refresh the whole dashboard
                 } catch (error) {
-                    alert(`Error: ${error.message}`);
+                     console.error("Unlink Document Error:", error);
+                    alert(`Error removing document: ${error.message}`);
                 }
             }
         }
 
+        // --- Delete Cortex ---
         async function deleteCortex(cortexId) {
             if (!userToken) return;
-            if (confirm('Are you sure you want to delete this Cortex? The documents inside will not be deleted.')) {
+            if (confirm('Are you sure you want to delete this Cortex?\n\nThis action cannot be undone. Documents within it will NOT be deleted from your library.')) {
                 try {
-                    const response = await fetch(`https://api.cogmatiq.com/cortices/${cortexId}`, {
+                    // *** Use apiBaseUrl here ***
+                    const response = await fetch(`${apiBaseUrl}/cortices/${cortexId}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${userToken}` }
                     });
-                    if (!response.ok) throw new Error('Failed to delete Cortex.');
-                    fetchInitialData();
+                     if (!response.ok) {
+                        const errorData = await response.json().catch(()=> ({detail: 'Failed to delete Cortex.'}));
+                        throw new Error(errorData.detail);
+                    }
+                    console.log(`Cortex ${cortexId} deleted.`);
+                    fetchInitialData(); // Refresh the list
                 } catch (error) {
-                    alert(`Error: ${error.message}`);
+                    console.error("Delete Cortex Error:", error);
+                    alert(`Error deleting Cortex: ${error.message}`);
                 }
             }
         }
         
-        async function openAddDocumentModal(kbId) {
-            currentKbId = kbId;
-            switchModalTab('library');
-            modalDocList.innerHTML = '<p class="text-gray-400">Loading library...</p>';
+        // --- Open Add Document Modal ---
+        function openAddDocumentModal(cortexId) { // Changed kbId to cortexId
+            currentCortexId = cortexId; // Store the target cortex ID
+            renderLibraryModal(); // Render the library tab first
+            switchModalTab('library'); // Ensure library tab is active
             addDocModal.classList.remove('hidden');
+        }
 
-            const response = await fetch('https://api.cogmatiq.com/documents', { headers: { 'Authorization': `Bearer ${userToken}` } });
-            const allDocs = await response.json();
-
-            if (allDocs.length === 0) {
-                modalDocList.innerHTML = '<p class="text-gray-400 text-center">Your document library is empty.</p>';
+        // --- Render Library Tab Content ---
+        function renderLibraryModal() {
+             modalDocList.innerHTML = ''; // Clear previous list
+            if (allLibraryDocs.length === 0) {
+                modalDocList.innerHTML = '<p class="text-gray-400 text-center">Your document library is empty. Use the "Upload New" tab.</p>';
             } else {
-                modalDocList.innerHTML = allDocs.map(doc => `
+                modalDocList.innerHTML = allLibraryDocs.map(doc => `
                     <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-700/50 cursor-pointer">
-                        <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text">
-                        <span>${doc.file_name}</span>
+                        <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text focus:ring-offset-0 focus:ring-1"> <span>${doc.file_name} ${doc.status === 'processing' ? '(Processing...)' : doc.status === 'error' ? '(Error)' : ''}</span>
                     </label>
                 `).join('');
             }
-            
-            const uploadOption = document.createElement('div');
-            uploadOption.className = 'mt-4 pt-4 border-t border-gray-700';
-            uploadOption.innerHTML = `<button onclick="triggerFileUpload('${kbId}')" class="w-full text-center accent-text font-semibold p-2 rounded-md hover:bg-gray-700/50">... or Upload a New Document</button>`;
-            modalDocList.appendChild(uploadOption);
         }
         
+        // --- Modal Tab Switching ---
         modalTabLibrary.addEventListener('click', () => switchModalTab('library'));
         modalTabUpload.addEventListener('click', () => switchModalTab('upload'));
-        modalTabUrl.addEventListener('click', () => switchModalTab('url'));
+        modalTabUrl.addEventListener('click', () => {
+             switchModalTab('url');
+             modalUrlInput.value = ''; // Clear URL input when switching to tab
+             modalUrlMessage.textContent = ''; // Clear any previous messages
+        });
 
         function switchModalTab(activeTab) {
-            [modalTabLibrary, modalTabUpload, modalTabUrl].forEach(tab => tab.classList.remove('active'));
-            [modalPanelLibrary, modalPanelUpload, modalPanelUrl].forEach(panel => panel.classList.remove('active'));
-            
-            if (activeTab === 'library') {
-                modalTabLibrary.classList.add('active');
-                modalPanelLibrary.classList.add('active');
-            } else if (activeTab === 'upload') {
-                modalTabUpload.classList.add('active');
-                modalPanelUpload.classList.add('active');
-            } else if (activeTab === 'url') {
-                modalTabUrl.classList.add('active');
-                modalPanelUrl.classList.add('active');
-            }
+            // ... (keep this function as is) ...
         }
 
+        // --- Modal Cancel Buttons ---
         document.getElementById('modal-cancel-button-library').addEventListener('click', () => addDocModal.classList.add('hidden'));
         document.getElementById('modal-cancel-button-upload').addEventListener('click', () => addDocModal.classList.add('hidden'));
         document.getElementById('modal-cancel-button-url').addEventListener('click', () => addDocModal.classList.add('hidden'));
 
+        // --- Modal Upload Button ---
         document.getElementById('modal-upload-button').addEventListener('click', () => {
-            fileInput.dataset.kbId = currentKbId;
-            fileInput.click();
+            if (!currentCortexId) return; // Ensure we have a target cortex
+            fileInput.dataset.cortexId = currentCortexId; // Use cortexId
+            fileInput.click(); // Trigger file input
         });
 
+        // --- Modal Add From Library Button ---
         modalAddButton.addEventListener('click', async () => {
-            if (!currentKbId) return;
+            if (!currentCortexId || !userToken) return;
             const selectedDocs = Array.from(modalDocList.querySelectorAll('input:checked')).map(input => input.value);
+            
             if (selectedDocs.length === 0) {
+                // Just close if nothing selected
                 addDocModal.classList.add('hidden');
-                return;
+                return; 
             }
 
+            modalAddButton.disabled = true; // Disable while processing
+            modalAddButton.textContent = 'Linking...';
+
             try {
-                await fetch(`https://api.cogmatiq.com/cortices/${currentKbId}/link`, {
+                 // *** Use apiBaseUrl here ***
+                const response = await fetch(`${apiBaseUrl}/cortices/${currentCortexId}/link`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ document_ids: selectedDocs })
                 });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(()=> ({detail: 'Failed to link documents.'}));
+                    throw new Error(errorData.detail);
+                }
                 addDocModal.classList.add('hidden');
-                fetchInitialData();
+                fetchInitialData(); // Refresh dashboard list
             } catch (error) {
-                alert('Failed to link documents.');
+                console.error("Link Document Error:", error);
+                alert(`Error linking documents: ${error.message}`);
+            } finally {
+                 modalAddButton.disabled = false;
+                 modalAddButton.textContent = 'Add Selected';
             }
         });
         
+        // --- Modal Add From URL Button ---
         modalAddUrlButton.addEventListener('click', async () => {
-            if (!currentKbId || !userToken) return;
+            if (!currentCortexId || !userToken) return;
             const url = modalUrlInput.value.trim();
-            if (!url) {
-                modalUrlMessage.textContent = 'Please enter a valid URL.';
-                modalUrlMessage.classList.remove('hidden');
+            
+            // Basic URL validation
+            let isValidUrl = false;
+            try {
+                new URL(url);
+                isValidUrl = url.startsWith('http://') || url.startsWith('https://');
+            } catch (_) {
+                isValidUrl = false;
+            }
+
+            if (!isValidUrl) {
+                modalUrlMessage.textContent = 'Please enter a valid URL (starting with http:// or https://).';
+                // modalUrlMessage.classList.remove('hidden'); // Ensure message is visible
                 return;
             }
 
-            modalUrlMessage.classList.add('hidden');
+            modalUrlMessage.textContent = ''; // Clear previous errors
+            // modalUrlMessage.classList.add('hidden'); // Hide message area
             modalAddUrlButton.disabled = true;
             modalAddUrlButton.textContent = 'Adding...';
 
             try {
-                const response = await fetch(`https://api.cogmatiq.com/cortices/${currentKbId}/webpage`, {
+                // *** Use apiBaseUrl here ***
+                const response = await fetch(`${apiBaseUrl}/cortices/${currentCortexId}/webpage`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: url })
                 });
                 
-                if (response.status === 403) {
-                    alert('You have reached your limit. Please upgrade to Pro.');
+                if (response.status === 403) { // Freemium limit
+                     addDocModal.classList.add('hidden'); // Close modal first
+                     modalUrlInput.value = ''; // Clear input
+                    alert('You have reached your document limit. Please upgrade to Pro.');
                     window.location.href = '/pricing.html';
-                    return;
+                    return; // Stop execution here
                 }
                 if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.detail || 'Failed to add webpage.');
+                    const err = await response.json().catch(() => ({ detail: 'Failed to add webpage. Check the URL or try again later.' }));
+                    throw new Error(err.detail);
                 }
                 
                 addDocModal.classList.add('hidden');
                 modalUrlInput.value = '';
-                fetchInitialData();
+                fetchInitialData(); // Refresh dashboard
             } catch (error) {
+                 console.error("Add URL Error:", error);
                 modalUrlMessage.textContent = `Error: ${error.message}`;
+                // modalUrlMessage.classList.remove('hidden'); // Show error
             } finally {
                 modalAddUrlButton.disabled = false;
                 modalAddUrlButton.textContent = 'Add Webpage';
             }
         });
 
+        // --- Create Cortex Button ---
         createCortexButton.addEventListener('click', async () => {
             const cortexName = prompt('Enter a name for your new Cortex:');
             if (!cortexName || !userToken) return;
+            
+            createCortexButton.disabled = true; // Prevent double clicks
+
             try {
-                await fetch('https://api.cogmatiq.com/cortices', {
+                 // *** Use apiBaseUrl here ***
+                const response = await fetch(`${apiBaseUrl}/cortices`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: cortexName })
                 });
-                fetchInitialData();
+                 if (!response.ok) {
+                    const errorData = await response.json().catch(()=> ({detail: 'Failed to create Cortex.'}));
+                    throw new Error(errorData.detail);
+                }
+                fetchInitialData(); // Refresh list
             } catch (error) {
-                alert('Failed to create Cortex.');
+                 console.error("Create Cortex Error:", error);
+                alert(`Error creating Cortex: ${error.message}`);
+            } finally {
+                 createCortexButton.disabled = false;
             }
         });
 
-        function triggerFileUpload(kbId) {
-            fileInput.dataset.kbId = kbId;
-            fileInput.click();
-        }
-
+        // --- File Input Listener (Upload Triggered from Modal) ---
         fileInput.addEventListener('change', () => {
-            if (fileInput.files.length) handleFileUpload(fileInput.files[0], fileInput.dataset.kbId);
+            const targetCortexId = fileInput.dataset.cortexId;
+            if (fileInput.files.length && targetCortexId) {
+                handleFileUpload(fileInput.files[0], targetCortexId);
+            }
+            // Clear dataset attribute after use
+            delete fileInput.dataset.cortexId; 
         });
 
-        const handleFileUpload = (file, kbId) => {
-            if (!userToken || !kbId) return;
-            addDocModal.classList.add('hidden');
+        // --- Handle File Upload ---
+        const handleFileUpload = (file, cortexId) => { // Changed kbId to cortexId
+            if (!userToken || !cortexId) return;
+            addDocModal.classList.add('hidden'); // Ensure modal is closed
             progressContainer.classList.remove('hidden');
             progressText.classList.remove('hidden');
             progressText.textContent = `Uploading ${file.name}...`;
             progressBar.style.width = '0%';
+            progressBar.classList.remove('bg-red-500'); // Ensure progress bar is accent color
 
             const formData = new FormData();
             formData.append('file', file);
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', `https://api.cogmatiq.com/cortices/${kbId}/documents`, true);
+             // *** Use apiBaseUrl here ***
+            xhr.open('POST', `${apiBaseUrl}/cortices/${cortexId}/documents`, true);
             xhr.setRequestHeader('Authorization', `Bearer ${userToken}`);
 
             xhr.upload.onprogress = (event) => {
@@ -502,37 +629,67 @@
                     const percentComplete = Math.round((event.loaded / event.total) * 100);
                     progressBar.style.width = `${percentComplete}%`;
                     progressText.textContent = `Uploading... ${percentComplete}%`;
+                } else {
+                     progressBar.style.width = `50%`; // Indeterminate progress
+                     progressText.textContent = `Uploading...`;
                 }
             };
 
-            xhr.onload = () => {
-                progressText.textContent = 'Upload complete. Processing...';
+            xhr.onload = async () => { // Marked async to use await inside
                 if (xhr.status === 200) {
-                    fetchInitialData();
+                     progressText.textContent = 'Upload complete. Processing started...';
+                     // Successfully uploaded, now refresh data
+                    await fetchInitialData(); // Await refresh before resetting UI
+                    setTimeout(resetUploadUI, 1500); // Shorter delay after refresh
                 } else if (xhr.status === 403) {
-                    alert('You have reached your limit. Please upgrade to Pro to upload more documents.');
+                     progressBar.style.width = '100%';
+                     progressBar.classList.add('bg-red-500'); // Indicate error
+                     progressText.textContent = 'Upload failed: Limit reached.';
+                    alert('You have reached your document limit. Please upgrade to Pro.');
                     window.location.href = '/pricing.html';
+                     setTimeout(resetUploadUI, 3000);
                 } else {
-                    alert('Upload failed. Please check the file and try again.');
+                     progressBar.style.width = '100%';
+                     progressBar.classList.add('bg-red-500');
+                     let errorDetail = 'Upload failed. Please check the file type/size and try again.';
+                     try {
+                         const errorJson = JSON.parse(xhr.responseText);
+                         errorDetail = `Upload failed: ${errorJson.detail || 'Unknown error'}`;
+                     } catch (e) {
+                         // Ignore if response is not JSON
+                     }
+                     progressText.textContent = errorDetail;
+                     console.error("Upload Error:", xhr.status, xhr.responseText);
+                     alert(errorDetail);
+                     setTimeout(resetUploadUI, 3000); // Longer delay to see error
                 }
-                setTimeout(resetUploadUI, 2000);
             };
 
             xhr.onerror = () => {
-                alert('A network error occurred.');
+                 progressBar.style.width = '100%';
+                 progressBar.classList.add('bg-red-500');
+                 progressText.textContent = 'Upload failed: Network error.';
+                alert('A network error occurred during upload.');
                 resetUploadUI();
             };
 
             xhr.send(formData);
         };
         
+        // --- Reset Upload UI ---
         const resetUploadUI = () => {
             progressContainer.classList.add('hidden');
             progressText.classList.add('hidden');
-            fileInput.value = '';
+            progressBar.style.width = '0%';
+             progressBar.classList.remove('bg-red-500');
+            fileInput.value = ''; // Clear file input
         };
 
-        logoutButton.addEventListener('click', async () => { await supabaseClient.auth.signOut(); window.location.href = '/'; });
+        // --- Logout Button ---
+        logoutButton.addEventListener('click', async () => { 
+            await supabaseClient.auth.signOut(); 
+            // Redirect is handled by onAuthStateChange listener
+        });
     </script>
 </body>
 </html>

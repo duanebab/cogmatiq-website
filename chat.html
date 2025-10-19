@@ -8,7 +8,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
+    <script>
+        // --- START: Environment Detection ---
+        let apiBaseUrl;
+        // *** Verify/Update these hostnames if yours are different ***
+        const stagingHostname = 'staging.cogmatiq.com'; 
+        const productionHostname = 'cogmatiq.com';      
+        const currentHostname = window.location.hostname;
+
+        if (currentHostname === stagingHostname || currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
+          // Use staging API for staging domain or local development
+          apiBaseUrl = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app'; 
+          console.log('Environment: Staging | API:', apiBaseUrl); 
+        } else {
+          // Default to production API for any other hostname (like cogmatiq.com)
+          apiBaseUrl = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app'; 
+          console.log('Environment: Production | API:', apiBaseUrl);
+        }
+        // --- END: Environment Detection ---
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -30,8 +50,11 @@
         .prose { color: #E5E7EB; }
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
         .prose strong { font-weight: 800; }
+        .prose a { color: #00B5AD; text-decoration: underline; } /* Added link styling */
+        .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } /* Added code block styling */
+        .prose code { font-family: monospace; }
 
-        /* NEW Sidebar Styles */
+        /* Sidebar Styles */
         .sidebar-button {
             background-color: transparent;
             color: #9CA3AF; /* gray-400 */
@@ -68,14 +91,15 @@
         </div>
     </header>
 
-    <div class="flex flex-grow pt-24 h-full"> <aside class="w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
+    <div class="flex flex-grow pt-24 h-full"> 
+        <aside class="w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
             <nav class="flex flex-col space-y-2">
                 <button id="chat-tab-button" class="sidebar-button active">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                     Chat
                 </button>
                 <button id="graph-tab-button" class="sidebar-button">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
                     Neural Map
                 </button>
             </nav>
@@ -84,21 +108,17 @@
         <main class="flex-grow flex flex-col p-8 pl-72 w-full h-full">
             
             <div id="chat-panel" class="panel active flex-col flex-grow h-full">
-                <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6">
-                    <div class="flex items-start gap-3">
-                        <div class="bg-gray-700/50 p-2 rounded-full">
-                             <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6 mb-4"> <div class="flex items-start gap-3">
+                        <div class="bg-gray-700/50 p-2 rounded-full flex-shrink-0"> <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         </div>
                         <div class="bg-gray-700/50 rounded-lg p-4 max-w-lg">
                             <p>I am your Cortex. I've processed your knowledge. Ask me anything.</p>
                         </div>
                     </div>
-                </div>
-                <div class="mt-6">
-                    <form id="chat-form" class="flex items-center gap-4">
+                     </div>
+                <div class="mt-auto"> <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                         </button>
                     </form>
                 </div>
@@ -114,12 +134,14 @@
     </div>
     
     <script>
+        // *** Ensure apiBaseUrl is defined globally by the script in <head> ***
         const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
     
-        const API_ENDPOINT = 'https://api.cogmatiq.com/query';
-        const GRAPH_API_ENDPOINT = 'https://api.cogmatiq.com/cortex-graph';
+        // *** Use apiBaseUrl for API endpoints ***
+        const API_ENDPOINT = `${apiBaseUrl}/query`;
+        const GRAPH_API_ENDPOINT = `${apiBaseUrl}/cortex-graph`;
 
         const chatContainer = document.getElementById('chat-container');
         const chatForm = document.getElementById('chat-form');
@@ -134,14 +156,17 @@
 
         let userToken = null;
         let graphLoaded = false;
+        let network = null; // To hold the vis.Network instance
         
         function getClientId() {
             const params = new URLSearchParams(window.location.search);
+            // Prioritize cortex_id, fall back to kb_id/session_id for potential legacy URLs
             return params.get('cortex_id') || params.get('kb_id') || params.get('session_id') || null;
         }
         
         const clientId = getClientId();
         if (!clientId) {
+            alert('Error: No Cortex ID found in URL.');
             window.location.href = '/dashboard.html';
         }
 
@@ -158,20 +183,16 @@
 
         function initializeListeners() {
             chatTabButton.addEventListener('click', () => {
-                chatTabButton.classList.add('active');
-                graphTabButton.classList.remove('active');
-                chatPanel.classList.add('active');
-                graphPanel.classList.remove('active');
+                switchTab('chat');
             });
 
             graphTabButton.addEventListener('click', () => {
-                graphTabButton.classList.add('active');
-                chatTabButton.classList.remove('active');
-                graphPanel.classList.add('active');
-                chatPanel.classList.remove('active');
-                
+                switchTab('graph');
                 if (!graphLoaded) {
                     loadGraphData();
+                } else if (network) {
+                    // Refit the network if it was already loaded
+                    network.fit(); 
                 }
             });
 
@@ -196,102 +217,188 @@
                         headers: { 'Authorization': `Bearer ${userToken}` },
                         body: formData 
                     });
-                    if (!response.ok) { throw new Error('API request failed.'); }
+                    if (!response.ok) { 
+                        const errorData = await response.json().catch(() => ({ detail: 'API request failed with status ' + response.status }));
+                        throw new Error(errorData.detail || 'API request failed.'); 
+                    }
                     const data = await response.json();
                     
                     updateAIMessage(aiMessageElement, data.answer);
 
                 } catch (error) {
-                    updateAIMessage(aiMessageElement, 'Sorry, something went wrong. Please try your question again.');
+                    console.error("Chat API Error:", error); // Log error
+                    updateAIMessage(aiMessageElement, `Sorry, something went wrong: ${error.message}. Please try again.`);
                 } finally {
                     submitButton.disabled = false;
+                    messageInput.focus(); // Re-focus input
                 }
             });
+        }
+        
+        function switchTab(tabName) {
+            if (tabName === 'chat') {
+                chatTabButton.classList.add('active');
+                graphTabButton.classList.remove('active');
+                chatPanel.classList.add('active');
+                graphPanel.classList.remove('active');
+            } else if (tabName === 'graph') {
+                graphTabButton.classList.add('active');
+                chatTabButton.classList.remove('active');
+                graphPanel.classList.add('active');
+                chatPanel.classList.remove('active');
+            }
         }
 
         async function loadGraphData() {
             if (!userToken) return;
-            graphLoaded = true;
+            graphLoaded = true; // Mark as attempting load
+            graphLoadingText.textContent = 'Loading Neural Map...';
+            graphLoadingText.classList.remove('hidden');
             
             try {
+                // *** Use GRAPH_API_ENDPOINT which already includes apiBaseUrl ***
                 const response = await fetch(`${GRAPH_API_ENDPOINT}/${clientId}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
-                if (!response.ok) throw new Error('Failed to load graph data.');
+                
+                if (response.status === 404) {
+                     graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
+                     graphLoadingText.classList.add('hidden');
+                     return;
+                }
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Failed to load graph data with status ' + response.status }));
+                    throw new Error(errorData.detail || 'Failed to load graph data.');
+                }
 
                 const data = await response.json();
                 graphLoadingText.classList.add('hidden');
                 
                 if (!data.nodes || data.nodes.length === 0) {
-                    graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Processing may still be in progress.</p>';
+                    graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
                     return;
                 }
+
+                // Clear container before drawing
+                graphContainer.innerHTML = ''; 
 
                 const options = {
                     nodes: {
                         shape: "dot",
                         size: 16,
-                        font: { color: "#E5E7EB", size: 14 },
+                        font: { color: "#E5E7EB", size: 14, face: 'Manrope' }, // Use Manrope font
                         borderWidth: 2,
+                        color: {
+                            background: '#2D3748', // gray-700
+                            border: '#00B5AD', // accent-text
+                            highlight: {
+                                background: '#00B5AD',
+                                border: '#E5E7EB'
+                            },
+                            hover: {
+                                background: '#009A94',
+                                border: '#E5E7EB'
+                            }
+                        }
                     },
                     edges: {
                         width: 1,
                         color: { color: "#4B5563", highlight: "#00B5AD", hover: "#00B5AD" },
                         arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-                        font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top' },
+                        font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top', face: 'Manrope' }, // Use Manrope font
+                        smooth: { // Add smoothing for better layout
+                            enabled: true,
+                            type: "continuous"
+                        }
                     },
                     physics: {
                         enabled: true,
                         solver: 'forceAtlas2Based',
                         forceAtlas2Based: {
-                            gravitationalConstant: -50,
-                            centralGravity: 0.01,
-                            springConstant: 0.08,
-                            springLength: 100,
-                            damping: 0.4,
-                            avoidOverlap: 0.1
+                            gravitationalConstant: -70, // Slightly stronger repulsion
+                            centralGravity: 0.015,    // Slightly stronger pull to center
+                            springLength: 120,       // Increase resting length
+                            springConstant: 0.05,    // Slightly weaker springs
+                            damping: 0.6,            // Increased damping
+                            avoidOverlap: 0.2        // Increased overlap avoidance
+                        },
+                        stabilization: { // Improve initial stabilization
+                           enabled: true,
+                           iterations: 1000, // Default is 1000
+                           updateInterval: 50,
+                           onlyDynamicEdges: false,
+                           fit: true
                         }
                     },
                     interaction: {
                         hover: true,
                         tooltipDelay: 200,
+                        navigationButtons: true, // Add zoom/pan buttons
+                        keyboard: true // Enable keyboard navigation
                     },
                     layout: {
                         improvedLayout: true,
                     },
                 };
-                new vis.Network(graphContainer, data, options);
+                
+                // Ensure vis is available
+                if (typeof vis !== 'undefined') {
+                     network = new vis.Network(graphContainer, data, options); // Store the instance
+                } else {
+                    console.error("vis.js library not loaded!");
+                     graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
+                }
+
 
             } catch (error) {
-                graphLoadingText.textContent = `Error: ${error.message}`;
+                console.error("Graph API Error:", error); // Log error
+                graphLoadingText.textContent = `Error loading Neural Map: ${error.message}`;
+                graphLoadingText.classList.remove('hidden');
+                graphLoadingText.classList.add('text-red-400'); // Make error red
+                 // Optionally clear the container if error occurs after loading started
+                // graphContainer.innerHTML = `<p class="text-red-400 text-center p-10">Error loading Neural Map: ${error.message}</p>`;
             }
         }
 
         function addMessageToUI(text, sender) {
             const messageWrapper = document.createElement('div');
-            
+            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4'); // Added mb-4 for spacing
+
             if (sender === 'user') {
-                messageWrapper.className = 'flex justify-end';
-                messageWrapper.innerHTML = `<div class="accent-bg rounded-lg p-4 max-w-lg"><p>${text}</p></div>`;
-            } else {
-                messageWrapper.className = 'flex items-start gap-3';
-                messageWrapper.innerHTML = `
-                    <div class="bg-gray-700/50 p-2 rounded-full">
-                         <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                messageWrapper.classList.add('justify-end');
+                 // User icon (optional, could add later if desired)
+                // const userIconDiv = document.createElement('div');
+                // userIconDiv.className = 'bg-gray-700/50 p-2 rounded-full flex-shrink-0';
+                // userIconDiv.innerHTML = `<svg class="w-6 h-6 text-gray-400" ...></svg>`; // User icon SVG
+                
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'accent-bg rounded-lg p-4 max-w-lg';
+                userMessageDiv.innerHTML = `<p>${text.replace(/\n/g, '<br>')}</p>`; // Basic newline handling
+
+                // messageWrapper.appendChild(userIconDiv); // Append icon if using
+                messageWrapper.appendChild(userMessageDiv);
+
+            } else { // AI sender
+                const aiIconDiv = document.createElement('div');
+                aiIconDiv.className = 'bg-gray-700/50 p-2 rounded-full flex-shrink-0';
+                aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
+
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full'; // Added w-full
+                aiMessageDiv.innerHTML = `
+                    <div class="typing-indicator flex items-center space-x-1">
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
                     </div>
-                    <div class="bg-gray-700/50 rounded-lg p-4 max-w-lg w-full">
-                        <div class="typing-indicator flex items-center space-x-1">
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
-                        </div>
-                        <div class="prose response-content hidden"></div>
-                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
-                    </div>
+                    <div class="prose max-w-none response-content hidden"></div> <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
                 `;
+                messageWrapper.appendChild(aiIconDiv);
+                messageWrapper.appendChild(aiMessageDiv);
             }
             chatContainer.appendChild(messageWrapper);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // Scroll smoothly to the bottom
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' }); 
             return messageWrapper;
         }
 
@@ -300,18 +407,31 @@
             const responseContent = element.querySelector('.response-content');
             const copyButton = element.querySelector('.copy-button');
 
-            typingIndicator.classList.add('hidden');
-            responseContent.innerHTML = marked.parse(text);
-            responseContent.classList.remove('hidden');
-            copyButton.classList.remove('hidden');
+            if(typingIndicator) typingIndicator.classList.add('hidden');
+            if(responseContent) {
+                // Use marked.parse, ensuring options prevent malicious HTML if needed (defaults are generally safe)
+                responseContent.innerHTML = marked.parse(text || "No response received."); 
+                responseContent.classList.remove('hidden');
+            }
+            if(copyButton) copyButton.classList.remove('hidden');
+
+             // Scroll smoothly again after content update
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
 
         function copyToClipboard(buttonElement) {
-            const content = buttonElement.parentElement.querySelector('.response-content').innerText;
-            navigator.clipboard.writeText(content).then(() => {
-                buttonElement.textContent = 'Copied!';
-                setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
-            });
+            // Find the sibling .response-content to get the text
+            const contentElement = buttonElement.parentElement.querySelector('.response-content');
+            if (contentElement) {
+                navigator.clipboard.writeText(contentElement.innerText).then(() => {
+                    buttonElement.textContent = 'Copied!';
+                    setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    buttonElement.textContent = 'Copy Failed';
+                     setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
+                });
+            }
         }
     </script>
 </body>

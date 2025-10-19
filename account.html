@@ -12,15 +12,33 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta name="msapplication-TileColor" content="#1A2533">
     <meta name="theme-color" content="#1A2533">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
+    <script>
+        // --- START: Environment Detection ---
+        let apiBaseUrl;
+        // *** Verify/Update these hostnames if yours are different ***
+        const stagingHostname = 'staging.cogmatiq.com'; 
+        const productionHostname = 'cogmatiq.com';      
+        const currentHostname = window.location.hostname;
+
+        if (currentHostname === stagingHostname || currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
+          // Use staging API for staging domain or local development
+          apiBaseUrl = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app'; 
+          console.log('Environment: Staging | API:', apiBaseUrl); 
+        } else {
+          // Default to production API for any other hostname (like cogmatiq.com)
+          apiBaseUrl = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app'; 
+          console.log('Environment: Production | API:', apiBaseUrl);
+        }
+        // --- END: Environment Detection ---
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <style>
         body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
@@ -98,7 +116,8 @@
         main();
 
         async function fetchSubscriptionStatus() {
-            const res = await fetch('https://api.cogmatiq.com/subscription-status', { headers: { 'Authorization': `Bearer ${userToken}` } });
+            // *** Use apiBaseUrl here ***
+            const res = await fetch(`${apiBaseUrl}/subscription-status`, { headers: { 'Authorization': `Bearer ${userToken}` } });
             const data = await res.json();
             
             billingButton.disabled = false;
@@ -112,7 +131,8 @@
                     messageEl.textContent = 'Redirecting to billing portal...';
                     billingButton.disabled = true;
                     try {
-                        const response = await fetch('https://api.cogmatiq.com/create-customer-portal-session', {
+                        // *** Use apiBaseUrl here ***
+                        const response = await fetch(`${apiBaseUrl}/create-customer-portal-session`, {
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${userToken}` }
                         });
