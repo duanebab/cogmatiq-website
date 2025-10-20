@@ -10,6 +10,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#1A2533">
+    <meta name="theme-color" content="#1A2533">
 
     <script>
         // --- START: Environment Detection ---
@@ -61,6 +67,26 @@
         }
         .modal-panel { display: none; }
         .modal-panel.active { display: block; }
+
+         /* Tooltip */
+        [title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 5px;
+            background-color: #111827;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        [title] {
+            position: relative;
+        }
     </style>
 </head>
 <body class="w-full">
@@ -83,62 +109,61 @@
         <div class="max-w-5xl mx-auto">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold">Your Cortices</h1>
-                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale">
-                    + Create New Cortex
+                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale disabled:opacity-50"> + Create New Cortex
                 </button>
             </div>
 
             <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5 mb-4">
-                <div id="progress-bar" class="accent-bg h-2.5 rounded-full" style="width: 0%"></div>
+                <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
             </div>
             <p id="progress-text" class="text-center text-sm text-gray-400 mb-4 hidden"></p>
             
             <div id="cortex-list" class="space-y-6">
                 <p id="loading-text" class="text-gray-400 text-center">Loading your Cortices...</p>
-            </div>
+                </div>
         </div>
     </main>
     
     <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.txt,.md,.epub">
 
-    <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-20">
-        <div class="card rounded-lg shadow-xl w-full max-w-lg">
-            <h2 class="text-xl font-semibold mb-4 px-6 pt-6">Add Documents to Cortex</h2>
+    <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-20 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="modal-content"> <h2 id="modal-title" class="text-xl font-semibold mb-4 px-6 pt-6 text-white">Add Sources to Cortex</h2>
             
             <div class="border-b border-gray-700">
-                <nav class="flex -mb-px px-6">
-                    <button id="modal-tab-library" class="modal-tab active">From Library</button>
-                    <button id="modal-tab-upload" class="modal-tab">Upload New</button>
-                    <button id="modal-tab-url" class="modal-tab">From Web URL</button>
+                <nav class="flex -mb-px px-6" aria-label="Tabs">
+                    <button id="modal-tab-library" role="tab" aria-controls="modal-panel-library" aria-selected="true" class="modal-tab active">From Library</button>
+                    <button id="modal-tab-upload" role="tab" aria-controls="modal-panel-upload" aria-selected="false" class="modal-tab">Upload New</button>
+                    <button id="modal-tab-url" role="tab" aria-controls="modal-panel-url" aria-selected="false" class="modal-tab">From Web URL</button>
                 </nav>
             </div>
 
-            <div id="modal-panel-library" class="modal-panel active p-6">
-                <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto">
-                    </div>
-                <div class="flex justify-end gap-4 mt-6">
-                    <button id="modal-cancel-button-library" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500">Cancel</button>
-                    <button id="modal-add-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale">Add Selected</button>
+            <div id="modal-panel-library" role="tabpanel" class="modal-panel active p-6">
+                <p class="text-gray-400 text-sm mb-4">Select existing documents from your library to link to this Cortex.</p>
+                <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border border-gray-700 rounded-md p-3 bg-gray-800/50">
+                    <p class="text-gray-500 italic">Loading library...</p> 
                 </div>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="modal-cancel-button-library" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
+                    <button type="button" id="modal-add-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Add Selected</button> </div>
             </div>
 
-            <div id="modal-panel-upload" class="modal-panel p-6">
+            <div id="modal-panel-upload" role="tabpanel" class="modal-panel p-6">
                 <p class="text-gray-400 text-sm mb-4">Upload a new PDF, DOCX, TXT, MD, or EPUB file. It will be added to your library and this Cortex.</p>
-                <button id="modal-upload-button" class="w-full text-center accent-text font-semibold p-8 rounded-md border-2 border-dashed border-gray-600 hover:border-accent-text hover:bg-gray-700/50">
-                    Click or Drag to Upload
+                <button type="button" id="modal-upload-trigger-button" class="w-full text-center accent-text font-semibold p-8 rounded-md border-2 border-dashed border-gray-600 hover:border-accent-text hover:bg-gray-700/50 transition-colors">
+                    Click or Drag File Here
                 </button>
-                <div class="flex justify-end gap-4 mt-6">
-                    <button id="modal-cancel-button-upload" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500">Cancel</button>
+                 <p class="text-xs text-center text-gray-500 mt-2">Max file size: 100MB</p> <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="modal-cancel-button-upload" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
                 </div>
             </div>
 
-            <div id="modal-panel-url" class="modal-panel p-6">
-                <p class="text-gray-400 text-sm mb-4">Add a single webpage. We'll scrape its content and add it to your Cortex.</p>
+            <div id="modal-panel-url" role="tabpanel" class="modal-panel p-6">
+                <p class="text-gray-400 text-sm mb-4">Add a single webpage. We'll scrape its content and add it as a document to your library and this Cortex.</p>
                 <input type="url" id="modal-url-input" placeholder="https://example.com/article" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                <p id="modal-url-message" class="text-sm text-red-400 mt-2"></p> <div class="flex justify-end gap-4 mt-6">
-                    <button id="modal-cancel-button-url" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500">Cancel</button>
-                    <button id="modal-add-url-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale">Add Webpage</button>
-                </div>
+                <p id="modal-url-message" class="text-sm text-red-400 mt-2"></p>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="modal-cancel-button-url" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
+                    <button type="button" id="modal-add-url-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50">Add Webpage</button> </div>
             </div>
 
         </div>
@@ -146,10 +171,20 @@
 
     <script>
         // *** Ensure apiBaseUrl is defined globally by the script in <head> ***
-        const supabaseUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co'; // Replace with your Production URL
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU'; // Replace with your Production Anon Key
+        const supabaseStagingUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co'; // Your Staging URL
+        const supabaseStagingAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'; // Your Staging Anon Key
         
+        // --- Determine Supabase credentials based on hostname ---
+        const useStagingSupabase = window.location.hostname === 'staging.cogmatiq.com' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const finalSupabaseUrl = useStagingSupabase ? supabaseStagingUrl : supabaseUrl;
+        const finalSupabaseAnonKey = useStagingSupabase ? supabaseStagingAnonKey : supabaseAnonKey;
+        console.log(`Using Supabase URL: ${finalSupabaseUrl}`); // Debug which Supabase is used
+        // --- Initialize Supabase Client ---
+        const supabaseClient = supabase.createClient(finalSupabaseUrl, finalSupabaseAnonKey);
+        
+        // --- DOM Elements ---
         const createCortexButton = document.getElementById('create-cortex-button');
         const fileInput = document.getElementById('file-input');
         const cortexList = document.getElementById('cortex-list');
@@ -159,58 +194,95 @@
         const progressContainer = document.getElementById('progress-container');
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
+        // Modal elements
         const addDocModal = document.getElementById('add-doc-modal');
+        const modalContent = document.getElementById('modal-content');
         const modalDocList = document.getElementById('modal-doc-list');
         const modalAddButton = document.getElementById('modal-add-button');
         const modalUrlInput = document.getElementById('modal-url-input');
         const modalAddUrlButton = document.getElementById('modal-add-url-button');
         const modalUrlMessage = document.getElementById('modal-url-message');
-        const modalTabLibrary = document.getElementById('modal-tab-library');
-        const modalTabUpload = document.getElementById('modal-tab-upload');
-        const modalTabUrl = document.getElementById('modal-tab-url');
-        const modalPanelLibrary = document.getElementById('modal-panel-library');
-        const modalPanelUpload = document.getElementById('modal-panel-upload');
-        const modalPanelUrl = document.getElementById('modal-panel-url');
+        const modalTabs = {
+            library: document.getElementById('modal-tab-library'),
+            upload: document.getElementById('modal-tab-upload'),
+            url: document.getElementById('modal-tab-url')
+        };
+        const modalPanels = {
+            library: document.getElementById('modal-panel-library'),
+            upload: document.getElementById('modal-panel-upload'),
+            url: document.getElementById('modal-panel-url')
+        };
+        const modalCancelButtons = {
+            library: document.getElementById('modal-cancel-button-library'),
+            upload: document.getElementById('modal-cancel-button-upload'),
+            url: document.getElementById('modal-cancel-button-url')
+        };
+        const modalUploadTriggerButton = document.getElementById('modal-upload-trigger-button');
         
+        // --- State Variables ---
         let userToken = null;
-        let currentKbId = null; // Changed from currentKbId to currentCortexId for clarity
-        let allLibraryDocs = []; // Cache library docs
+        let currentCortexId = null; 
+        let allLibraryDocs = []; 
+        const activePolls = {}; // Keep track of active polling
 
-        async function main() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
+        // --- Initialization ---
+        async function initializeDashboard() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+             if (error) {
+                console.error("Error getting session:", error);
+                window.location.href = '/login.html'; // Redirect if session fetch fails
+                return;
+            }
             if (session) {
                 userToken = session.access_token;
+                // *** ADDED DEBUG LOG ***
+                console.log("User Token Obtained:", userToken ? userToken.substring(0, 20) + '...' : 'null or undefined'); 
                 fetchInitialData();
             } else {
+                console.log("No active session found, redirecting to login."); // Added log
                 window.location.href = '/login.html';
             }
              supabaseClient.auth.onAuthStateChange((_event, session) => {
                 if (!session) {
+                    console.log("Auth state changed: No session, redirecting to /");
                     window.location.href = '/'; 
                 } else {
                     userToken = session.access_token; // Keep token updated
+                    console.log("Auth state changed: Session updated.");
                 }
             });
         }
-        main();
+        initializeDashboard(); // Run initialization
 
+        // --- Data Fetching ---
         async function fetchInitialData() {
-            if (!userToken) return;
-            loadingText.classList.remove('hidden');
+            if (!userToken) {
+                 console.error("fetchInitialData called with no userToken!"); // Added check
+                loadingText.textContent = 'Error: Authentication token missing.';
+                loadingText.classList.remove('hidden');
+                return;
+            }
             loadingText.textContent = 'Loading your data...';
-            cortexList.innerHTML = ''; // Clear previous list
-            
+            loadingText.classList.remove('hidden');
+            cortexList.innerHTML = ''; 
+            createCortexButton.disabled = true; // Disable create button while loading
+
             try {
+                const authHeader = { 'Authorization': `Bearer ${userToken}` };
+                // *** ADDED DEBUG LOG ***
+                console.log("Fetching initial data with headers:", authHeader); 
+
                 // *** Use apiBaseUrl in fetch calls ***
                 const [kbsRes, subRes, docsRes] = await Promise.all([
-                    fetch(`${apiBaseUrl}/cortices`, { headers: { 'Authorization': `Bearer ${userToken}` } }),
-                    fetch(`${apiBaseUrl}/subscription-status`, { headers: { 'Authorization': `Bearer ${userToken}` } }),
-                    fetch(`${apiBaseUrl}/documents`, { headers: { 'Authorization': `Bearer ${userToken}` } }) // Fetch library docs once
+                    fetch(`${apiBaseUrl}/cortices`, { headers: authHeader }),
+                    fetch(`${apiBaseUrl}/subscription-status`, { headers: authHeader }),
+                    fetch(`${apiBaseUrl}/documents`, { headers: authHeader }) // Fetch library docs once
                 ]);
 
-                if (!kbsRes.ok || !subRes.ok || !docsRes.ok) {
-                    throw new Error('Failed to load initial data.');
-                }
+                // Check all responses before proceeding
+                if (!kbsRes.ok) throw new Error(`Failed to load Cortices: ${kbsRes.statusText} (${kbsRes.status})`);
+                if (!subRes.ok) throw new Error(`Failed to load subscription: ${subRes.statusText} (${subRes.status})`);
+                if (!docsRes.ok) throw new Error(`Failed to load documents: ${docsRes.statusText} (${docsRes.status})`);
 
                 const cortices = await kbsRes.json();
                 const subStatus = await subRes.json();
@@ -218,14 +290,20 @@
                 
                 renderSubscriptionStatus(subStatus.is_pro);
                 renderCortices(cortices);
+                createCortexButton.disabled = false; // Re-enable button after successful load
+                loadingText.classList.add('hidden'); // Hide loading text on success
+
             } catch (error) {
                 console.error("Fetch Initial Data Error:", error);
                 loadingText.textContent = `Error loading data: ${error.message}`;
+                 createCortexButton.disabled = false; // Re-enable button even on error
             }
         }
 
+        // --- UI Rendering ---
         function renderSubscriptionStatus(isPro) {
-            if (isPro) {
+            // ... (keep this function as is) ...
+             if (isPro) {
                 navLinksContainer.innerHTML = `
                     <span class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50">
                         Pro Plan
@@ -244,7 +322,8 @@
         }
 
         function renderCortices(cortices) {
-            loadingText.classList.add('hidden');
+             // ... (keep this function as is, including polling calls) ...
+             loadingText.classList.add('hidden');
             cortexList.innerHTML = ''; // Clear again just in case
             if (!cortices || cortices.length === 0) {
                 cortexList.innerHTML = '<p class="text-gray-400 text-center py-8">No Cortices yet. Click "Create New Cortex" to get started.</p>';
@@ -258,47 +337,40 @@
                             statusIndicator = `<span class="text-xs font-semibold text-yellow-400 animate-pulse ml-2">(Processing...)</span>`;
                             pollDocumentStatus(doc.id, cortex.id); // Start polling if processing
                         } else if (doc.status === 'error') {
-                            statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2">(Error)</span>`;
+                            statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2" title="${doc.error_message || 'Processing failed'}">(Error)</span>`; // Show error message on hover
                         }
                         
                         // Action button (unlink) only appears for 'ready' docs on hover
                         const actionButtonHTML = doc.status === 'ready' ? 
-                            `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortex.id}', '${doc.id}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
+                            `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortex.id}', '${doc.id}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto p-1"> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
                              </button>` : '';
 
-                        return `<li id="doc-${doc.id}-${cortex.id}" class="flex justify-between items-center group/doc py-1 text-sm text-gray-300"> <span>- ${doc.file_name}${statusIndicator}</span>
-                                    <div class="doc-status">${actionButtonHTML}</div>
+                        return `<li id="doc-${doc.id}-${cortex.id}" class="flex justify-between items-center group/doc py-1 text-sm text-gray-300"> <span class="truncate pr-2" title="${doc.file_name}">${doc.file_name}${statusIndicator}</span> <div class="doc-status flex-shrink-0">${actionButtonHTML}</div>
                                 </li>`;
                     }).join('') 
-                    : '<li class="text-gray-500 text-sm">No documents added yet.</li>';
+                    : '<li class="text-gray-500 text-sm italic">No documents added yet.</li>'; // Added italic
 
                 const cortexElement = document.createElement('div');
                 cortexElement.className = 'card p-6 rounded-lg hover:shadow-lg transition-shadow group/cortex'; // Renamed group
                 cortexElement.innerHTML = `
-                    <div class="flex justify-between items-start mb-4"> <div>
-                            <h3 class="text-xl font-semibold text-white mb-1">${cortex.name}</h3>
-                             <p class="text-xs text-gray-500">Created: ${new Date(cortex.created_at).toLocaleDateString()}</p> 
+                    <div class="flex justify-between items-start mb-4 gap-4"> <div class="flex-grow min-w-0"> <h3 class="text-xl font-semibold text-white mb-1 truncate" title="${cortex.name}">${cortex.name}</h3> <p class="text-xs text-gray-500">Created: ${new Date(cortex.created_at).toLocaleDateString()}</p> 
                         </div>
-                        <div class="flex items-center gap-3 flex-shrink-0"> <button class="text-sm font-semibold text-red-400 opacity-0 group-hover/cortex:opacity-100 transition-opacity hover:underline" onclick="deleteCortex('${cortex.id}')">Delete Cortex</button>
-                            <button class="text-sm font-semibold accent-text hover:underline" onclick="openAddDocumentModal('${cortex.id}')">+ Add Document</button>
-                            <a href="/chat.html?cortex_id=${cortex.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale">Open Chat</a>
+                        <div class="flex items-center gap-2 flex-shrink-0"> <button title="Delete Cortex" class="text-sm font-semibold text-red-500 opacity-0 group-hover/cortex:opacity-100 transition-opacity hover:text-red-400 p-1" onclick="deleteCortex('${cortex.id}')"> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
+                             </button>
+                            <button class="text-sm font-semibold accent-text hover:underline whitespace-nowrap" onclick="openAddDocumentModal('${cortex.id}')">+ Add Source</button> <a href="/chat.html?cortex_id=${cortex.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale whitespace-nowrap">Open Chat</a>
                         </div>
                     </div>
                     <div class="border-t border-gray-700 pt-4">
-                        <h4 class="text-sm font-semibold text-gray-400 mb-2">Documents:</h4>
-                        <ul class="space-y-1">${docListHTML}</ul>
+                        <h4 class="text-sm font-semibold text-gray-400 mb-2">Sources:</h4> <ul class="space-y-1">${docListHTML}</ul>
                     </div>
                 `;
                 cortexList.appendChild(cortexElement);
             });
         }
 
-        // Keep track of active polling intervals
-        const activePolls = {}; 
-
         async function pollDocumentStatus(docId, cortexId) {
-            // Prevent multiple polls for the same doc
+             // ... (keep polling logic as is) ...
+             // Prevent multiple polls for the same doc
             if (activePolls[docId]) return; 
 
             console.log(`Polling status for doc: ${docId}`);
@@ -318,6 +390,14 @@
                         clearInterval(activePolls[docId]); 
                         delete activePolls[docId];
                         // Optionally update UI to show permanent error if desired
+                        const docElementId = `doc-${docId}-${cortexId}`; // Need cortexId for unique ID
+                        const docElement = document.getElementById(docElementId);
+                         if (docElement) {
+                             const statusSpan = docElement.querySelector('span'); // The element with the filename
+                             if (statusSpan) {
+                                statusSpan.innerHTML += `<span class="text-xs font-semibold text-red-400 ml-2">(Polling Error)</span>`;
+                             }
+                         }
                         return; 
                     }
                     
@@ -337,11 +417,11 @@
                                 let statusIndicator = '';
                                 let actionButtonHTML = '';
                                 if(doc.status === 'ready') {
-                                     actionButtonHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortexId}', '${docId}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto">
+                                     actionButtonHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument('${cortexId}', '${docId}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto p-1">
                                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
                                                       </button>`;
                                 } else { // Error status
-                                    statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2">(Error)</span>`;
+                                    statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2" title="${doc.error_message || 'Processing failed'}">(Error)</span>`;
                                 }
                                 // Update filename span to remove processing text
                                 statusSpan.innerHTML = `- ${doc.file_name}${statusIndicator}`; 
@@ -359,10 +439,41 @@
             }, 5000); // Poll every 5 seconds
         }
         
-        // --- Delete Document ---
+        // --- API Actions (Create, Delete, Link, Unlink) ---
+        async function createCortex() {
+             const cortexName = prompt('Enter a name for your new Cortex:');
+            if (!cortexName || !userToken) return;
+            
+            createCortexButton.disabled = true; 
+
+            try {
+                 // *** Use apiBaseUrl here ***
+                const response = await fetch(`${apiBaseUrl}/cortices`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: cortexName.trim() }) // Trim name
+                });
+                 if (!response.ok) {
+                    const errorData = await response.json().catch(()=> ({detail: 'Failed to create Cortex.'}));
+                    throw new Error(errorData.detail);
+                }
+                await fetchInitialData(); // Await refresh before enabling button
+            } catch (error) {
+                 console.error("Create Cortex Error:", error);
+                alert(`Error creating Cortex: ${error.message}`);
+            } finally {
+                 createCortexButton.disabled = false;
+            }
+        }
+
         async function deleteDocument(docId) {
+             // ... (keep delete document logic as is, using apiBaseUrl) ...
             if (!userToken) return;
             if (confirm('Are you sure you want to permanently delete this document?\n\nThis action cannot be undone and will remove the document from ALL your Cortices.')) {
+                // Find the button and disable it, add loading state maybe
+                const button = event.target.closest('button');
+                if(button) button.disabled = true; 
+                
                 try {
                     // *** Use apiBaseUrl here ***
                     const response = await fetch(`${apiBaseUrl}/documents/${docId}`, {
@@ -374,18 +485,26 @@
                         throw new Error(errorData.detail);
                     }
                     console.log(`Document ${docId} deleted successfully.`);
-                    fetchInitialData(); // Refresh the whole dashboard
+                    // Remove the element directly from UI for faster feedback
+                    const docElement = document.getElementById(`doc-${docId}`); // Assuming library.html has similar IDs
+                    if(docElement) docElement.remove();
+                    // Optional: Refresh full data in background if needed, but UI removal is faster
+                    fetchInitialData(); 
                 } catch (error) {
                     console.error("Delete Document Error:", error);
                     alert(`Error deleting document: ${error.message}`);
+                    if(button) button.disabled = false; // Re-enable button on error
                 }
             }
         }
         
-        // --- Unlink Document ---
         async function unlinkDocument(cortexId, docId) {
+            // ... (keep unlink document logic as is, using apiBaseUrl) ...
             if (!userToken) return;
             if (confirm('Remove this document from this Cortex? (The document will remain in your library).')) {
+                 const button = event.target.closest('button');
+                 if(button) button.disabled = true;
+
                 try {
                      // *** Use apiBaseUrl here ***
                     const response = await fetch(`${apiBaseUrl}/cortices/${cortexId}/documents/${docId}`, {
@@ -397,18 +516,26 @@
                         throw new Error(errorData.detail);
                     }
                     console.log(`Document ${docId} unlinked from Cortex ${cortexId}.`);
-                    fetchInitialData(); // Refresh the whole dashboard
+                    // Remove just this list item for faster UI feedback
+                    const listItem = document.getElementById(`doc-${docId}-${cortexId}`);
+                    if (listItem) listItem.remove();
+                     // Optional: Refresh full data in background if needed
+                    // fetchInitialData(); 
                 } catch (error) {
                      console.error("Unlink Document Error:", error);
                     alert(`Error removing document: ${error.message}`);
+                    if(button) button.disabled = false;
                 }
             }
         }
 
-        // --- Delete Cortex ---
         async function deleteCortex(cortexId) {
+             // ... (keep delete cortex logic as is, using apiBaseUrl) ...
             if (!userToken) return;
             if (confirm('Are you sure you want to delete this Cortex?\n\nThis action cannot be undone. Documents within it will NOT be deleted from your library.')) {
+                 const button = event.target.closest('button');
+                 if(button) button.disabled = true;
+
                 try {
                     // *** Use apiBaseUrl here ***
                     const response = await fetch(`${apiBaseUrl}/cortices/${cortexId}`, {
@@ -420,73 +547,130 @@
                         throw new Error(errorData.detail);
                     }
                     console.log(`Cortex ${cortexId} deleted.`);
-                    fetchInitialData(); // Refresh the list
+                     // Remove cortex card directly from UI
+                     const cardElement = button.closest('.card');
+                     if(cardElement) cardElement.remove();
+                     // Optional: Refresh full data if needed
+                    // fetchInitialData(); 
                 } catch (error) {
                     console.error("Delete Cortex Error:", error);
                     alert(`Error deleting Cortex: ${error.message}`);
+                     if(button) button.disabled = false;
                 }
             }
         }
         
-        // --- Open Add Document Modal ---
-        function openAddDocumentModal(cortexId) { // Changed kbId to cortexId
-            currentCortexId = cortexId; // Store the target cortex ID
-            renderLibraryModal(); // Render the library tab first
-            switchModalTab('library'); // Ensure library tab is active
+        // --- Modal Logic ---
+        function openAddDocumentModal(cortexId) { 
+            currentCortexId = cortexId; 
+            renderLibraryModal(); 
+            switchModalTab('library'); 
+            // Show modal with animation
             addDocModal.classList.remove('hidden');
+            requestAnimationFrame(() => { // Allow display change to register
+                 addDocModal.classList.remove('opacity-0');
+                 modalContent.classList.remove('scale-95', 'opacity-0');
+            });
+        }
+        
+        function closeAddDocumentModal() {
+            // Hide modal with animation
+            addDocModal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { // Wait for animation before hiding
+                addDocModal.classList.add('hidden');
+                 // Reset modal state if needed
+                 modalUrlInput.value = '';
+                 modalUrlMessage.textContent = '';
+                 modalAddButton.disabled = true; // Re-disable add button
+                 modalAddUrlButton.disabled = false; // Re-enable url button
+                 modalAddUrlButton.textContent = 'Add Webpage'; 
+            }, 300); // Match animation duration
         }
 
-        // --- Render Library Tab Content ---
         function renderLibraryModal() {
+             // ... (keep library rendering logic as is) ...
              modalDocList.innerHTML = ''; // Clear previous list
+             modalAddButton.disabled = true; // Start disabled
+
             if (allLibraryDocs.length === 0) {
-                modalDocList.innerHTML = '<p class="text-gray-400 text-center">Your document library is empty. Use the "Upload New" tab.</p>';
+                modalDocList.innerHTML = '<p class="text-gray-400 text-center italic">Your document library is empty. Use the "Upload New" or "From Web URL" tab.</p>';
             } else {
-                modalDocList.innerHTML = allLibraryDocs.map(doc => `
-                    <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-700/50 cursor-pointer">
-                        <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text focus:ring-offset-0 focus:ring-1"> <span>${doc.file_name} ${doc.status === 'processing' ? '(Processing...)' : doc.status === 'error' ? '(Error)' : ''}</span>
+                 // Get list of doc IDs already in the current cortex to disable them
+                 const currentCortex = document.getElementById(`cortex-${currentCortexId}`); // Assume cortex card has ID `cortex-{id}`
+                 const existingDocIds = currentCortex ? Array.from(currentCortex.querySelectorAll('ul li[id^="doc-"]')).map(li => li.id.split('-')[1]) : [];
+
+                modalDocList.innerHTML = allLibraryDocs.map(doc => {
+                    const isLinked = existingDocIds.includes(doc.id);
+                    const disabledAttr = isLinked ? 'disabled' : '';
+                    const labelClass = isLinked ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700/50 cursor-pointer';
+                    let statusIndicator = '';
+                    if (doc.status === 'processing') statusIndicator = '<span class="text-xs text-yellow-400 ml-1">(Processing...)</span>';
+                    else if (doc.status === 'error') statusIndicator = '<span class="text-xs text-red-400 ml-1">(Error)</span>';
+
+                    return `
+                    <label class="flex items-center gap-3 p-2 rounded-md ${labelClass}">
+                        <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text focus:ring-offset-0 focus:ring-1" ${disabledAttr}>
+                        <span class="truncate" title="${doc.file_name}">${doc.file_name}${statusIndicator}</span>
+                        ${isLinked ? '<span class="text-xs text-gray-500 ml-auto">(Already Added)</span>' : ''}
                     </label>
-                `).join('');
+                `;
+                }).join('');
+
+                 // Add event listener to enable/disable button based on selection
+                 modalDocList.addEventListener('change', () => {
+                     const selectedCount = modalDocList.querySelectorAll('input:checked:not(:disabled)').length;
+                     modalAddButton.disabled = selectedCount === 0;
+                 });
             }
         }
         
         // --- Modal Tab Switching ---
-        modalTabLibrary.addEventListener('click', () => switchModalTab('library'));
-        modalTabUpload.addEventListener('click', () => switchModalTab('upload'));
-        modalTabUrl.addEventListener('click', () => {
-             switchModalTab('url');
-             modalUrlInput.value = ''; // Clear URL input when switching to tab
-             modalUrlMessage.textContent = ''; // Clear any previous messages
+        Object.keys(modalTabs).forEach(key => {
+            modalTabs[key].addEventListener('click', () => switchModalTab(key));
         });
 
-        function switchModalTab(activeTab) {
-            // ... (keep this function as is) ...
+        function switchModalTab(activeTabKey) {
+            Object.keys(modalTabs).forEach(key => {
+                modalTabs[key].classList.toggle('active', key === activeTabKey);
+                modalTabs[key].setAttribute('aria-selected', key === activeTabKey);
+                modalPanels[key].classList.toggle('active', key === activeTabKey);
+            });
+             if (activeTabKey === 'library') {
+                renderLibraryModal(); // Re-render library when switching back
+            }
+             if (activeTabKey === 'url') {
+                modalUrlInput.value = ''; 
+                modalUrlMessage.textContent = ''; 
+                modalAddUrlButton.disabled = false;
+             }
         }
 
         // --- Modal Cancel Buttons ---
-        document.getElementById('modal-cancel-button-library').addEventListener('click', () => addDocModal.classList.add('hidden'));
-        document.getElementById('modal-cancel-button-upload').addEventListener('click', () => addDocModal.classList.add('hidden'));
-        document.getElementById('modal-cancel-button-url').addEventListener('click', () => addDocModal.classList.add('hidden'));
+         Object.values(modalCancelButtons).forEach(button => {
+            button.addEventListener('click', closeAddDocumentModal);
+         });
 
-        // --- Modal Upload Button ---
-        document.getElementById('modal-upload-button').addEventListener('click', () => {
-            if (!currentCortexId) return; // Ensure we have a target cortex
-            fileInput.dataset.cortexId = currentCortexId; // Use cortexId
-            fileInput.click(); // Trigger file input
+        // --- Modal Upload Button Trigger ---
+        modalUploadTriggerButton.addEventListener('click', () => {
+            if (!currentCortexId) return; 
+            fileInput.dataset.cortexId = currentCortexId; 
+            fileInput.click(); 
         });
 
         // --- Modal Add From Library Button ---
         modalAddButton.addEventListener('click', async () => {
-            if (!currentCortexId || !userToken) return;
-            const selectedDocs = Array.from(modalDocList.querySelectorAll('input:checked')).map(input => input.value);
+             // ... (keep existing logic, including apiBaseUrl usage) ...
+             if (!currentCortexId || !userToken) return;
+            const selectedDocs = Array.from(modalDocList.querySelectorAll('input:checked:not(:disabled)')).map(input => input.value); // Ignore disabled checkboxes
             
             if (selectedDocs.length === 0) {
-                // Just close if nothing selected
-                addDocModal.classList.add('hidden');
+                // Should not happen if button is correctly disabled, but good practice
+                closeAddDocumentModal();
                 return; 
             }
 
-            modalAddButton.disabled = true; // Disable while processing
+            modalAddButton.disabled = true; 
             modalAddButton.textContent = 'Linking...';
 
             try {
@@ -500,39 +684,37 @@
                     const errorData = await response.json().catch(()=> ({detail: 'Failed to link documents.'}));
                     throw new Error(errorData.detail);
                 }
-                addDocModal.classList.add('hidden');
-                fetchInitialData(); // Refresh dashboard list
+                closeAddDocumentModal();
+                await fetchInitialData(); // Refresh dashboard list
             } catch (error) {
                 console.error("Link Document Error:", error);
                 alert(`Error linking documents: ${error.message}`);
-            } finally {
-                 modalAddButton.disabled = false;
+                 modalAddButton.disabled = false; // Re-enable on error
                  modalAddButton.textContent = 'Add Selected';
-            }
+            } 
         });
         
         // --- Modal Add From URL Button ---
         modalAddUrlButton.addEventListener('click', async () => {
-            if (!currentCortexId || !userToken) return;
+             // ... (keep existing logic, including apiBaseUrl usage) ...
+             if (!currentCortexId || !userToken) return;
             const url = modalUrlInput.value.trim();
             
             // Basic URL validation
             let isValidUrl = false;
             try {
-                new URL(url);
-                isValidUrl = url.startsWith('http://') || url.startsWith('https://');
+                const parsedUrl = new URL(url); // More robust check
+                isValidUrl = ['http:', 'https:',].includes(parsedUrl.protocol);
             } catch (_) {
                 isValidUrl = false;
             }
 
             if (!isValidUrl) {
                 modalUrlMessage.textContent = 'Please enter a valid URL (starting with http:// or https://).';
-                // modalUrlMessage.classList.remove('hidden'); // Ensure message is visible
                 return;
             }
 
-            modalUrlMessage.textContent = ''; // Clear previous errors
-            // modalUrlMessage.classList.add('hidden'); // Hide message area
+            modalUrlMessage.textContent = ''; 
             modalAddUrlButton.disabled = true;
             modalAddUrlButton.textContent = 'Adding...';
 
@@ -545,24 +727,23 @@
                 });
                 
                 if (response.status === 403) { // Freemium limit
-                     addDocModal.classList.add('hidden'); // Close modal first
-                     modalUrlInput.value = ''; // Clear input
+                     closeAddDocumentModal(); 
+                     modalUrlInput.value = ''; 
                     alert('You have reached your document limit. Please upgrade to Pro.');
                     window.location.href = '/pricing.html';
-                    return; // Stop execution here
+                    return; 
                 }
                 if (!response.ok) {
-                    const err = await response.json().catch(() => ({ detail: 'Failed to add webpage. Check the URL or try again later.' }));
+                    const err = await response.json().catch(() => ({ detail: 'Failed to add webpage. Check the URL or server logs.' }));
                     throw new Error(err.detail);
                 }
                 
-                addDocModal.classList.add('hidden');
+                closeAddDocumentModal();
                 modalUrlInput.value = '';
-                fetchInitialData(); // Refresh dashboard
+                await fetchInitialData(); // Refresh dashboard
             } catch (error) {
                  console.error("Add URL Error:", error);
                 modalUrlMessage.textContent = `Error: ${error.message}`;
-                // modalUrlMessage.classList.remove('hidden'); // Show error
             } finally {
                 modalAddUrlButton.disabled = false;
                 modalAddUrlButton.textContent = 'Add Webpage';
@@ -570,51 +751,27 @@
         });
 
         // --- Create Cortex Button ---
-        createCortexButton.addEventListener('click', async () => {
-            const cortexName = prompt('Enter a name for your new Cortex:');
-            if (!cortexName || !userToken) return;
-            
-            createCortexButton.disabled = true; // Prevent double clicks
+        createCortexButton.addEventListener('click', createCortex); // Call function
 
-            try {
-                 // *** Use apiBaseUrl here ***
-                const response = await fetch(`${apiBaseUrl}/cortices`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: cortexName })
-                });
-                 if (!response.ok) {
-                    const errorData = await response.json().catch(()=> ({detail: 'Failed to create Cortex.'}));
-                    throw new Error(errorData.detail);
-                }
-                fetchInitialData(); // Refresh list
-            } catch (error) {
-                 console.error("Create Cortex Error:", error);
-                alert(`Error creating Cortex: ${error.message}`);
-            } finally {
-                 createCortexButton.disabled = false;
-            }
-        });
-
-        // --- File Input Listener (Upload Triggered from Modal) ---
+        // --- File Input Listener ---
         fileInput.addEventListener('change', () => {
             const targetCortexId = fileInput.dataset.cortexId;
             if (fileInput.files.length && targetCortexId) {
                 handleFileUpload(fileInput.files[0], targetCortexId);
             }
-            // Clear dataset attribute after use
             delete fileInput.dataset.cortexId; 
         });
 
         // --- Handle File Upload ---
-        const handleFileUpload = (file, cortexId) => { // Changed kbId to cortexId
-            if (!userToken || !cortexId) return;
-            addDocModal.classList.add('hidden'); // Ensure modal is closed
+        function handleFileUpload(file, cortexId) { // Changed name convention
+             // ... (keep existing logic, including apiBaseUrl usage) ...
+             if (!userToken || !cortexId) return;
+            closeAddDocumentModal(); // Close modal immediately
             progressContainer.classList.remove('hidden');
             progressText.classList.remove('hidden');
-            progressText.textContent = `Uploading ${file.name}...`;
+            progressText.textContent = `Uploading ${file.name}... (0%)`;
             progressBar.style.width = '0%';
-            progressBar.classList.remove('bg-red-500'); // Ensure progress bar is accent color
+            progressBar.classList.remove('bg-red-500'); 
 
             const formData = new FormData();
             formData.append('file', file);
@@ -635,33 +792,31 @@
                 }
             };
 
-            xhr.onload = async () => { // Marked async to use await inside
+            xhr.onload = async () => { 
                 if (xhr.status === 200) {
                      progressText.textContent = 'Upload complete. Processing started...';
-                     // Successfully uploaded, now refresh data
-                    await fetchInitialData(); // Await refresh before resetting UI
-                    setTimeout(resetUploadUI, 1500); // Shorter delay after refresh
+                     // Need to refresh data to show the new 'processing' doc
+                    await fetchInitialData(); 
+                    setTimeout(resetUploadUI, 1500); 
                 } else if (xhr.status === 403) {
                      progressBar.style.width = '100%';
-                     progressBar.classList.add('bg-red-500'); // Indicate error
+                     progressBar.classList.add('bg-red-500'); 
                      progressText.textContent = 'Upload failed: Limit reached.';
-                    alert('You have reached your document limit. Please upgrade to Pro.');
+                    alert('You have reached your document limit. Please upgrade to Pro to upload more documents.');
                     window.location.href = '/pricing.html';
                      setTimeout(resetUploadUI, 3000);
                 } else {
                      progressBar.style.width = '100%';
                      progressBar.classList.add('bg-red-500');
-                     let errorDetail = 'Upload failed. Please check the file type/size and try again.';
+                     let errorDetail = 'Upload failed. Please check file type/size and try again.';
                      try {
                          const errorJson = JSON.parse(xhr.responseText);
-                         errorDetail = `Upload failed: ${errorJson.detail || 'Unknown error'}`;
-                     } catch (e) {
-                         // Ignore if response is not JSON
-                     }
+                         errorDetail = `Upload failed: ${errorJson.detail || 'Server error'}`;
+                     } catch (e) { /* Ignore non-JSON errors */ }
                      progressText.textContent = errorDetail;
                      console.error("Upload Error:", xhr.status, xhr.responseText);
                      alert(errorDetail);
-                     setTimeout(resetUploadUI, 3000); // Longer delay to see error
+                     setTimeout(resetUploadUI, 4000); // Longer delay to read error
                 }
             };
 
@@ -669,26 +824,28 @@
                  progressBar.style.width = '100%';
                  progressBar.classList.add('bg-red-500');
                  progressText.textContent = 'Upload failed: Network error.';
-                alert('A network error occurred during upload.');
+                alert('A network error occurred during upload. Please check your connection.');
                 resetUploadUI();
             };
 
             xhr.send(formData);
-        };
+        }
         
         // --- Reset Upload UI ---
-        const resetUploadUI = () => {
-            progressContainer.classList.add('hidden');
+        function resetUploadUI() {
+             // ... (keep existing logic) ...
+             progressContainer.classList.add('hidden');
             progressText.classList.add('hidden');
             progressBar.style.width = '0%';
              progressBar.classList.remove('bg-red-500');
             fileInput.value = ''; // Clear file input
-        };
+        }
 
         // --- Logout Button ---
         logoutButton.addEventListener('click', async () => { 
+            console.log("Signing out...");
             await supabaseClient.auth.signOut(); 
-            // Redirect is handled by onAuthStateChange listener
+             // Redirect is handled by onAuthStateChange listener
         });
     </script>
 </body>
