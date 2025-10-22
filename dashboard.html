@@ -435,10 +435,11 @@
                              if (statusSpan && statusDiv) {
                                 let statusIndicator = '';
                                 let actionButtonHTML = '';
-                                // Use the file_name from the *fetched doc object*, as it might have been updated (e.g., for URLs)
-                                const
-cIoIuAisjA
-fileName = doc.file_name || originalFileName;
+                                
+                                // *** THIS IS THE FIX ***
+                                // The typo was here.
+                                const fileName = doc.file_name || originalFileName;
+                                // *** END FIX ***
                                 
                                 if(doc.status === 'ready') {
                                      actionButtonHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument(event, '${cortexId}', '${docId}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto p-1">
@@ -454,7 +455,6 @@ fileName = doc.file_name || originalFileName;
                              }
                         }
                         
-                        // Refresh library docs in background
                         fetchLibraryDocumentsInBackground();
                     }
                 } catch (error) {
