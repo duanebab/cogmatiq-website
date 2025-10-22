@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -17,23 +17,18 @@
     <meta name="theme-color" content="#1A2533">
 
     <script>
-        // --- START: Environment Detection ---
         let apiBaseUrl;
-        // *** Verify/Update these hostnames if yours are different ***
         const stagingHostname = 'staging.cogmatiq.com'; 
         const productionHostname = 'cogmatiq.com';      
         const currentHostname = window.location.hostname;
 
         if (currentHostname === stagingHostname || currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-          // Use staging API for staging domain or local development
           apiBaseUrl = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app'; 
           console.log('Environment: Staging | API:', apiBaseUrl); 
         } else {
-          // Default to production API for any other hostname (like cogmatiq.com)
           apiBaseUrl = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app'; 
           console.log('Environment: Production | API:', apiBaseUrl);
         }
-        // --- END: Environment Detection ---
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -54,11 +49,14 @@
         #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
 
         .prose { color: #E5E7EB; }
-        .prose ul { list-style-type: disc; margin-left: 1.5rem; }
+        .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
+        .prose ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5em; margin-bottom: 0.5em; }
+        .prose ol { list-style-type: decimal; margin-left: 1.5rem; margin-top: 0.5em; margin-bottom: 0.5em; }
         .prose strong { font-weight: 800; }
-        .prose a { color: #00B5AD; text-decoration: underline; } /* Added link styling */
-        .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } /* Added code block styling */
+        .prose a { color: #00B5AD; text-decoration: underline; } 
+        .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } 
         .prose code { font-family: monospace; }
+        .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
 
         /* Sidebar Styles */
         .sidebar-button {
@@ -160,20 +158,25 @@
     
     <script>
         // *** Ensure apiBaseUrl is defined globally by the script in <head> ***
-        const supabaseUrl = 'https://wzekdxvvynpvisbvkiqg.supabase.co'; // Replace with your Production URL
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU'; // Replace with your Production Anon Key
-        const supabaseStagingUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co'; // Your Staging URL
-        const supabaseStagingAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'; // Your Staging Anon Key
         
-        // --- Determine Supabase credentials based on hostname ---
+        // *** 1. Define ALL Supabase credentials ***
+        const supabaseUrlProd = 'https://wzekdxvvynpvisbvkiqg.supabase.co'; // PRODUCTION URL
+        const supabaseAnonKeyProd = 'YOUR_SUPABASE_PROD_ANON_KEY_HERE'; // *** REPLACE THIS! ***
+        
+        const supabaseUrlStaging = 'https://qcsjjhmbjajgidhqpgdj.supabase.co'; // STAGING URL
+        const supabaseAnonKeyStaging = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'; // STAGING ANON KEY
+        
+        // --- 2. Determine Supabase credentials based on hostname ---
         const useStagingSupabase = window.location.hostname === 'staging.cogmatiq.com' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const finalSupabaseUrl = useStagingSupabase ? supabaseStagingUrl : supabaseUrl;
-        const finalSupabaseAnonKey = useStagingSupabase ? supabaseStagingAnonKey : supabaseAnonKey;
-        console.log(`Using Supabase URL: ${finalSupabaseUrl}`); // Debug which Supabase is used
-        // --- Initialize Supabase Client ---
+        const finalSupabaseUrl = useStagingSupabase ? supabaseUrlStaging : supabaseUrlProd;
+        const finalSupabaseAnonKey = useStagingSupabase ? supabaseAnonKeyStaging : supabaseAnonKeyProd;
+        
+        console.log(`Using Supabase URL: ${finalSupabaseUrl}`); // Debug
+
+        // --- 3. Initialize Supabase Client ---
         const supabaseClient = supabase.createClient(finalSupabaseUrl, finalSupabaseAnonKey);
     
-        // *** Define API endpoints using apiBaseUrl ***
+        // *** 4. Define API endpoints using apiBaseUrl ***
         const API_ENDPOINT = `${apiBaseUrl}/query`;
         const GRAPH_API_ENDPOINT = `${apiBaseUrl}/cortex-graph`;
 
@@ -192,48 +195,54 @@
         // --- State Variables ---
         let userToken = null;
         let graphLoaded = false;
-        let network = null; // To hold the vis.Network instance
+        let network = null; 
         
         // --- Functions ---
         function getClientId() {
             const params = new URLSearchParams(window.location.search);
-            // Prioritize cortex_id, fall back to kb_id/session_id for potential legacy URLs
+            // *** THIS IS THE KEY: We get 'cortex_id' from the URL ***
             return params.get('cortex_id') || params.get('kb_id') || params.get('session_id') || null;
         }
         
-        const clientId = getClientId();
+        const clientId = getClientId(); // This variable now holds the cortex_id
         if (!clientId) {
             alert('Error: No Cortex ID found in URL.');
             window.location.href = '/dashboard.html';
         }
 
-        async function main() {
-             // *** ADDED LOG ***
-             console.log("Chat page loaded. Checking session..."); 
-            const { data: { session }, error } = await supabaseClient.auth.getSession(); // Added error handling
+        // --- *** REFACTORED: Initialization using onAuthStateChange *** ---
+        function initializeChat() {
+            console.log("Chat page loaded. Setting up auth listener...");
             
-             // *** ADDED LOG ***
-            console.log("getSession() result:", { session: session ? 'Exists' : 'null', error: error }); 
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                console.log(`Auth Event: ${event}`);
 
-            if (error) {
-                console.error("Error getting session:", error);
-                window.location.href = '/login.html'; // Redirect on error
-                return;
-            }
-            
-            if (session) {
-                userToken = session.access_token;
-                 // *** ADDED LOG ***
-                console.log("User Token Obtained:", userToken ? userToken.substring(0, 20) + '...' : 'null or undefined');
-                initializeListeners();
-            } else {
-                 console.log("No active session found on chat page, redirecting to login."); // Added log
-                window.location.href = '/login.html';
-            }
+                if (event === 'SIGNED_OUT') {
+                    console.warn("Auth state: SIGNED_OUT. Redirecting to login.");
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (session && session.access_token) {
+                    if (userToken !== session.access_token) {
+                        userToken = session.access_token;
+                        console.log("Token set/updated. Initializing listeners...");
+                        initializeListeners(); 
+                    }
+                } else if (!session && event === 'INITIAL_SESSION') { 
+                     console.warn("Auth state: No session on load. Redirecting to login.");
+                     window.location.href = '/login.html';
+                }
+            });
         }
-        main(); // Run initialization
+        initializeChat();
+        // --- *** END: Refactored Initialization *** ---
+
 
         function initializeListeners() {
+            // Prevent duplicate listeners
+            if (chatTabButton.dataset.listener) return; 
+
             chatTabButton.addEventListener('click', () => {
                 switchTab('chat');
             });
@@ -243,8 +252,7 @@
                 if (!graphLoaded) {
                     loadGraphData();
                 } else if (network) {
-                    // Refit the network if it was already loaded and visible
-                    setTimeout(() => network.fit(), 0); // Use timeout to ensure DOM is ready
+                    setTimeout(() => network.fit(), 0); 
                 }
             });
 
@@ -261,31 +269,38 @@
                 
                 const formData = new FormData();
                 formData.append('question', question);
-                formData.append('client_id', clientId);
+                
+                // *** THIS IS THE FIX: Send 'cortex_id', not 'client_id' ***
+                formData.append('cortex_id', clientId); 
 
                 try {
-                     // *** Use API_ENDPOINT (which uses apiBaseUrl) ***
                     const response = await fetch(API_ENDPOINT, { 
                         method: 'POST', 
                         headers: { 'Authorization': `Bearer ${userToken}` },
                         body: formData 
                     });
+                    
                     if (!response.ok) { 
-                        const errorData = await response.json().catch(() => ({ detail: 'API request failed with status ' + response.status }));
-                        throw new Error(errorData.detail || 'API request failed.'); 
+                        // *** FIX: Parse the error JSON from the API ***
+                        const errorData = await response.json().catch(() => ({ detail: `API error: ${response.status} ${response.statusText}` }));
+                        throw new Error(errorData.detail || 'An unknown error occurred.'); 
                     }
+                    
                     const data = await response.json();
                     
                     updateAIMessage(aiMessageElement, data.answer);
 
                 } catch (error) {
-                    console.error("Chat API Error:", error); // Log error
+                    console.error("Chat API Error:", error); 
+                    // *** FIX: Display the *actual* error message, not [object Object] ***
                     updateAIMessage(aiMessageElement, `Sorry, something went wrong: ${error.message}. Please try again.`);
                 } finally {
                     submitButton.disabled = false;
-                    messageInput.focus(); // Re-focus input
+                    messageInput.focus(); 
                 }
             });
+
+            chatTabButton.dataset.listener = 'true';
         }
         
         function switchTab(tabName) {
@@ -300,57 +315,98 @@
                 graphPanel.classList.add('active');
                 chatPanel.classList.remove('active');
                  if (network) {
-                     // Refit the network when switching to the tab
                      setTimeout(() => network.fit(), 0); 
                  }
             }
         }
 
         async function loadGraphData() {
-            if (!userToken) return;
+            if (!userToken) {
+                 graphLoadingText.textContent = 'Error: Authentication token missing.';
+                 graphLoadingText.classList.add('text-red-400');
+                 return;
+            }
             graphLoaded = true; 
             graphLoadingText.textContent = 'Loading Neural Map...';
-            graphLoadingText.classList.remove('hidden');
+            graphLoadingText.classList.remove('hidden', 'text-red-400');
             
             try {
-                // *** Use GRAPH_API_ENDPOINT (which uses apiBaseUrl) ***
                 const response = await fetch(`${GRAPH_API_ENDPOINT}/${clientId}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
                 
-                if (response.status === 404) {
-                     graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
+                // Handle 200 (OK) and 404 (Not Found) the same way
+                if (response.status === 200 || response.status === 404) {
+                     const data = await response.json();
+                     if (!data.nodes || data.nodes.length === 0) {
+                        graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
+                        graphLoadingText.classList.add('hidden');
+                        return;
+                     }
+                     
                      graphLoadingText.classList.add('hidden');
-                     return;
-                }
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ detail: 'Failed to load graph data with status ' + response.status }));
-                    throw new Error(errorData.detail || 'Failed to load graph data.');
-                }
+                     graphContainer.innerHTML = ''; // Clear loading text
 
-                const data = await response.json();
-                graphLoadingText.classList.add('hidden');
+                     const options = {
+                        nodes: {
+                            shape: "dot",
+                            size: 16,
+                            font: { color: "#E5E7EB", size: 14, face: 'Manrope' }, 
+                            borderWidth: 2,
+                            color: {
+                                background: '#2D3748', 
+                                border: '#00B5AD', 
+                                highlight: { background: '#00B5AD', border: '#E5E7EB' },
+                                hover: { background: '#009A94', border: '#E5E7EB' }
+                            }
+                        },
+                        edges: {
+                            width: 1,
+                            color: { color: "#4B5563", highlight: "#00B5AD", hover: "#00B5AD" },
+                            arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+                            font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top', face: 'Manrope' }, 
+                            smooth: { enabled: true, type: "continuous" }
+                        },
+                        physics: {
+                            enabled: true,
+                            solver: 'forceAtlas2Based',
+                            forceAtlas2Based: {
+                                gravitationalConstant: -70, 
+                                centralGravity: 0.015,
+                                springLength: 120,
+                                springConstant: 0.05,
+                                damping: 0.6,
+                                avoidOverlap: 0.2
+                            },
+                            stabilization: {
+                               enabled: true,
+                               iterations: 1000, 
+                               updateInterval: 50,
+                               onlyDynamicEdges: false,
+                               fit: true
+                            }
+                        },
+                        interaction: {
+                            hover: true,
+                            tooltipDelay: 200,
+                            navigationButtons: true, 
+                            keyboard: true 
+                        },
+                        layout: {
+                            improvedLayout: true,
+                        },
+                    };
                 
-                if (!data.nodes || data.nodes.length === 0) {
-                    graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
-                    return;
-                }
-
-                graphContainer.innerHTML = ''; 
-
-                const options = {
-                    nodes: { /* ... keep options ... */ },
-                    edges: { /* ... keep options ... */ },
-                    physics: { /* ... keep options ... */ },
-                    interaction: { /* ... keep options ... */ },
-                    layout: { /* ... keep options ... */ }
-                };
-                
-                if (typeof vis !== 'undefined') {
-                     network = new vis.Network(graphContainer, data, options); 
-                } else {
-                    console.error("vis.js library not loaded!");
-                     graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
+                    if (typeof vis !== 'undefined') {
+                         network = new vis.Network(graphContainer, data, options); 
+                    } else {
+                        console.error("vis.js library not loaded!");
+                         graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
+                    }
+                     
+                } else { // Handle other errors like 500
+                    const errorData = await response.json().catch(() => ({ detail: `Failed to load graph data: ${response.status} ${response.statusText}` }));
+                    throw new Error(errorData.detail);
                 }
 
             } catch (error) {
@@ -362,18 +418,16 @@
         }
 
         function addMessageToUI(text, sender) {
-             // ... (keep this function as is) ...
              const messageWrapper = document.createElement('div');
-            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4'); // Added mb-4 for spacing
+            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4'); 
 
             if (sender === 'user') {
                 messageWrapper.classList.add('justify-end');
                 const userMessageDiv = document.createElement('div');
                 userMessageDiv.className = 'accent-bg rounded-lg p-4 max-w-lg';
-                // Sanitize user input before inserting as HTML if needed, though textContent is safer
                 const p = document.createElement('p');
                 p.textContent = text; 
-                userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>'); // Convert newlines after potential sanitization
+                userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>'); 
                 messageWrapper.appendChild(userMessageDiv);
 
             } else { // AI sender
@@ -382,7 +436,7 @@
                 aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
 
                 const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full'; // Added w-full
+                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full'; 
                 aiMessageDiv.innerHTML = `
                     <div class="typing-indicator flex items-center space-x-1">
                         <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
@@ -400,15 +454,13 @@
         }
 
         function updateAIMessage(element, text) {
-             // ... (keep this function as is) ...
              const typingIndicator = element.querySelector('.typing-indicator');
             const responseContent = element.querySelector('.response-content');
             const copyButton = element.querySelector('.copy-button');
 
             if(typingIndicator) typingIndicator.classList.add('hidden');
             if(responseContent) {
-                // Use marked.parse, with basic sanitization enabled
-                responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false }); // Disable Marked's sanitizer if you trust the API output or handle sanitization elsewhere. Be careful with unsanitized HTML.
+                responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false }); 
                 responseContent.classList.remove('hidden');
             }
             if(copyButton) copyButton.classList.remove('hidden');
@@ -417,10 +469,8 @@
         }
 
         function copyToClipboard(buttonElement) {
-             // ... (keep this function as is) ...
             const contentElement = buttonElement.parentElement.querySelector('.response-content');
             if (contentElement) {
-                // Get innerText to avoid copying HTML tags if marked.parse generated them
                 const textToCopy = contentElement.innerText || contentElement.textContent; 
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     buttonElement.textContent = 'Copied!';
@@ -434,17 +484,6 @@
                 console.error('Could not find content element to copy.');
             }
         }
-
-        // Add listener for auth state changes after initial load
-         supabaseClient.auth.onAuthStateChange((_event, session) => {
-            if (!session) {
-                console.log("Auth state changed (chat page): No session, redirecting to /login.html");
-                window.location.href = '/login.html'; 
-            } else {
-                userToken = session.access_token; // Keep token updated
-                 console.log("Auth state changed (chat page): Session updated.");
-            }
-        });
     </script>
 </body>
 </html>
