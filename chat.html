@@ -132,15 +132,7 @@
             
             <div id="chat-panel" class="panel active flex-col flex-grow h-full">
                 <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6 mb-4">
-                    <div class="flex items-start gap-3">
-                        <div class="bg-gray-700/50 p-2 rounded-full flex-shrink-0">
-                            <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        </div>
-                        <div class="bg-gray-700/50 rounded-lg p-4 max-w-lg">
-                            <p>I am your Cortex. I've processed your knowledge. Ask me anything.</p>
-                        </div>
                     </div>
-                </div>
                 <div class="mt-auto">
                     <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
@@ -161,23 +153,21 @@
     </div>
     
     <script>
-        // *** Ensure apiBaseUrl is defined globally by the script in <head> ***
+        // *** 1. DEFINE ALL SUPABASE CREDENTIALS ***
+        const supabaseUrlProd = 'https://wzekdxvvynpvisbvkiqg.supabase.co'; 
+        const supabaseAnonKeyProd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
         
-        // *** 1. Define ALL Supabase credentials ***
-        const supabaseUrlProd = 'https://wzekdxvvynpvisbvkiqg.supabase.co'; // PRODUCTION URL
-        const supabaseAnonKeyProd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU'; // *** REPLACE WITH YOUR PRODUCTION ANON KEY ***
+        const supabaseUrlStaging = 'https://qcsjjhmbjajgidhqpgdj.supabase.co'; 
+        const supabaseAnonKeyStaging = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'; 
         
-        const supabaseUrlStaging = 'https://qcsjjhmbjajgidhqpgdj.supabase.co'; // STAGING URL
-        const supabaseAnonKeyStaging = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'; // STAGING ANON KEY
-        
-        // --- 2. Determine Supabase credentials based on hostname ---
+        // --- 2. DETERMINE SUPABASE CREDENTIALS ---
         const useStagingSupabase = window.location.hostname === 'staging.cogmatiq.com' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const finalSupabaseUrl = useStagingSupabase ? supabaseUrlStaging : supabaseUrlProd;
         const finalSupabaseAnonKey = useStagingSupabase ? supabaseAnonKeyStaging : supabaseAnonKeyProd;
         
-        console.log(`Using Supabase URL: ${finalSupabaseUrl}`); // Debug
+        console.log(`Using Supabase URL: ${finalSupabaseUrl}`);
 
-        // --- 3. Initialize Supabase Client ---
+        // --- 3. INITIALIZE SUPABASE CLIENT ---
         let supabaseClient;
         try {
             supabaseClient = supabase.createClient(finalSupabaseUrl, finalSupabaseAnonKey);
@@ -191,7 +181,7 @@
         const GRAPH_API_ENDPOINT = `${apiBaseUrl}/cortex-graph`;
         const HISTORY_API_ENDPOINT = `${apiBaseUrl}/cortex`; // For /cortex/{cortex_id}/history
 
-        // --- DOM Elements ---
+        // --- 5. DOM ELEMENTS ---
         const chatContainer = document.getElementById('chat-container');
         const chatForm = document.getElementById('chat-form');
         const messageInput = document.getElementById('message-input');
@@ -203,62 +193,72 @@
         const graphContainer = document.getElementById('graph-container');
         const graphLoadingText = document.getElementById('graph-loading-text');
 
-        // --- State Variables ---
+        // --- 6. STATE VARIABLES ---
         let userToken = null;
         let graphLoaded = false;
         let network = null; 
-        let chatHistory = []; // Store chat history locally
-
-        // --- Functions ---
-        function getClientId() {
+        // *** THIS IS A CRITICAL FIX - THE OLD FILE WAS MISSING THIS ***
+        let chatHistory = []; 
+        // *** END FIX ***
+        
+        // --- 7. FUNCTIONS ---
+        function getCortexId() {
             const params = new URLSearchParams(window.location.search);
-            return params.get('cortex_id') || params.get('kb_id') || params.get('session_id') || null;
+            return params.get('cortex_id') || null;
         }
         
-        const clientId = getClientId();
-        if (!clientId) {
+        const cortexId = getCortexId();
+        if (!cortexId) {
             alert('Error: No Cortex ID found in URL.');
             window.location.href = '/dashboard.html';
         }
 
-        // --- Fetch and Display Chat History ---
+        // --- *** 8. MODIFIED: FETCH CHAT HISTORY *** ---
         async function fetchChatHistory() {
-            if (!userToken || !clientId) {
+            if (!userToken || !cortexId) {
                 console.warn('Cannot fetch chat history: Missing token or cortex_id');
+                // Add default welcome message if no token
+                chatContainer.innerHTML = '';
+                addMessageToUI("I am your Cortex. I've processed your knowledge. Ask me anything.", 'ai');
                 return;
             }
+            
+            chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
+            
             try {
-                const response = await fetch(`${HISTORY_API_ENDPOINT}/${clientId}/history`, {
+                const response = await fetch(`${HISTORY_API_ENDPOINT}/${cortexId}/history`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
+                
+                document.getElementById('history-loading')?.remove();
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ detail: `Failed to fetch chat history: ${response.status} ${response.statusText}` }));
                     throw new Error(errorData.detail);
                 }
+                
                 const data = await response.json();
-                chatHistory = data.messages || []; // Expected format: { messages: [{ role: 'user', content: '...' }, ...] }
-                displayChatHistory();
+                
+                // *** FIX: The backend returns a list, not an object with .messages ***
+                chatHistory = data || []; 
+                
+                if (chatHistory.length === 0) {
+                    addMessageToUI("I am your Cortex. I've processed your knowledge. Ask me anything.", 'ai');
+                } else {
+                    // Render all past messages
+                    chatHistory.forEach(message => {
+                        addMessageToUI(message.content, message.role);
+                    });
+                }
             } catch (error) {
                 console.error('Error fetching chat history:', error);
-                // Don't block UI; just log the error
+                document.getElementById('history-loading')?.remove();
+                addMessageToUI(`Error loading chat history: ${error.message}. You can still chat.`, 'ai');
             }
-        }
-
-        function displayChatHistory() {
-            // Clear existing messages except the welcome message
-            const welcomeMessage = chatContainer.querySelector('.flex.items-start.gap-3');
-            chatContainer.innerHTML = '';
-            if (welcomeMessage) {
-                chatContainer.appendChild(welcomeMessage);
-            }
-            // Add history messages
-            chatHistory.forEach(message => {
-                addMessageToUI(message.content, message.role);
-            });
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
 
-        // --- Initialize Chat ---
+        // --- 9. INITIALIZE CHAT ---
         function initializeChat() {
             console.log("Chat page loaded. Setting up auth listener...");
             
@@ -274,9 +274,9 @@
                 if (session && session.access_token) {
                     if (userToken !== session.access_token) {
                         userToken = session.access_token;
-                        console.log("Token set/updated. Initializing listeners...");
+                        console.log("Token set/updated. Initializing listeners and fetching history...");
                         initializeListeners();
-                        fetchChatHistory(); // Fetch history after auth
+                        fetchChatHistory(); // Fetch history *after* auth
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
                     console.warn("Auth state: No session on load. Redirecting to login.");
@@ -284,23 +284,16 @@
                 }
             });
         }
-        initializeChat();
 
+        // --- 10. INITIALIZE LISTENERS ---
         function initializeListeners() {
-            // Prevent duplicate listeners
             if (chatTabButton.dataset.listener) return; 
 
-            chatTabButton.addEventListener('click', () => {
-                switchTab('chat');
-            });
-
+            chatTabButton.addEventListener('click', () => switchTab('chat'));
             graphTabButton.addEventListener('click', () => {
                 switchTab('graph');
-                if (!graphLoaded) {
-                    loadGraphData();
-                } else if (network) {
-                    setTimeout(() => network.fit(), 0); 
-                }
+                if (!graphLoaded) loadGraphData();
+                else if (network) setTimeout(() => network.fit(), 0); 
             });
 
             chatForm.addEventListener('submit', async (e) => {
@@ -308,7 +301,7 @@
                 const question = messageInput.value.trim();
                 if (!question || !userToken) return;
 
-                // Add user message to UI and history
+                // Add user message to UI and local history
                 addMessageToUI(question, 'user');
                 chatHistory.push({ role: 'user', content: question });
                 messageInput.value = '';
@@ -317,11 +310,12 @@
                 const aiMessageElement = addMessageToUI('', 'ai');
                 
                 const formData = new FormData();
-                formData.append('cortex_id', clientId);
+                formData.append('cortex_id', cortexId);
                 formData.append('question', question);
-                // Include chat history (last 5 messages to match backend limit)
-                const recentHistory = chatHistory.slice(-5);
-                formData.append('chat_history_json', JSON.stringify(recentHistory));
+                
+                // *** FIX: Send only the *previous* history, not the new question ***
+                const historyToSend = chatHistory.slice(0, -1).slice(-5); // Get last 5 *previous* messages
+                formData.append('chat_history_json', JSON.stringify(historyToSend));
 
                 try {
                     const response = await fetch(API_ENDPOINT, {
@@ -337,14 +331,14 @@
                     
                     const data = await response.json();
                     updateAIMessage(aiMessageElement, data.answer);
-                    // Add AI response to history
+                    // Add AI response to local history
                     chatHistory.push({ role: 'ai', content: data.answer });
 
                 } catch (error) {
                     console.error("Chat API Error:", error);
                     updateAIMessage(aiMessageElement, `Sorry, something went wrong: ${error.message}. Please try again.`);
-                    // Add error message to history to maintain conversation flow
-                    chatHistory.push({ role: 'ai', content: error.message });
+                    // Add error message to history
+                    chatHistory.push({ role: 'ai', content: `Error: ${error.message}` });
                 } finally {
                     submitButton.disabled = false;
                     messageInput.focus();
@@ -382,7 +376,7 @@
             graphLoadingText.classList.remove('hidden', 'text-red-400');
             
             try {
-                const response = await fetch(`${GRAPH_API_ENDPOINT}/${clientId}`, {
+                const response = await fetch(`${GRAPH_API_ENDPOINT}/${cortexId}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
                 
@@ -467,9 +461,13 @@
             }
         }
 
+        // --- *** 11. MODIFIED: ADD/UPDATE MESSAGE UI *** ---
         function addMessageToUI(text, sender) {
             const messageWrapper = document.createElement('div');
-            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4');
+            // *** FIX: Add classes and data-attributes for history tracking ***
+            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4', 'message-wrapper');
+            messageWrapper.dataset.role = sender;
+            messageWrapper.dataset.content = text; 
 
             if (sender === 'user') {
                 messageWrapper.classList.add('justify-end');
@@ -486,15 +484,26 @@
 
                 const aiMessageDiv = document.createElement('div');
                 aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full';
-                aiMessageDiv.innerHTML = `
-                    <div class="typing-indicator flex items-center space-x-1">
-                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
-                    </div>
-                    <div class="prose max-w-none response-content hidden"></div>
-                    <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
-                `;
+                
+                if (text === '') { // This is a new "typing..." message
+                    aiMessageDiv.innerHTML = `
+                        <div class="typing-indicator flex items-center space-x-1">
+                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+                        </div>
+                        <div class="prose max-w-none response-content hidden"></div>
+                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                    `;
+                } else { // This is a message from history
+                     aiMessageDiv.innerHTML = `
+                        <div class="typing-indicator hidden"></div>
+                        <div class="prose max-w-none response-content"></div> 
+                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                    `;
+                    aiMessageDiv.querySelector('.response-content').innerHTML = marked.parse(text, { sanitize: false });
+                }
+                
                 messageWrapper.appendChild(aiIconDiv);
                 messageWrapper.appendChild(aiMessageDiv);
             }
@@ -507,6 +516,11 @@
             const typingIndicator = element.querySelector('.typing-indicator');
             const responseContent = element.querySelector('.response-content');
             const copyButton = element.querySelector('.copy-button');
+
+            // *** FIX: Update the wrapper's data-content attribute ***
+            if (element) {
+                element.dataset.content = text;
+            }
 
             if (typingIndicator) typingIndicator.classList.add('hidden');
             if (responseContent) {
@@ -534,6 +548,9 @@
                 console.error('Could not find content element to copy.');
             }
         }
+        
+        // --- 12. RUN INITIALIZATION ---
+        initializeChat();
     </script>
 </body>
 </html>
