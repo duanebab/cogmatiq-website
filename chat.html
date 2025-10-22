@@ -58,10 +58,9 @@
         .prose code { font-family: monospace; }
         .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
 
-        /* Sidebar Styles */
         .sidebar-button {
             background-color: transparent;
-            color: #9CA3AF; /* gray-400 */
+            color: #9CA3AF;
             display: flex;
             align-items: center;
             padding: 0.75rem 1.5rem;
@@ -70,18 +69,17 @@
             transition: background-color 0.2s, color 0.2s;
         }
         .sidebar-button:hover {
-            background-color: #2D3748; /* gray-700 */
+            background-color: #2D3748;
             color: #E5E7EB;
         }
         .sidebar-button.active {
-            background-color: #1F2A44; /* card bg */
+            background-color: #1F2A44;
             color: #E5E7EB;
         }
         .panel { display: none; }
         .panel.active { display: flex; }
         
         #graph-container { width: 100%; height: 100%; min-height: 500px; background-color: #111827; }
-         /* Tooltip */
         [title]:hover::after {
             content: attr(title);
             position: absolute;
@@ -197,9 +195,7 @@
         let userToken = null;
         let graphLoaded = false;
         let network = null; 
-        // *** THIS IS A CRITICAL FIX - THE OLD FILE WAS MISSING THIS ***
-        let chatHistory = []; 
-        // *** END FIX ***
+        let chatHistory = []; // This will be an ARRAY
         
         // --- 7. FUNCTIONS ---
         function getCortexId() {
@@ -213,11 +209,10 @@
             window.location.href = '/dashboard.html';
         }
 
-        // --- *** 8. MODIFIED: FETCH CHAT HISTORY *** ---
+        // --- 8. FETCH CHAT HISTORY ---
         async function fetchChatHistory() {
             if (!userToken || !cortexId) {
                 console.warn('Cannot fetch chat history: Missing token or cortex_id');
-                // Add default welcome message if no token
                 chatContainer.innerHTML = '';
                 addMessageToUI("I am your Cortex. I've processed your knowledge. Ask me anything.", 'ai');
                 return;
@@ -239,13 +234,14 @@
                 
                 const data = await response.json();
                 
-                // *** FIX: The backend returns a list, not an object with .messages ***
-                chatHistory = data || []; 
+                // *** THIS IS THE FIX ***
+                // The backend returns {"messages": [...]}, so we get the .messages property
+                chatHistory = data.messages || []; 
+                // *** END FIX ***
                 
                 if (chatHistory.length === 0) {
                     addMessageToUI("I am your Cortex. I've processed your knowledge. Ask me anything.", 'ai');
                 } else {
-                    // Render all past messages
                     chatHistory.forEach(message => {
                         addMessageToUI(message.content, message.role);
                     });
@@ -276,7 +272,7 @@
                         userToken = session.access_token;
                         console.log("Token set/updated. Initializing listeners and fetching history...");
                         initializeListeners();
-                        fetchChatHistory(); // Fetch history *after* auth
+                        fetchChatHistory(); 
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
                     console.warn("Auth state: No session on load. Redirecting to login.");
@@ -313,8 +309,8 @@
                 formData.append('cortex_id', cortexId);
                 formData.append('question', question);
                 
-                // *** FIX: Send only the *previous* history, not the new question ***
-                const historyToSend = chatHistory.slice(0, -1).slice(-5); // Get last 5 *previous* messages
+                // Send only the *previous* history
+                const historyToSend = chatHistory.slice(0, -1).slice(-10); // Send last 5 exchanges (10 messages)
                 formData.append('chat_history_json', JSON.stringify(historyToSend));
 
                 try {
@@ -336,9 +332,10 @@
 
                 } catch (error) {
                     console.error("Chat API Error:", error);
-                    updateAIMessage(aiMessageElement, `Sorry, something went wrong: ${error.message}. Please try again.`);
+                    const errorMessage = `Sorry, something went wrong: ${error.message}. Please try again.`;
+                    updateAIMessage(aiMessageElement, errorMessage);
                     // Add error message to history
-                    chatHistory.push({ role: 'ai', content: `Error: ${error.message}` });
+                    chatHistory.push({ role: 'ai', content: errorMessage });
                 } finally {
                     submitButton.disabled = false;
                     messageInput.focus();
@@ -461,10 +458,9 @@
             }
         }
 
-        // --- *** 11. MODIFIED: ADD/UPDATE MESSAGE UI *** ---
         function addMessageToUI(text, sender) {
             const messageWrapper = document.createElement('div');
-            // *** FIX: Add classes and data-attributes for history tracking ***
+            // *** FIX: Add data-attributes for history tracking ***
             messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4', 'message-wrapper');
             messageWrapper.dataset.role = sender;
             messageWrapper.dataset.content = text; 
