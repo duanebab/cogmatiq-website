@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -131,17 +131,21 @@
         <main class="flex-grow flex flex-col p-8 pl-72 w-full h-full">
             
             <div id="chat-panel" class="panel active flex-col flex-grow h-full">
-                <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6 mb-4"> <div class="flex items-start gap-3">
-                        <div class="bg-gray-700/50 p-2 rounded-full flex-shrink-0"> <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6 mb-4">
+                    <div class="flex items-start gap-3">
+                        <div class="bg-gray-700/50 p-2 rounded-full flex-shrink-0">
+                            <svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         </div>
                         <div class="bg-gray-700/50 rounded-lg p-4 max-w-lg">
                             <p>I am your Cortex. I've processed your knowledge. Ask me anything.</p>
                         </div>
                     </div>
-                     </div>
-                <div class="mt-auto"> <form id="chat-form" class="flex items-center gap-4">
+                </div>
+                <div class="mt-auto">
+                    <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                         </button>
                     </form>
                 </div>
@@ -161,7 +165,7 @@
         
         // *** 1. Define ALL Supabase credentials ***
         const supabaseUrlProd = 'https://wzekdxvvynpvisbvkiqg.supabase.co'; // PRODUCTION URL
-        const supabaseAnonKeyProd = 'YOUR_SUPABASE_PROD_ANON_KEY_HERE'; // *** REPLACE THIS! ***
+        const supabaseAnonKeyProd = 'YOUR_ACTUAL_PROD_ANON_KEY_HERE'; // *** REPLACE WITH YOUR PRODUCTION ANON KEY ***
         
         const supabaseUrlStaging = 'https://qcsjjhmbjajgidhqpgdj.supabase.co'; // STAGING URL
         const supabaseAnonKeyStaging = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'; // STAGING ANON KEY
@@ -174,11 +178,18 @@
         console.log(`Using Supabase URL: ${finalSupabaseUrl}`); // Debug
 
         // --- 3. Initialize Supabase Client ---
-        const supabaseClient = supabase.createClient(finalSupabaseUrl, finalSupabaseAnonKey);
-    
-        // *** 4. Define API endpoints using apiBaseUrl ***
+        let supabaseClient;
+        try {
+            supabaseClient = supabase.createClient(finalSupabaseUrl, finalSupabaseAnonKey);
+        } catch (error) {
+            console.error('Failed to initialize Supabase client:', error);
+            alert('Error initializing Supabase. Please try again later.');
+        }
+
+        // --- 4. Define API endpoints using apiBaseUrl ---
         const API_ENDPOINT = `${apiBaseUrl}/query`;
         const GRAPH_API_ENDPOINT = `${apiBaseUrl}/cortex-graph`;
+        const HISTORY_API_ENDPOINT = `${apiBaseUrl}/cortex`; // For /cortex/{cortex_id}/history
 
         // --- DOM Elements ---
         const chatContainer = document.getElementById('chat-container');
@@ -196,21 +207,58 @@
         let userToken = null;
         let graphLoaded = false;
         let network = null; 
-        
+        let chatHistory = []; // Store chat history locally
+
         // --- Functions ---
         function getClientId() {
             const params = new URLSearchParams(window.location.search);
-            // *** THIS IS THE KEY: We get 'cortex_id' from the URL ***
             return params.get('cortex_id') || params.get('kb_id') || params.get('session_id') || null;
         }
         
-        const clientId = getClientId(); // This variable now holds the cortex_id
+        const clientId = getClientId();
         if (!clientId) {
             alert('Error: No Cortex ID found in URL.');
             window.location.href = '/dashboard.html';
         }
 
-        // --- *** REFACTORED: Initialization using onAuthStateChange *** ---
+        // --- Fetch and Display Chat History ---
+        async function fetchChatHistory() {
+            if (!userToken || !clientId) {
+                console.warn('Cannot fetch chat history: Missing token or cortex_id');
+                return;
+            }
+            try {
+                const response = await fetch(`${HISTORY_API_ENDPOINT}/${clientId}/history`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `Failed to fetch chat history: ${response.status} ${response.statusText}` }));
+                    throw new Error(errorData.detail);
+                }
+                const data = await response.json();
+                chatHistory = data.messages || []; // Expected format: { messages: [{ role: 'user', content: '...' }, ...] }
+                displayChatHistory();
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+                // Don't block UI; just log the error
+            }
+        }
+
+        function displayChatHistory() {
+            // Clear existing messages except the welcome message
+            const welcomeMessage = chatContainer.querySelector('.flex.items-start.gap-3');
+            chatContainer.innerHTML = '';
+            if (welcomeMessage) {
+                chatContainer.appendChild(welcomeMessage);
+            }
+            // Add history messages
+            chatHistory.forEach(message => {
+                addMessageToUI(message.content, message.role);
+            });
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        // --- Initialize Chat ---
         function initializeChat() {
             console.log("Chat page loaded. Setting up auth listener...");
             
@@ -227,17 +275,16 @@
                     if (userToken !== session.access_token) {
                         userToken = session.access_token;
                         console.log("Token set/updated. Initializing listeners...");
-                        initializeListeners(); 
+                        initializeListeners();
+                        fetchChatHistory(); // Fetch history after auth
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
-                     console.warn("Auth state: No session on load. Redirecting to login.");
-                     window.location.href = '/login.html';
+                    console.warn("Auth state: No session on load. Redirecting to login.");
+                    window.location.href = '/login.html';
                 }
             });
         }
         initializeChat();
-        // --- *** END: Refactored Initialization *** ---
-
 
         function initializeListeners() {
             // Prevent duplicate listeners
@@ -261,42 +308,46 @@
                 const question = messageInput.value.trim();
                 if (!question || !userToken) return;
 
+                // Add user message to UI and history
                 addMessageToUI(question, 'user');
+                chatHistory.push({ role: 'user', content: question });
                 messageInput.value = '';
                 submitButton.disabled = true;
 
                 const aiMessageElement = addMessageToUI('', 'ai');
                 
                 const formData = new FormData();
+                formData.append('cortex_id', clientId);
                 formData.append('question', question);
-                
-                // *** THIS IS THE FIX: Send 'cortex_id', not 'client_id' ***
-                formData.append('cortex_id', clientId); 
+                // Include chat history (last 5 messages to match backend limit)
+                const recentHistory = chatHistory.slice(-5);
+                formData.append('chat_history_json', JSON.stringify(recentHistory));
 
                 try {
-                    const response = await fetch(API_ENDPOINT, { 
-                        method: 'POST', 
+                    const response = await fetch(API_ENDPOINT, {
+                        method: 'POST',
                         headers: { 'Authorization': `Bearer ${userToken}` },
-                        body: formData 
+                        body: formData
                     });
                     
-                    if (!response.ok) { 
-                        // *** FIX: Parse the error JSON from the API ***
+                    if (!response.ok) {
                         const errorData = await response.json().catch(() => ({ detail: `API error: ${response.status} ${response.statusText}` }));
-                        throw new Error(errorData.detail || 'An unknown error occurred.'); 
+                        throw new Error(errorData.detail || 'An unknown error occurred.');
                     }
                     
                     const data = await response.json();
-                    
                     updateAIMessage(aiMessageElement, data.answer);
+                    // Add AI response to history
+                    chatHistory.push({ role: 'ai', content: data.answer });
 
                 } catch (error) {
-                    console.error("Chat API Error:", error); 
-                    // *** FIX: Display the *actual* error message, not [object Object] ***
+                    console.error("Chat API Error:", error);
                     updateAIMessage(aiMessageElement, `Sorry, something went wrong: ${error.message}. Please try again.`);
+                    // Add error message to history to maintain conversation flow
+                    chatHistory.push({ role: 'ai', content: error.message });
                 } finally {
                     submitButton.disabled = false;
-                    messageInput.focus(); 
+                    messageInput.focus();
                 }
             });
 
@@ -314,19 +365,19 @@
                 chatTabButton.classList.remove('active');
                 graphPanel.classList.add('active');
                 chatPanel.classList.remove('active');
-                 if (network) {
-                     setTimeout(() => network.fit(), 0); 
-                 }
+                if (network) {
+                    setTimeout(() => network.fit(), 0);
+                }
             }
         }
 
         async function loadGraphData() {
             if (!userToken) {
-                 graphLoadingText.textContent = 'Error: Authentication token missing.';
-                 graphLoadingText.classList.add('text-red-400');
-                 return;
+                graphLoadingText.textContent = 'Error: Authentication token missing.';
+                graphLoadingText.classList.add('text-red-400');
+                return;
             }
-            graphLoaded = true; 
+            graphLoaded = true;
             graphLoadingText.textContent = 'Loading Neural Map...';
             graphLoadingText.classList.remove('hidden', 'text-red-400');
             
@@ -335,27 +386,26 @@
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
                 
-                // Handle 200 (OK) and 404 (Not Found) the same way
                 if (response.status === 200 || response.status === 404) {
-                     const data = await response.json();
-                     if (!data.nodes || data.nodes.length === 0) {
+                    const data = await response.json();
+                    if (!data.nodes || data.nodes.length === 0) {
                         graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
                         graphLoadingText.classList.add('hidden');
                         return;
-                     }
-                     
-                     graphLoadingText.classList.add('hidden');
-                     graphContainer.innerHTML = ''; // Clear loading text
+                    }
+                    
+                    graphLoadingText.classList.add('hidden');
+                    graphContainer.innerHTML = '';
 
-                     const options = {
+                    const options = {
                         nodes: {
                             shape: "dot",
                             size: 16,
-                            font: { color: "#E5E7EB", size: 14, face: 'Manrope' }, 
+                            font: { color: "#E5E7EB", size: 14, face: 'Manrope' },
                             borderWidth: 2,
                             color: {
-                                background: '#2D3748', 
-                                border: '#00B5AD', 
+                                background: '#2D3748',
+                                border: '#00B5AD',
                                 highlight: { background: '#00B5AD', border: '#E5E7EB' },
                                 hover: { background: '#009A94', border: '#E5E7EB' }
                             }
@@ -364,14 +414,14 @@
                             width: 1,
                             color: { color: "#4B5563", highlight: "#00B5AD", hover: "#00B5AD" },
                             arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-                            font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top', face: 'Manrope' }, 
+                            font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top', face: 'Manrope' },
                             smooth: { enabled: true, type: "continuous" }
                         },
                         physics: {
                             enabled: true,
                             solver: 'forceAtlas2Based',
                             forceAtlas2Based: {
-                                gravitationalConstant: -70, 
+                                gravitationalConstant: -70,
                                 centralGravity: 0.015,
                                 springLength: 120,
                                 springConstant: 0.05,
@@ -379,18 +429,18 @@
                                 avoidOverlap: 0.2
                             },
                             stabilization: {
-                               enabled: true,
-                               iterations: 1000, 
-                               updateInterval: 50,
-                               onlyDynamicEdges: false,
-                               fit: true
+                                enabled: true,
+                                iterations: 1000,
+                                updateInterval: 50,
+                                onlyDynamicEdges: false,
+                                fit: true
                             }
                         },
                         interaction: {
                             hover: true,
                             tooltipDelay: 200,
-                            navigationButtons: true, 
-                            keyboard: true 
+                            navigationButtons: true,
+                            keyboard: true
                         },
                         layout: {
                             improvedLayout: true,
@@ -398,72 +448,72 @@
                     };
                 
                     if (typeof vis !== 'undefined') {
-                         network = new vis.Network(graphContainer, data, options); 
+                        network = new vis.Network(graphContainer, data, options);
                     } else {
                         console.error("vis.js library not loaded!");
-                         graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
+                        graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
                     }
                      
-                } else { // Handle other errors like 500
+                } else {
                     const errorData = await response.json().catch(() => ({ detail: `Failed to load graph data: ${response.status} ${response.statusText}` }));
                     throw new Error(errorData.detail);
                 }
 
             } catch (error) {
-                console.error("Graph API Error:", error); 
+                console.error("Graph API Error:", error);
                 graphLoadingText.textContent = `Error loading Neural Map: ${error.message}`;
                 graphLoadingText.classList.remove('hidden');
-                graphLoadingText.classList.add('text-red-400'); 
+                graphLoadingText.classList.add('text-red-400');
             }
         }
 
         function addMessageToUI(text, sender) {
-             const messageWrapper = document.createElement('div');
-            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4'); 
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4');
 
             if (sender === 'user') {
                 messageWrapper.classList.add('justify-end');
                 const userMessageDiv = document.createElement('div');
                 userMessageDiv.className = 'accent-bg rounded-lg p-4 max-w-lg';
                 const p = document.createElement('p');
-                p.textContent = text; 
-                userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>'); 
+                p.textContent = text;
+                userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>');
                 messageWrapper.appendChild(userMessageDiv);
-
-            } else { // AI sender
+            } else {
                 const aiIconDiv = document.createElement('div');
                 aiIconDiv.className = 'bg-gray-700/50 p-2 rounded-full flex-shrink-0';
                 aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
 
                 const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full'; 
+                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full';
                 aiMessageDiv.innerHTML = `
                     <div class="typing-indicator flex items-center space-x-1">
                         <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
                         <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
                         <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
                     </div>
-                    <div class="prose max-w-none response-content hidden"></div> <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                    <div class="prose max-w-none response-content hidden"></div>
+                    <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
                 `;
                 messageWrapper.appendChild(aiIconDiv);
                 messageWrapper.appendChild(aiMessageDiv);
             }
             chatContainer.appendChild(messageWrapper);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' }); 
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
             return messageWrapper;
         }
 
         function updateAIMessage(element, text) {
-             const typingIndicator = element.querySelector('.typing-indicator');
+            const typingIndicator = element.querySelector('.typing-indicator');
             const responseContent = element.querySelector('.response-content');
             const copyButton = element.querySelector('.copy-button');
 
-            if(typingIndicator) typingIndicator.classList.add('hidden');
-            if(responseContent) {
-                responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false }); 
+            if (typingIndicator) typingIndicator.classList.add('hidden');
+            if (responseContent) {
+                responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false });
                 responseContent.classList.remove('hidden');
             }
-            if(copyButton) copyButton.classList.remove('hidden');
+            if (copyButton) copyButton.classList.remove('hidden');
 
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
@@ -471,14 +521,14 @@
         function copyToClipboard(buttonElement) {
             const contentElement = buttonElement.parentElement.querySelector('.response-content');
             if (contentElement) {
-                const textToCopy = contentElement.innerText || contentElement.textContent; 
+                const textToCopy = contentElement.innerText || contentElement.textContent;
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     buttonElement.textContent = 'Copied!';
                     setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
                     buttonElement.textContent = 'Copy Failed';
-                     setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
+                    setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
                 });
             } else {
                 console.error('Could not find content element to copy.');
