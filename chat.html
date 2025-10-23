@@ -504,7 +504,6 @@
             const listHTML = allCortices.map(cortex => {
                 const isActive = cortex.id === cortexId;
                 const activeClass = isActive ? 'active' : '';
-                // *** MODIFIED: Added delete button wrapper ***
                 return `
                     <div class="flex items-center group/cortex-item ${activeClass} rounded-md">
                         <a href="/chat.html?cortex_id=${cortex.id}" class="cortex-link flex-grow ${activeClass}" title="${cortex.name}">
@@ -985,7 +984,6 @@
                  return;
              }
             
-             // Optimistic UI update
              const tempId = `temp_${Date.now()}`;
              const newCortex = { id: tempId, name: cortexName, documents: [] };
              allCortices.unshift(newCortex); 
@@ -998,7 +996,6 @@
                     body: JSON.stringify({ name: cortexName.trim() }) 
                 });
                 
-                // Refresh the list with the real data from the server
                 await fetchAndRenderCortices();
                 
                 // Redirect to the new cortex
@@ -1007,7 +1004,7 @@
             } catch (error) {
                  console.error("Create Cortex Error:", error);
                 alert(`Error creating Cortex: ${error.message}`);
-                await fetchAndRenderCortices(); // Re-fetch to remove temp cortex
+                await fetchAndRenderCortices(); 
             }
         }
 
@@ -1030,7 +1027,7 @@
                 } catch (error) {
                     console.error("Delete Cortex Error:", error);
                     alert(`Error deleting Cortex: ${error.message}`);
-                    allCortices = oldCortices; // Revert on failure
+                    allCortices = oldCortices; 
                     renderCortexSidebarList();
                 }
             }
@@ -1056,7 +1053,7 @@
                 });
                 
                 closeAddDocumentModal();
-                // If we added to the *current* cortex, refresh everything
+                
                 if (currentCortexId === cortexId) {
                     await Promise.all([
                         fetchAndRenderCortices(),
@@ -1064,7 +1061,6 @@
                         fetchLibraryDocumentsInBackground()
                     ]);
                 } else {
-                    // Otherwise, just refresh the cortex list
                     await fetchAndRenderCortices();
                 }
 
