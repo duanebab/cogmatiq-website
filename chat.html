@@ -131,6 +131,9 @@
             flex-grow: 1;
             overflow-y: auto;
             min-height: 0; /* Prevent overflow on Firefox */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
         }
         #chat-form-container {
             position: sticky;
@@ -391,6 +394,13 @@
             alert('Error: No Cortex ID found in URL.');
             window.location.href = '/dashboard.html';
         }
+
+        // Utility to scroll chat container to bottom
+        function scrollChatToBottom() {
+            requestAnimationFrame(() => {
+                chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            });
+        }
         
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
@@ -435,12 +445,13 @@
                         addMessageToUI(message.content, message.role);
                     });
                 }
+                scrollChatToBottom();
             } catch (error) {
                 console.error('Error fetching chat history:', error);
                 document.getElementById('history-loading')?.remove();
                 addMessageToUI(`Error loading chat history: ${error.message}. You can still chat.`, 'ai');
+                scrollChatToBottom();
             }
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
 
         async function fetchAndRenderCortices() {
@@ -575,10 +586,10 @@
             mobileMenuOpenButton.addEventListener('click', openMobileMenu);
             mobileMenuCloseButton.addEventListener('click', closeMobileMenu);
             mobileSidebarOverlay.addEventListener('click', closeMobileMenu);
-            chatTabButton.addEventListener('click', () => switchTab('chat'));
+            chatTabButton.addEventListener('click', () => { switchTab('chat'); scrollChatToBottom(); });
             graphTabButton.addEventListener('click', () => switchTab('graph'));
             createCortexSidebarButtonMobile.addEventListener('click', createCortex);
-            mobileChatTabButton.addEventListener('click', () => { switchTab('chat'); closeMobileMenu(); });
+            mobileChatTabButton.addEventListener('click', () => { switchTab('chat'); closeMobileMenu(); scrollChatToBottom(); });
             mobileGraphTabButton.addEventListener('click', () => { switchTab('graph'); closeMobileMenu(); });
             chatForm.addEventListener('submit', handleChatSubmit);
             Object.keys(modalTabs).forEach(key => {
@@ -675,6 +686,8 @@
                 } else if (network) {
                     setTimeout(() => network.fit(), 0);
                 }
+            } else {
+                scrollChatToBottom();
             }
         }
         async function loadGraphData() {
@@ -800,7 +813,7 @@
                 messageWrapper.appendChild(aiMessageDiv);
             }
             chatContainer.appendChild(messageWrapper);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            scrollChatToBottom();
             return messageWrapper;
         }
 
@@ -817,7 +830,7 @@
                 responseContent.classList.remove('hidden');
             }
             if (copyButton) copyButton.classList.remove('hidden');
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            scrollChatToBottom();
         }
 
         function copyToClipboard(buttonElement) {
