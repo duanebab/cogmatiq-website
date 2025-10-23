@@ -73,16 +73,9 @@
     </div>
 
     <script>
-<<<<<<< Updated upstream
-        // *** NOTE: No API calls here, but keeping script for consistency ***
-        const supabaseUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
-
-        console.log('Supabase Client Initialized with Anon Key:', supabaseAnonKey.substring(0, 10) + '...'); // Debug API key (partial for security)
-
-=======
->>>>>>> Stashed changes
+        // *** FIX: Removed the entire broken <script> block ***
+        // We can now safely use the 'supabaseClient' variable defined in /supabaseClient.js
+        
         const form = document.getElementById('login-form');
         const messageEl = document.getElementById('message');
         const loginButton = document.getElementById('login-button');
@@ -95,7 +88,7 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             messageEl.textContent = '';
-            messageEl.classList.remove('text-red-400', 'text-green-400');
+            messageEl.classList.remove('text-red-400', 'text-green-400', 'text-yellow-400');
             resendEmailDiv.classList.add('hidden');
             loginButton.disabled = true;
             loginButton.textContent = 'Logging In...';
@@ -111,6 +104,7 @@
                         messageEl.textContent = 'Please check your email to confirm your account.';
                         messageEl.classList.add('text-yellow-400');
                         resendEmailDiv.classList.remove('hidden');
+                        resendButton.disabled = false;
                     } else {
                         messageEl.textContent = 'Invalid email or password.';
                         messageEl.classList.add('text-red-400');
@@ -141,7 +135,7 @@
             resendButton.disabled = true;
             resendButton.textContent = 'Sending...';
             messageEl.textContent = 'Sending confirmation email...';
-            messageEl.classList.remove('text-red-400', 'text-green-400');
+            messageEl.classList.remove('text-red-400', 'text-green-400', 'text-yellow-400');
             messageEl.classList.add('text-gray-400');
 
 
