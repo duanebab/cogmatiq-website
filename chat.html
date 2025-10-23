@@ -26,6 +26,7 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
+        /* (Styles are identical, omitted for brevity) */
         body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
@@ -39,7 +40,6 @@
         .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
         .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
 
-
         .prose { color: #E5E7EB; }
         .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
@@ -50,46 +50,23 @@
         .prose code { font-family: monospace; }
         .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
 
-        /* Sidebar Button */
         .sidebar-button {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            color: #9CA3AF; /* gray-400 */
+            display: flex; align-items: center; width: 100%;
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem;
+            font-weight: 600; color: #9CA3AF;
             transition: background-color 0.2s, color 0.2s;
         }
-        .sidebar-button:hover {
-            background-color: #2D3748; /* gray-700 */
-            color: #E5E7EB;
-        }
-        .sidebar-button.active {
-            background-color: #1F2A44;
-            color: #E5E7EB;
-        }
+        .sidebar-button:hover { background-color: #2D3748; color: #E5E7EB; }
+        .sidebar-button.active { background-color: #1F2A44; color: #E5E7EB; }
 
-        /* Cortex List Link */
         .cortex-link {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            color: #9CA3AF;
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; padding: 0.75rem 1.5rem; border-radius: 0.5rem;
+            font-weight: 600; color: #9CA3AF;
             transition: background-color 0.2s, color 0.2s;
         }
-        .cortex-link:hover {
-            background-color: #2D3748;
-            color: #E5E7EB;
-        }
-        .cortex-link.active {
-            background-color: #1F2A44;
-            color: #E5E7EB;
-        }
+        .cortex-link:hover { background-color: #2D3748; color: #E5E7EB; }
+        .cortex-link.active { background-color: #1F2A44; color: #E5E7EB; }
         
         .panel { display: none; }
         .panel.active { display: flex; }
@@ -97,26 +74,14 @@
         #graph-container { width: 100%; height: 100%; min-height: 500px; background-color: #111827; }
         
         [title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-bottom: 5px;
-            background-color: #111827;
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 50;
+            content: attr(title); position: absolute; bottom: 100%; left: 50%;
+            transform: translateX(-50%); margin-bottom: 5px;
+            background-color: #111827; color: #fff; padding: 4px 8px;
+            border-radius: 4px; font-size: 0.75rem; white-space: nowrap; z-index: 50;
         }
         [title] { position: relative; }
 
-        /* Mobile Sidebar */
-        #mobile-sidebar-overlay {
-            transition: opacity 0.3s ease-in-out;
-        }
+        #mobile-sidebar-overlay { transition: opacity 0.3s ease-in-out; }
         #mobile-sidebar {
             transition: transform 0.3s ease-in-out;
             transform: translateX(-100%);
@@ -144,7 +109,7 @@
         </div>
     </header>
 
-    <div class="flex flex-grow pt-24 overflow-hidden"> 
+    <div class="flex flex-grow pt-24 h-full overflow-hidden"> 
         
         <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
             
@@ -223,15 +188,17 @@
         <main class="flex flex-col w-full md:pl-64 h-full" onclick="closeMobileMenu()">
             
             <div id="chat-panel" class="panel active flex-col h-full">
-                <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5 flex-shrink-0">
-                    <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
+                <div class="flex-shrink-0 p-4 md:p-8 md:pb-4">
+                    <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5">
+                        <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
+                    </div>
+                    <p id="progress-text" class="text-center text-sm text-gray-400 mt-2 hidden"></p>
                 </div>
-                <p id="progress-text" class="text-center text-sm text-gray-400 mb-4 hidden flex-shrink-0"></p>
             
-                <div id="chat-container" class="flex-grow overflow-y-auto p-4 md:p-8 space-y-6">
+                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6">
                     </div>
                 
-                <div class="flex-shrink-0 p-4 md:p-8 border-t border-gray-700 bg-[#1A2533]"> 
+                <div class="flex-shrink-0 p-4 md:p-8 mt-auto border-t border-gray-700 bg-[#1A2533]"> 
                     <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                         <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
@@ -395,7 +362,6 @@
             window.location.href = '/dashboard.html';
         }
         
-        // *** THIS IS THE FIX: Added the fetchApi helper function ***
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
             const headers = {
@@ -430,7 +396,6 @@
                 const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
                 
-                // *** THIS IS THE FIX: Correctly parse the object ***
                 chatHistory = data.messages || []; 
                 
                 if (chatHistory.length === 0) {
