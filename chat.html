@@ -220,9 +220,9 @@
             </nav>
         </aside>
 
-        <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full h-full" onclick="closeMobileMenu()">
+        <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full mb-16 md:mb-0" onclick="closeMobileMenu()">
             
-            <div id="chat-panel" class="panel active flex-col flex-grow mb-16 md:mb-0">
+            <div id="chat-panel" class="panel active flex-col flex-grow">
                 <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5 mb-4">
                     <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
                 </div>
@@ -230,8 +230,7 @@
             
                 <div id="chat-container" class="flex-grow overflow-y-auto pr-2 md:pr-4 space-y-6 mb-4">
                     </div>
-                <div class="mt-auto">
-                    <form id="chat-form" class="flex items-center gap-4">
+                <div class="mt-auto flex-shrink-0"> <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                         <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
@@ -240,7 +239,7 @@
                 </div>
             </div>
 
-            <div id="graph-panel" class="panel flex-col flex-grow card rounded-lg overflow-hidden mb-16 md:mb-0">
+            <div id="graph-panel" class="panel flex-col flex-grow card rounded-lg overflow-hidden">
                 <div id="graph-container" class="flex-grow">
                     <p id="graph-loading-text" class="text-gray-400 text-center p-10">Loading Neural Map...</p>
                 </div>
@@ -930,7 +929,8 @@
                 modalDocList.innerHTML = '<p class="text-gray-400 text-center italic">Your document library is empty. Use the "Upload New" or "From Web URL" tab.</p>';
             } else {
                  const currentCortex = allCortices.find(c => c.id === currentCortexId);
-                 const existingDocIds = currentCortex ? currentCortex.documents.map(d => d.id) : [];
+                 // *** FIX: Check if currentCortex and documents exist ***
+                 const existingDocIds = (currentCortex && currentCortex.documents) ? currentCortex.documents.map(d => d.id) : [];
 
                 modalDocList.innerHTML = allLibraryDocs.map(doc => {
                     const isLinked = existingDocIds.includes(doc.id);
@@ -998,7 +998,6 @@
                 
                 await fetchAndRenderCortices();
                 
-                // Redirect to the new cortex
                 window.location.href = `/chat.html?cortex_id=${createdCortexData[0].id}`;
 
             } catch (error) {
