@@ -37,6 +37,9 @@
         #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
         #cortex-list-sidebar::-webkit-scrollbar { width: 4px; }
         #cortex-list-sidebar::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        #mobile-cortex-list-sidebar::-webkit-scrollbar { width: 4px; }
+        #mobile-cortex-list-sidebar::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+
 
         .prose { color: #E5E7EB; }
         .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
@@ -113,7 +116,9 @@
         }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden"> <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm">
+<body class="flex flex-col h-screen overflow-hidden"> 
+
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm">
         <div class="flex items-center gap-3">
             <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -209,7 +214,8 @@
     <script>
         // --- apiBaseUrl and supabaseClient are loaded from supabaseClient.js ---
         
-        // --- 4. Define API endpoints using apiBaseUrl ---
+        // --- 4. Define API endpoints ---
+        // *** FIX: Add apiBaseUrl to the endpoint definitions ***
         const API_ENDPOINT = `${apiBaseUrl}/query`;
         const GRAPH_API_ENDPOINT = `${apiBaseUrl}/cortex-graph`;
         const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
@@ -246,7 +252,7 @@
         let graphLoaded = false;
         let network = null; 
         let chatHistory = []; 
-        let allCortices = []; // To store the list of cortices
+        let allCortices = [];
         
         // --- 7. FUNCTIONS ---
         function getCortexId() {
@@ -260,14 +266,15 @@
             window.location.href = '/dashboard.html';
         }
         
-        // --- Generic API Fetch helper ---
+        // *** FIX: Correct fetchApi to NOT add apiBaseUrl ***
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
             const headers = {
                 ...options.headers,
                 'Authorization': `Bearer ${userToken}`
             };
-            const response = await fetch(`${apiBaseUrl}${endpoint}`, { ...options, headers });
+            // The 'endpoint' variable *already* contains the full URL
+            const response = await fetch(endpoint, { ...options, headers });
             if (!response.ok) {
                 let errorDetail = `API Error: ${response.status} ${response.statusText}`;
                 try {
@@ -292,7 +299,8 @@
             chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
             
             try {
-                const data = await fetchApi(`/cortex/${cortexId}/history`);
+                // Use the full endpoint URL
+                const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
                 
                 chatHistory = data.messages || []; 
@@ -314,7 +322,8 @@
 
         async function fetchAndRenderCortices() {
             try {
-                allCortices = await fetchApi('/cortices');
+                // Use the full endpoint URL
+                allCortices = await fetchApi(CORTICES_API_ENDPOINT);
                 renderCortexSidebarList();
             } catch (error) {
                 console.error("Error fetching cortices:", error);
@@ -370,7 +379,7 @@
                         console.log("Token set/updated. Initializing listeners and fetching data...");
                         initializeListeners();
                         fetchChatHistory();
-                        fetchAndRenderCortices(); // <-- Fetch cortex list
+                        fetchAndRenderCortices();
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
                     console.warn("Auth state: No session on load. Redirecting to login.");
@@ -424,11 +433,12 @@
             formData.append('cortex_id', cortexId);
             formData.append('question', question);
             
-            const historyToSend = chatHistory.slice(0, -1).slice(-10); // Send last 5 exchanges
+            const historyToSend = chatHistory.slice(0, -1).slice(-10);
             formData.append('chat_history_json', JSON.stringify(historyToSend));
 
             try {
-                const data = await fetchApi('/query', {
+                // Use the full endpoint URL
+                const data = await fetchApi(API_ENDPOINT, {
                     method: 'POST',
                     body: formData
                 });
@@ -462,25 +472,22 @@
             mobileSidebar.style.transform = 'translateX(-100%)';
             setTimeout(() => {
                 mobileSidebarOverlay.classList.add('hidden');
-            }, 300); // Match transition duration
+            }, 300); 
         }
 
         function switchTab(tabName) {
             const isChat = tabName === 'chat';
 
-            // Sync desktop buttons
             chatTabButton.classList.toggle('active', isChat);
             graphTabButton.classList.toggle('active', !isChat);
             
-            // Sync mobile buttons
             mobileChatTabButton.classList.toggle('active', isChat);
             mobileGraphTabButton.classList.toggle('active', !isChat);
 
-            // Toggle panels
             chatPanel.classList.toggle('active', isChat);
             graphPanel.classList.toggle('active', !isChat);
             
-            if (!isChat) { // Switched to Graph
+            if (!isChat) { 
                 if (!graphLoaded) {
                     loadGraphData();
                 } else if (network) {
@@ -500,6 +507,7 @@
             graphLoadingText.classList.remove('hidden', 'text-red-400');
             
             try {
+                // Use the full endpoint URL
                 const data = await fetchApi(`${GRAPH_API_ENDPOINT}/${cortexId}`);
                 
                 if (!data.nodes || data.nodes.length === 0) {
@@ -664,6 +672,13 @@
         
         // --- 13. RUN INITIALIZATION ---
         initializeChat();
+
+        // Make functions globally accessible
+        window.switchTab = switchTab;
+        window.openMobileMenu = openMobileMenu;
+        window.closeMobileMenu = closeMobileMenu;
+        window.copyToClipboard = copyToClipboard;
+        
     </script>
 </body>
 </html>
