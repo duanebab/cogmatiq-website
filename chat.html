@@ -222,7 +222,7 @@
 
         <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full h-full" onclick="closeMobileMenu()">
             
-            <div id="chat-panel" class="panel active flex-col flex-grow h-full mb-16 md:mb-0">
+            <div id="chat-panel" class="panel active flex-col flex-grow mb-16 md:mb-0">
                 <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5 mb-4">
                     <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
                 </div>
@@ -240,11 +240,12 @@
                 </div>
             </div>
 
-            <div id="graph-panel" class="panel flex-col h-full card rounded-lg overflow-hidden mb-16 md:mb-0">
+            <div id="graph-panel" class="panel flex-col flex-grow card rounded-lg overflow-hidden mb-16 md:mb-0">
                 <div id="graph-container" class="flex-grow">
                     <p id="graph-loading-text" class="text-gray-400 text-center p-10">Loading Neural Map...</p>
                 </div>
             </div>
+
         </main>
     </div>
 
@@ -308,7 +309,7 @@
         const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
         const HISTORY_API_ENDPOINT = `${apiBaseUrl}/cortex`; 
         const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
-        const DOCS_API_ENDPOINT = `${apiBaseUrl}/documents`; // <-- NEW
+        const DOCS_API_ENDPOINT = `${apiBaseUrl}/documents`; 
 
         // --- 5. DOM ELEMENTS ---
         const chatContainer = document.getElementById('chat-container');
@@ -337,7 +338,7 @@
         const mobileCortexList = document.getElementById('mobile-cortex-list-sidebar');
         const mobileAccountStatus = document.getElementById('account-status-mobile');
 
-        // --- NEW: Modal & Upload Elements ---
+        // Modal & Upload Elements
         const addSourceHeaderButton = document.getElementById('add-source-header-button');
         const createCortexSidebarButton = document.getElementById('create-cortex-sidebar-button');
         const createCortexSidebarButtonMobile = document.getElementById('create-cortex-sidebar-button-mobile');
@@ -465,7 +466,6 @@
             }
         }
         
-        // --- NEW: Fetch Library Docs ---
         async function fetchLibraryDocumentsInBackground() {
             if (!userToken) return;
             isLibraryLoaded = false;
@@ -501,10 +501,10 @@
                 document.title = `${currentCortex.name} - Cogmatiq`;
             }
 
-            // Create HTML for each Cortex link
             const listHTML = allCortices.map(cortex => {
                 const isActive = cortex.id === cortexId;
                 const activeClass = isActive ? 'active' : '';
+                // *** MODIFIED: Added delete button wrapper ***
                 return `
                     <div class="flex items-center group/cortex-item ${activeClass} rounded-md">
                         <a href="/chat.html?cortex_id=${cortex.id}" class="cortex-link flex-grow ${activeClass}" title="${cortex.name}">
@@ -567,7 +567,7 @@
                         fetchChatHistory();
                         fetchAndRenderCortices();
                         fetchAndRenderSubscriptionStatus();
-                        fetchLibraryDocumentsInBackground(); // <-- NEW
+                        fetchLibraryDocumentsInBackground(); 
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
                     console.warn("Auth state: No session on load. Redirecting to login.");
@@ -610,7 +610,7 @@
             });
             
             modalUploadTriggerButton.addEventListener('click', () => {
-                fileInput.dataset.cortexId = cortexId; // Use the current cortexId
+                fileInput.dataset.cortexId = cortexId;
                 fileInput.click(); 
             });
             
@@ -889,11 +889,9 @@
             }
         }
         
-        // --- 14. NEW: MODAL/UPLOAD/CORTEX FUNCTIONS (Copied from Dashboard) ---
+        // --- 14. NEW: MODAL/UPLOAD/CORTEX FUNCTIONS ---
         
         function openAddDocumentModal(cortexIdToAddTo) { 
-            // Note: cortexId is the global var for the *current* page's cortex.
-            // We pass cortexIdToAddTo to be explicit
             currentCortexId = cortexIdToAddTo; 
             switchModalTab('library'); 
             renderLibraryModal(); 
@@ -987,14 +985,14 @@
                  return;
              }
             
-             // Optimistically add to UI
+             // Optimistic UI update
              const tempId = `temp_${Date.now()}`;
              const newCortex = { id: tempId, name: cortexName, documents: [] };
-             allCortices.unshift(newCortex); // Add to start of list
+             allCortices.unshift(newCortex); 
              renderCortexSidebarList();
 
             try {
-                const createdCortex = await fetchApi(CORTICES_API_ENDPOINT, {
+                const createdCortexData = await fetchApi(CORTICES_API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: cortexName.trim() }) 
@@ -1002,6 +1000,9 @@
                 
                 // Refresh the list with the real data from the server
                 await fetchAndRenderCortices();
+                
+                // Redirect to the new cortex
+                window.location.href = `/chat.html?cortex_id=${createdCortexData[0].id}`;
 
             } catch (error) {
                  console.error("Create Cortex Error:", error);
@@ -1011,7 +1012,7 @@
         }
 
         async function deleteCortex(event, cortexIdToDelete) { 
-             event.stopPropagation(); // Stop the link from being clicked
+             event.stopPropagation(); 
              if (!userToken) return;
              if (cortexIdToDelete === cortexId) {
                  alert("You cannot delete the Cortex you are currently in. Please switch to another Cortex first.");
@@ -1019,7 +1020,6 @@
              }
              
             if (confirm('Are you sure you want to delete this Cortex?\n\nThis action cannot be undone. Documents within it will NOT be deleted from your library.')) {
-                 // Optimistic UI update
                  const oldCortices = [...allCortices];
                  allCortices = allCortices.filter(c => c.id !== cortexIdToDelete);
                  renderCortexSidebarList();
@@ -1056,11 +1056,16 @@
                 });
                 
                 closeAddDocumentModal();
-                await fetchAndRenderCortices(); // Refresh sidebar
-                
-                // If we added to the *current* cortex, refresh chat history (to be safe)
+                // If we added to the *current* cortex, refresh everything
                 if (currentCortexId === cortexId) {
-                    await fetchChatHistory();
+                    await Promise.all([
+                        fetchAndRenderCortices(),
+                        fetchChatHistory(),
+                        fetchLibraryDocumentsInBackground()
+                    ]);
+                } else {
+                    // Otherwise, just refresh the cortex list
+                    await fetchAndRenderCortices();
                 }
 
             } catch (error) {
@@ -1090,7 +1095,7 @@
                 modalUrlInput.value = '';
                 
                 await fetchAndRenderCortices(); 
-                await fetchLibraryDocumentsInBackground(); 
+                fetchLibraryDocumentsInBackground(); 
                 
                 if (currentCortexId === cortexId) {
                     await fetchChatHistory();
@@ -1141,7 +1146,7 @@
                 progressText.textContent = 'Upload complete. Processing started...';
                 
                 await fetchAndRenderCortices();
-                await fetchLibraryDocumentsInBackground();
+                fetchLibraryDocumentsInBackground();
                 
                 setTimeout(resetUploadUI, 2000); 
 
