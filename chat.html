@@ -157,6 +157,12 @@
             <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1">
                 <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
             </nav>
+
+            <div class="mt-auto p-4 border-t border-gray-700">
+                <div id="account-status-desktop">
+                    <p class="text-sm text-gray-500">Loading account...</p>
+                </div>
+            </div>
         </aside>
 
         <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
@@ -185,6 +191,12 @@
             <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1">
                 <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
             </nav>
+
+            <div class="mt-auto p-4 border-t border-gray-700">
+                <div id="account-status-mobile">
+                    <p class="text-sm text-gray-500">Loading account...</p>
+                </div>
+            </div>
         </aside>
 
         <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full h-full" onclick="closeMobileMenu()">
@@ -220,6 +232,7 @@
         const GRAPH_API_ENDPOINT = `${apiBaseUrl}/cortex-graph`;
         const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
         const HISTORY_API_ENDPOINT = `${apiBaseUrl}/cortex`; 
+        const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`; // <-- NEW
 
         // --- 5. DOM ELEMENTS ---
         const chatContainer = document.getElementById('chat-container');
@@ -232,10 +245,11 @@
         const graphLoadingText = document.getElementById('graph-loading-text');
         const cortexNameEl = document.getElementById('cortex-name');
         
-        // Desktop tabs
+        // Desktop elements
         const chatTabButton = document.getElementById('chat-tab-button');
         const graphTabButton = document.getElementById('graph-tab-button');
         const desktopCortexList = document.getElementById('cortex-list-sidebar');
+        const desktopAccountStatus = document.getElementById('account-status-desktop'); // <-- NEW
         
         // Mobile menu elements
         const mobileMenuOpenButton = document.getElementById('mobile-menu-open-button');
@@ -245,6 +259,7 @@
         const mobileChatTabButton = document.getElementById('mobile-chat-tab-button');
         const mobileGraphTabButton = document.getElementById('mobile-graph-tab-button');
         const mobileCortexList = document.getElementById('mobile-cortex-list-sidebar');
+        const mobileAccountStatus = document.getElementById('account-status-mobile'); // <-- NEW
 
 
         // --- 6. STATE VARIABLES ---
@@ -299,7 +314,6 @@
             chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
             
             try {
-                // Use the full endpoint URL
                 const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
                 
@@ -322,7 +336,6 @@
 
         async function fetchAndRenderCortices() {
             try {
-                // Use the full endpoint URL
                 allCortices = await fetchApi(CORTICES_API_ENDPOINT);
                 renderCortexSidebarList();
             } catch (error) {
@@ -331,6 +344,19 @@
                 mobileCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">Error loading</p>`;
             }
         }
+        
+        // --- *** NEW: Fetch Subscription Status *** ---
+        async function fetchAndRenderSubscriptionStatus() {
+            try {
+                const data = await fetchApi(STATUS_API_ENDPOINT);
+                renderSubscriptionStatus(data.is_pro);
+            } catch (error) {
+                console.error("Error fetching subscription status:", error);
+                renderSubscriptionStatus(null, true); 
+            }
+        }
+        
+        // --- 9. RENDERING FUNCTIONS ---
         
         function renderCortexSidebarList() {
             if (!allCortices || allCortices.length === 0) {
@@ -359,8 +385,30 @@
             desktopCortexList.innerHTML = listHTML;
             mobileCortexList.innerHTML = listHTML;
         }
+        
+        // --- *** NEW: Render Subscription Status *** ---
+        function renderSubscriptionStatus(isPro, isError = false) {
+            let statusHTML = '';
 
-        // --- 9. INITIALIZE CHAT ---
+            if (isError) {
+                statusHTML = `<p class="text-sm text-red-400">Error loading status.</p>`;
+            } else if (isPro) {
+                statusHTML = `
+                    <p class="text-sm font-semibold text-green-400">Pro Plan</p>
+                    <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
+                `;
+            } else {
+                statusHTML = `
+                    <p class="text-sm font-semibold text-gray-400">Free Plan</p>
+                    <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
+                `;
+            }
+            
+            if (desktopAccountStatus) desktopAccountStatus.innerHTML = statusHTML;
+            if (mobileAccountStatus) mobileAccountStatus.innerHTML = statusHTML;
+        }
+
+        // --- 10. INITIALIZE CHAT ---
         function initializeChat() {
             console.log("Chat page loaded. Setting up auth listener...");
             
@@ -380,6 +428,7 @@
                         initializeListeners();
                         fetchChatHistory();
                         fetchAndRenderCortices();
+                        fetchAndRenderSubscriptionStatus(); // <-- NEW
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
                     console.warn("Auth state: No session on load. Redirecting to login.");
@@ -388,7 +437,7 @@
             });
         }
 
-        // --- 10. INITIALIZE LISTENERS ---
+        // --- 11. INITIALIZE LISTENERS ---
         function initializeListeners() {
             if (chatTabButton.dataset.listener) return; 
 
@@ -433,11 +482,10 @@
             formData.append('cortex_id', cortexId);
             formData.append('question', question);
             
-            const historyToSend = chatHistory.slice(0, -1).slice(-10);
+            const historyToSend = chatHistory.slice(0, -1).slice(-10); 
             formData.append('chat_history_json', JSON.stringify(historyToSend));
 
             try {
-                // Use the full endpoint URL
                 const data = await fetchApi(API_ENDPOINT, {
                     method: 'POST',
                     body: formData
@@ -457,7 +505,7 @@
             }
         }
         
-        // --- 11. UI/NAV FUNCTIONS ---
+        // --- 12. UI/NAV FUNCTIONS ---
         
         function openMobileMenu() {
             mobileSidebarOverlay.classList.remove('hidden');
@@ -507,7 +555,6 @@
             graphLoadingText.classList.remove('hidden', 'text-red-400');
             
             try {
-                // Use the full endpoint URL
                 const data = await fetchApi(`${GRAPH_API_ENDPOINT}/${cortexId}`);
                 
                 if (!data.nodes || data.nodes.length === 0) {
@@ -584,7 +631,7 @@
             }
         }
 
-        // --- 12. ADD/UPDATE MESSAGE UI ---
+        // --- 13. ADD/UPDATE MESSAGE UI ---
         function addMessageToUI(text, sender) {
             const messageWrapper = document.createElement('div');
             messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4', 'message-wrapper');
@@ -670,7 +717,7 @@
             }
         }
         
-        // --- 13. RUN INITIALIZATION ---
+        // --- 14. RUN INITIALIZATION ---
         initializeChat();
 
         // Make functions globally accessible
