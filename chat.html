@@ -144,7 +144,7 @@
         </div>
     </header>
 
-    <div class="flex flex-grow pt-24 overflow-hidden"> 
+    <div class="flex flex-grow pt-24 h-full overflow-hidden"> 
         
         <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
             
@@ -222,7 +222,7 @@
 
         <main class="flex flex-col w-full md:pl-64 h-full" onclick="closeMobileMenu()">
             
-            <div id="chat-panel" class="panel active flex-col h-full">
+            <div id="chat-panel" class="panel active flex flex-col h-full">
                 <div class="flex-shrink-0 p-4 md:p-8 md:pb-4">
                     <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5">
                         <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
@@ -397,12 +397,14 @@
             window.location.href = '/dashboard.html';
         }
         
+        // *** THIS IS THE FIX: Added fetchApi helper function ***
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
             const headers = {
                 ...options.headers,
                 'Authorization': `Bearer ${userToken}`
             };
+            // 'endpoint' is the full URL, so we fetch it directly
             const response = await fetch(endpoint, { ...options, headers });
             if (!response.ok) {
                 let errorDetail = `API Error: ${response.status} ${response.statusText}`;
@@ -431,6 +433,7 @@
                 const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
                 
+                // *** THIS IS THE FIX: Correctly parse the .messages object ***
                 chatHistory = data.messages || []; 
                 
                 if (chatHistory.length === 0) {
