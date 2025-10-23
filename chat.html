@@ -144,7 +144,7 @@
         </div>
     </header>
 
-    <div class="flex flex-grow pt-24 h-full"> 
+    <div class="flex flex-grow pt-24"> 
         
         <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
             
@@ -201,7 +201,8 @@
                         Chat
                     </button>
                     <button id="mobile-graph-tab-button" class="sidebar-button">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> Note
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
+                        Neural Map
                     </button>
                 </nav>
             </div>
@@ -219,7 +220,7 @@
             </nav>
         </aside>
 
-        <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full mb-16 md:mb-0" onclick="closeMobileMenu()">
+        <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full pb-16 md:pb-8" onclick="closeMobileMenu()">
             
             <div id="chat-panel" class="panel active flex-col flex-grow">
                 <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5 mb-4">
@@ -229,7 +230,8 @@
             
                 <div id="chat-container" class="flex-grow overflow-y-auto pr-2 md:pr-4 space-y-6 mb-4">
                     </div>
-                <div class="mt-auto flex-shrink-0"> <form id="chat-form" class="flex items-center gap-4">
+                <div class="mt-auto flex-shrink-0"> 
+                    <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                         <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
