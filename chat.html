@@ -280,7 +280,7 @@
             window.location.href = '/dashboard.html';
         }
         
-        // *** THIS IS THE FIX: The 'endpoint' var already has the full URL ***
+        // *** THIS IS THE FIX: The 'endpoint' var should NOT have the base URL added ***
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
             const headers = {
@@ -288,7 +288,7 @@
                 'Authorization': `Bearer ${userToken}`
             };
             // 'endpoint' is the full URL, so we fetch it directly
-            const response = await fetch(endpoint, { ...options, headers });
+            const response = await fetch(endpoint, { ...options, headers }); // <-- NO apiBaseUrl here
             if (!response.ok) {
                 let errorDetail = `API Error: ${response.status} ${response.statusText}`;
                 try {
@@ -316,7 +316,6 @@
                 const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
                 
-                // *** THIS IS THE FIX: The backend returns {"messages": [...]}, so we get the .messages property ***
                 chatHistory = data.messages || []; 
                 
                 if (chatHistory.length === 0) {
