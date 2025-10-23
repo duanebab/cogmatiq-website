@@ -314,6 +314,7 @@
             chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
             
             try {
+                // Use the full endpoint URL
                 const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
                 
@@ -336,6 +337,7 @@
 
         async function fetchAndRenderCortices() {
             try {
+                // Use the full endpoint URL
                 allCortices = await fetchApi(CORTICES_API_ENDPOINT);
                 renderCortexSidebarList();
             } catch (error) {
@@ -482,10 +484,11 @@
             formData.append('cortex_id', cortexId);
             formData.append('question', question);
             
-            const historyToSend = chatHistory.slice(0, -1).slice(-10); 
+            const historyToSend = chatHistory.slice(0, -1).slice(-10);
             formData.append('chat_history_json', JSON.stringify(historyToSend));
 
             try {
+                // Use the full endpoint URL
                 const data = await fetchApi(API_ENDPOINT, {
                     method: 'POST',
                     body: formData
@@ -555,6 +558,7 @@
             graphLoadingText.classList.remove('hidden', 'text-red-400');
             
             try {
+                // Use the full endpoint URL
                 const data = await fetchApi(`${GRAPH_API_ENDPOINT}/${cortexId}`);
                 
                 if (!data.nodes || data.nodes.length === 0) {
