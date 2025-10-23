@@ -35,10 +35,9 @@
         #chat-container::-webkit-scrollbar { width: 8px; }
         #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
         #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
-        #cortex-list-sidebar::-webkit-scrollbar { width: 4px; }
-        #cortex-list-sidebar::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
-        #mobile-cortex-list-sidebar::-webkit-scrollbar { width: 4px; }
-        #mobile-cortex-list-sidebar::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
 
 
         .prose { color: #E5E7EB; }
@@ -51,7 +50,7 @@
         .prose code { font-family: monospace; }
         .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
 
-        /* Desktop Sidebar Button */
+        /* Sidebar Button */
         .sidebar-button {
             display: flex;
             align-items: center;
@@ -70,19 +69,6 @@
             background-color: #1F2A44;
             color: #E5E7EB;
         }
-        
-        /* Mobile Tab Button */
-        .mobile-tab {
-            color: #9CA3AF;
-            transition: color 0.2s;
-            flex: 1;
-            padding: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.75rem;
-        }
-        .mobile-tab.active { color: #00B5AD; }
         
         .panel { display: none; }
         .panel.active { display: flex; }
@@ -137,7 +123,14 @@
     <div class="flex flex-grow pt-24 h-full"> 
         
         <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
-            <div class="flex-shrink-0">
+            
+            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+                <div id="account-status-desktop">
+                    <p class="text-sm text-gray-500">Loading account...</p>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 pt-4">
                 <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
                 <nav class="flex flex-col space-y-2">
                     <button id="chat-tab-button" class="sidebar-button active">
@@ -154,15 +147,9 @@
             <div class="border-t border-gray-700 my-4"></div>
             
             <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2 flex-shrink-0">Your Cortices</h3>
-            <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1">
+            <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
                 <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
             </nav>
-
-            <div class="flex-shrink-0 p-4 border-t border-gray-700">
-                <div id="account-status-desktop">
-                    <p class="text-sm text-gray-500">Loading account...</p>
-                </div>
-            </div>
         </aside>
 
         <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
@@ -171,6 +158,12 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             
+            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+                <div id="account-status-mobile">
+                    <p class="text-sm text-gray-500">Loading account...</p>
+                </div>
+            </div>
+
             <div class="flex-shrink-0 mt-6">
                 <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
                 <nav class="flex flex-col space-y-2">
@@ -188,15 +181,9 @@
             <div class="border-t border-gray-700 my-4"></div>
             
             <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2 flex-shrink-0">Your Cortices</h3>
-            <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1">
+            <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
                 <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
             </nav>
-
-            <div class="flex-shrink-0 p-4 border-t border-gray-700">
-                <div id="account-status-mobile">
-                    <p class="text-sm text-gray-500">Loading account...</p>
-                </div>
-            </div>
         </aside>
         <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full h-full" onclick="closeMobileMenu()">
             
