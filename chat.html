@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with your Cortex - Cogmatiq</title>
+    <title>Chat - Cogmatiq</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,17 +31,17 @@
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
         .card { background: #1F2A44; border: 1px solid #2D3748; }
-
-        /* Custom scrollbar for chat */
+        
         #chat-container::-webkit-scrollbar { width: 8px; }
-        #chat-container::-webkit-scrollbar-track { background: #1A2533; }
+        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
         #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        #cortex-list-sidebar::-webkit-scrollbar { width: 4px; }
+        #cortex-list-sidebar::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
 
-        /* Prose styles for markdown */
         .prose { color: #E5E7EB; }
         .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
-        .prose ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5em; margin-bottom: 0.5em; }
-        .prose ol { list-style-type: decimal; margin-left: 1.5rem; margin-top: 0.5em; margin-bottom: 0.5em; }
+        .prose ul { list-style-type: disc; margin-left: 1.5rem; }
+        .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
         .prose strong { font-weight: 800; }
         .prose a { color: #00B5AD; text-decoration: underline; } 
         .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } 
@@ -50,24 +50,24 @@
 
         /* Desktop Sidebar Button */
         .sidebar-button {
-            background-color: transparent;
-            color: #9CA3AF;
             display: flex;
             align-items: center;
+            width: 100%;
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
             font-weight: 600;
+            color: #9CA3AF; /* gray-400 */
             transition: background-color 0.2s, color 0.2s;
         }
         .sidebar-button:hover {
-            background-color: #2D3748;
+            background-color: #2D3748; /* gray-700 */
             color: #E5E7EB;
         }
         .sidebar-button.active {
             background-color: #1F2A44;
             color: #E5E7EB;
         }
-
+        
         /* Mobile Tab Button */
         .mobile-tab {
             color: #9CA3AF;
@@ -79,17 +79,13 @@
             align-items: center;
             font-size: 0.75rem;
         }
-        .mobile-tab.active {
-            color: #00B5AD; /* accent-text */
-        }
+        .mobile-tab.active { color: #00B5AD; }
         
-        /* Panel visibility */
         .panel { display: none; }
         .panel.active { display: flex; }
         
         #graph-container { width: 100%; height: 100%; min-height: 500px; background-color: #111827; }
         
-        /* Tooltip (unchanged) */
         [title]:hover::after {
             content: attr(title);
             position: absolute;
@@ -103,43 +99,93 @@
             border-radius: 4px;
             font-size: 0.75rem;
             white-space: nowrap;
-            z-index: 10;
+            z-index: 50;
         }
-        [title] {
-            position: relative;
+        [title] { position: relative; }
+
+        /* Mobile Sidebar */
+        #mobile-sidebar-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #mobile-sidebar {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%);
         }
     </style>
 </head>
-<body class="flex flex-col h-screen">
-
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-            <span class="text-2xl font-bold text-white">Cogmatiq</span>
-        </a>
-        <div>
+<body class="flex flex-col h-screen overflow-hidden"> <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+                <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="cortex-name" class="text-gray-300 font-semibold text-sm md:text-base truncate max-w-[150px] md:max-w-xs">Loading...</span>
             <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Dashboard</a>
         </div>
     </header>
 
     <div class="flex flex-grow pt-24 h-full"> 
         
-        <aside class="hidden md:block w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
-            <nav class="flex flex-col space-y-2">
-                <button id="chat-tab-button" class="sidebar-button active">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                    Chat
-                </button>
-                <button id="graph-tab-button" class="sidebar-button">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
-                    Neural Map
-                </button>
+        <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
+            <div class="flex-shrink-0">
+                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
+                <nav class="flex flex-col space-y-2">
+                    <button id="chat-tab-button" class="sidebar-button active">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        Chat
+                    </button>
+                    <button id="graph-tab-button" class="sidebar-button">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
+                        Neural Map
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="border-t border-gray-700 my-4"></div>
+            
+            <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Your Cortices</h3>
+            <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1">
+                <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
             </nav>
         </aside>
 
-        <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full h-full">
+        <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
+        <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-gray-700 bg-[#1A2533] z-50 flex flex-col">
+            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
             
-            <div id="chat-panel" class="panel active flex-col flex-grow h-full mb-16 md:mb-0"> <div id="chat-container" class="flex-grow overflow-y-auto pr-4 space-y-6 mb-4">
+            <div class="flex-shrink-0 mt-6">
+                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
+                <nav class="flex flex-col space-y-2">
+                    <button id="mobile-chat-tab-button" class="sidebar-button active">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        Chat
+                    </button>
+                    <button id="mobile-graph-tab-button" class="sidebar-button">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
+                        Neural Map
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="border-t border-gray-700 my-4"></div>
+            
+            <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Your Cortices</h3>
+            <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1">
+                <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
+            </nav>
+        </aside>
+
+        <main class="flex-grow flex flex-col p-4 md:p-8 md:pl-72 w-full h-full" onclick="closeMobileMenu()">
+            
+            <div id="chat-panel" class="panel active flex-col flex-grow h-full mb-16 md:mb-0">
+                <div id="chat-container" class="flex-grow overflow-y-auto pr-2 md:pr-4 space-y-6 mb-4">
                     </div>
                 <div class="mt-auto">
                     <form id="chat-form" class="flex items-center gap-4">
@@ -160,23 +206,14 @@
         </main>
     </div>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#1F2A44] border-t border-gray-700 flex justify-around items-center z-20">
-        <button id="mobile-chat-tab-button" class="mobile-tab active">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-            <span>Chat</span>
-        </button>
-        <button id="mobile-graph-tab-button" class="mobile-tab">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
-            <span>Neural Map</span>
-        </button>
-    </nav>
     <script>
         // --- apiBaseUrl and supabaseClient are loaded from supabaseClient.js ---
         
         // --- 4. Define API endpoints using apiBaseUrl ---
         const API_ENDPOINT = `${apiBaseUrl}/query`;
         const GRAPH_API_ENDPOINT = `${apiBaseUrl}/cortex-graph`;
-        const HISTORY_API_ENDPOINT = `${apiBaseUrl}/cortex`; // For /cortex/{cortex_id}/history
+        const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
+        const HISTORY_API_ENDPOINT = `${apiBaseUrl}/cortex`; 
 
         // --- 5. DOM ELEMENTS ---
         const chatContainer = document.getElementById('chat-container');
@@ -187,20 +224,29 @@
         const graphPanel = document.getElementById('graph-panel');
         const graphContainer = document.getElementById('graph-container');
         const graphLoadingText = document.getElementById('graph-loading-text');
+        const cortexNameEl = document.getElementById('cortex-name');
         
         // Desktop tabs
         const chatTabButton = document.getElementById('chat-tab-button');
         const graphTabButton = document.getElementById('graph-tab-button');
+        const desktopCortexList = document.getElementById('cortex-list-sidebar');
         
-        // Mobile tabs
+        // Mobile menu elements
+        const mobileMenuOpenButton = document.getElementById('mobile-menu-open-button');
+        const mobileMenuCloseButton = document.getElementById('mobile-menu-close-button');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const mobileSidebarOverlay = document.getElementById('mobile-sidebar-overlay');
         const mobileChatTabButton = document.getElementById('mobile-chat-tab-button');
         const mobileGraphTabButton = document.getElementById('mobile-graph-tab-button');
+        const mobileCortexList = document.getElementById('mobile-cortex-list-sidebar');
+
 
         // --- 6. STATE VARIABLES ---
         let userToken = null;
         let graphLoaded = false;
         let network = null; 
         let chatHistory = []; 
+        let allCortices = []; // To store the list of cortices
         
         // --- 7. FUNCTIONS ---
         function getCortexId() {
@@ -213,8 +259,28 @@
             alert('Error: No Cortex ID found in URL.');
             window.location.href = '/dashboard.html';
         }
+        
+        // --- Generic API Fetch helper ---
+        async function fetchApi(endpoint, options = {}) {
+            if (!userToken) throw new Error("Authentication token is missing.");
+            const headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${userToken}`
+            };
+            const response = await fetch(`${apiBaseUrl}${endpoint}`, { ...options, headers });
+            if (!response.ok) {
+                let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorDetail = errorData.detail || errorDetail;
+                } catch (e) {}
+                throw new Error(errorDetail);
+            }
+            if (response.status === 202 || response.status === 204) return null;
+            return response.json();
+        }
 
-        // --- 8. FETCH CHAT HISTORY ---
+        // --- 8. FETCH LOGIC ---
         async function fetchChatHistory() {
             if (!userToken || !cortexId) {
                 console.warn('Cannot fetch chat history: Missing token or cortex_id');
@@ -226,20 +292,9 @@
             chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
             
             try {
-                const response = await fetch(`${HISTORY_API_ENDPOINT}/${cortexId}/history`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-                
+                const data = await fetchApi(`/cortex/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ detail: `Failed to fetch chat history: ${response.status} ${response.statusText}` }));
-                    throw new Error(errorData.detail);
-                }
                 
-                const data = await response.json();
-                
-                // *** FIX: The backend returns {"messages": [...]}, so we get the .messages property ***
                 chatHistory = data.messages || []; 
                 
                 if (chatHistory.length === 0) {
@@ -255,6 +310,45 @@
                 addMessageToUI(`Error loading chat history: ${error.message}. You can still chat.`, 'ai');
             }
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function fetchAndRenderCortices() {
+            try {
+                allCortices = await fetchApi('/cortices');
+                renderCortexSidebarList();
+            } catch (error) {
+                console.error("Error fetching cortices:", error);
+                desktopCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">Error loading</p>`;
+                mobileCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">Error loading</p>`;
+            }
+        }
+        
+        function renderCortexSidebarList() {
+            if (!allCortices || allCortices.length === 0) {
+                const emptyHTML = `<p class="text-gray-500 text-sm px-4 py-2">No cortices found.</p>`;
+                desktopCortexList.innerHTML = emptyHTML;
+                mobileCortexList.innerHTML = emptyHTML;
+                return;
+            }
+            
+            const currentCortex = allCortices.find(c => c.id === cortexId);
+            if (currentCortex) {
+                cortexNameEl.textContent = currentCortex.name;
+                document.title = `${currentCortex.name} - Cogmatiq`;
+            }
+
+            const listHTML = allCortices.map(cortex => {
+                const isActive = cortex.id === cortexId;
+                const activeClass = isActive ? 'active' : '';
+                return `
+                    <a href="/chat.html?cortex_id=${cortex.id}" class="sidebar-button ${activeClass}" title="${cortex.name}">
+                        <span class="truncate">${cortex.name}</span>
+                    </a>
+                `;
+            }).join('');
+            
+            desktopCortexList.innerHTML = listHTML;
+            mobileCortexList.innerHTML = listHTML;
         }
 
         // --- 9. INITIALIZE CHAT ---
@@ -273,9 +367,10 @@
                 if (session && session.access_token) {
                     if (userToken !== session.access_token) {
                         userToken = session.access_token;
-                        console.log("Token set/updated. Initializing listeners and fetching history...");
+                        console.log("Token set/updated. Initializing listeners and fetching data...");
                         initializeListeners();
-                        fetchChatHistory(); 
+                        fetchChatHistory();
+                        fetchAndRenderCortices(); // <-- Fetch cortex list
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
                     console.warn("Auth state: No session on load. Redirecting to login.");
@@ -292,68 +387,92 @@
             chatTabButton.addEventListener('click', () => switchTab('chat'));
             graphTabButton.addEventListener('click', () => switchTab('graph'));
             
-            // Mobile Listeners
-            mobileChatTabButton.addEventListener('click', () => switchTab('chat'));
-            mobileGraphTabButton.addEventListener('click', () => switchTab('graph'));
-
-            chatForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const question = messageInput.value.trim();
-                if (!question || !userToken) return;
-
-                addMessageToUI(question, 'user');
-                chatHistory.push({ role: 'user', content: question });
-                messageInput.value = '';
-                submitButton.disabled = true;
-
-                const aiMessageElement = addMessageToUI('', 'ai');
-                
-                const formData = new FormData();
-                formData.append('cortex_id', cortexId);
-                formData.append('question', question);
-                
-                const historyToSend = chatHistory.slice(0, -1).slice(-10); // Send last 5 exchanges
-                formData.append('chat_history_json', JSON.stringify(historyToSend));
-
-                try {
-                    const response = await fetch(API_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${userToken}` },
-                        body: formData
-                    });
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ detail: `API error: ${response.status} ${response.statusText}` }));
-                        throw new Error(errorData.detail || 'An unknown error occurred.');
-                    }
-                    
-                    const data = await response.json();
-                    updateAIMessage(aiMessageElement, data.answer);
-                    chatHistory.push({ role: 'ai', content: data.answer });
-
-                } catch (error) {
-                    console.error("Chat API Error:", error);
-                    const errorMessage = `Sorry, something went wrong: ${error.message}. Please try again.`;
-                    updateAIMessage(aiMessageElement, errorMessage);
-                    chatHistory.push({ role: 'ai', content: errorMessage });
-                } finally {
-                    submitButton.disabled = false;
-                    messageInput.focus();
-                }
+            // Mobile Menu Listeners
+            mobileMenuOpenButton.addEventListener('click', openMobileMenu);
+            mobileMenuCloseButton.addEventListener('click', closeMobileMenu);
+            mobileSidebarOverlay.addEventListener('click', closeMobileMenu);
+            
+            // Mobile Tab Listeners
+            mobileChatTabButton.addEventListener('click', () => {
+                switchTab('chat');
+                closeMobileMenu();
             });
+            mobileGraphTabButton.addEventListener('click', () => {
+                switchTab('graph');
+                closeMobileMenu();
+            });
+
+            // Chat Form Listener
+            chatForm.addEventListener('submit', handleChatSubmit);
 
             chatTabButton.dataset.listener = 'true';
         }
         
-        // *** 11. MODIFIED: TAB SWITCHING ***
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const question = messageInput.value.trim();
+            if (!question || !userToken) return;
+
+            addMessageToUI(question, 'user');
+            chatHistory.push({ role: 'user', content: question });
+            messageInput.value = '';
+            submitButton.disabled = true;
+
+            const aiMessageElement = addMessageToUI('', 'ai');
+            
+            const formData = new FormData();
+            formData.append('cortex_id', cortexId);
+            formData.append('question', question);
+            
+            const historyToSend = chatHistory.slice(0, -1).slice(-10); // Send last 5 exchanges
+            formData.append('chat_history_json', JSON.stringify(historyToSend));
+
+            try {
+                const data = await fetchApi('/query', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                updateAIMessage(aiMessageElement, data.answer);
+                chatHistory.push({ role: 'ai', content: data.answer });
+
+            } catch (error) {
+                console.error("Chat API Error:", error);
+                const errorMessage = `Sorry, something went wrong: ${error.message}. Please try again.`;
+                updateAIMessage(aiMessageElement, errorMessage);
+                chatHistory.push({ role: 'ai', content: errorMessage });
+            } finally {
+                submitButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+        
+        // --- 11. UI/NAV FUNCTIONS ---
+        
+        function openMobileMenu() {
+            mobileSidebarOverlay.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                mobileSidebarOverlay.classList.remove('opacity-0');
+                mobileSidebar.style.transform = 'translateX(0)';
+            });
+        }
+
+        function closeMobileMenu() {
+            mobileSidebarOverlay.classList.add('opacity-0');
+            mobileSidebar.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                mobileSidebarOverlay.classList.add('hidden');
+            }, 300); // Match transition duration
+        }
+
         function switchTab(tabName) {
             const isChat = tabName === 'chat';
 
-            // Toggle desktop buttons
+            // Sync desktop buttons
             chatTabButton.classList.toggle('active', isChat);
             graphTabButton.classList.toggle('active', !isChat);
             
-            // Toggle mobile buttons
+            // Sync mobile buttons
             mobileChatTabButton.classList.toggle('active', isChat);
             mobileGraphTabButton.classList.toggle('active', !isChat);
 
@@ -361,11 +480,10 @@
             chatPanel.classList.toggle('active', isChat);
             graphPanel.classList.toggle('active', !isChat);
             
-            if (!isChat) {
+            if (!isChat) { // Switched to Graph
                 if (!graphLoaded) {
                     loadGraphData();
                 } else if (network) {
-                    // Fit graph to container on tab switch
                     setTimeout(() => network.fit(), 0);
                 }
             }
@@ -382,83 +500,74 @@
             graphLoadingText.classList.remove('hidden', 'text-red-400');
             
             try {
-                const response = await fetch(`${GRAPH_API_ENDPOINT}/${cortexId}`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
+                const data = await fetchApi(`${GRAPH_API_ENDPOINT}/${cortexId}`);
                 
-                if (response.status === 200 || response.status === 404) {
-                    const data = await response.json();
-                    if (!data.nodes || data.nodes.length === 0) {
-                        graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
-                        graphLoadingText.classList.add('hidden');
-                        return;
-                    }
-                    
+                if (!data.nodes || data.nodes.length === 0) {
+                    graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Cortex yet. Add more documents or wait for processing to complete.</p>';
                     graphLoadingText.classList.add('hidden');
-                    graphContainer.innerHTML = '';
-
-                    const options = {
-                        nodes: {
-                            shape: "dot",
-                            size: 16,
-                            font: { color: "#E5E7EB", size: 14, face: 'Manrope' },
-                            borderWidth: 2,
-                            color: {
-                                background: '#2D3748',
-                                border: '#00B5AD',
-                                highlight: { background: '#00B5AD', border: '#E5E7EB' },
-                                hover: { background: '#009A94', border: '#E5E7EB' }
-                            }
-                        },
-                        edges: {
-                            width: 1,
-                            color: { color: "#4B5563", highlight: "#00B5AD", hover: "#00B5AD" },
-                            arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-                            font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top', face: 'Manrope' },
-                            smooth: { enabled: true, type: "continuous" }
-                        },
-                        physics: {
-                            enabled: true,
-                            solver: 'forceAtlas2Based',
-                            forceAtlas2Based: {
-                                gravitationalConstant: -70,
-                                centralGravity: 0.015,
-                                springLength: 120,
-                                springConstant: 0.05,
-                                damping: 0.6,
-                                avoidOverlap: 0.2
-                            },
-                            stabilization: {
-                                enabled: true,
-                                iterations: 1000,
-                                updateInterval: 50,
-                                onlyDynamicEdges: false,
-                                fit: true
-                            }
-                        },
-                        interaction: {
-                            hover: true,
-                            tooltipDelay: 200,
-                            navigationButtons: true,
-                            keyboard: true
-                        },
-                        layout: {
-                            improvedLayout: true,
-                        },
-                    };
-                
-                    if (typeof vis !== 'undefined') {
-                        network = new vis.Network(graphContainer, data, options);
-                    } else {
-                        console.error("vis.js library not loaded!");
-                        graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
-                    }
-                     
-                } else {
-                    const errorData = await response.json().catch(() => ({ detail: `Failed to load graph data: ${response.status} ${response.statusText}` }));
-                    throw new Error(errorData.detail);
+                    return;
                 }
+                
+                graphLoadingText.classList.add('hidden');
+                graphContainer.innerHTML = '';
 
+                const options = {
+                    nodes: {
+                        shape: "dot",
+                        size: 16,
+                        font: { color: "#E5E7EB", size: 14, face: 'Manrope' },
+                        borderWidth: 2,
+                        color: {
+                            background: '#2D3748',
+                            border: '#00B5AD',
+                            highlight: { background: '#00B5AD', border: '#E5E7EB' },
+                            hover: { background: '#009A94', border: '#E5E7EB' }
+                        }
+                    },
+                    edges: {
+                        width: 1,
+                        color: { color: "#4B5563", highlight: "#00B5AD", hover: "#00B5AD" },
+                        arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+                        font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top', face: 'Manrope' },
+                        smooth: { enabled: true, type: "continuous" }
+                    },
+                    physics: {
+                        enabled: true,
+                        solver: 'forceAtlas2Based',
+                        forceAtlas2Based: {
+                            gravitationalConstant: -70,
+                            centralGravity: 0.015,
+                            springLength: 120,
+                            springConstant: 0.05,
+                            damping: 0.6,
+                            avoidOverlap: 0.2
+                        },
+                        stabilization: {
+                            enabled: true,
+                            iterations: 1000,
+                            updateInterval: 50,
+                            onlyDynamicEdges: false,
+                            fit: true
+                        }
+                    },
+                    interaction: {
+                        hover: true,
+                        tooltipDelay: 200,
+                        navigationButtons: true,
+                        keyboard: true
+                    },
+                    layout: {
+                        improvedLayout: true,
+                    },
+                };
+            
+                if (typeof vis !== 'undefined') {
+                    network = new vis.Network(graphContainer, data, options);
+                } else {
+                    console.error("vis.js library not loaded!");
+                    graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
+                }
+                     
             } catch (error) {
                 console.error("Graph API Error:", error);
                 graphLoadingText.textContent = `Error loading Neural Map: ${error.message}`;
