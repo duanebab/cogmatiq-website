@@ -18,34 +18,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
-<<<<<<< Updated upstream
-    <script>
-        // --- START: Environment Detection ---
-        let apiBaseUrl;
-        // *** Verify/Update these hostnames if yours are different ***
-        const stagingHostname = 'staging.cogmatiq.com'; 
-        const productionHostname = 'cogmatiq.com';      
-        const currentHostname = window.location.hostname;
-
-        if (currentHostname === stagingHostname || currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-          // Use staging API for staging domain or local development
-          apiBaseUrl = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app'; 
-          console.log('Environment: Staging | API:', apiBaseUrl); 
-        } else {
-          // Default to production API for any other hostname (like cogmatiq.com)
-          apiBaseUrl = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app'; 
-          console.log('Environment: Production | API:', apiBaseUrl);
-        }
-        // --- END: Environment Detection ---
-    </script>
-=======
->>>>>>> Stashed changes
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
+        body { font-family: 'Manrope', sans-serif; background: linear-gradient(to bottom, #1A2533, #111827); color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
@@ -84,44 +62,22 @@
             <ul class="text-left space-y-3 mb-8">
                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited Document Uploads</li>
                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited Cortices</li>
-<<<<<<< Updated upstream
-                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority Support</li>
-            </ul>
-
-            <button id="upgrade-button" class="w-full accent-bg text-white font-semibold py-3 px-4 rounded-md text-lg hover-scale">Upgrade Now</button>
-            <p id="message" class="mt-4 text-sm text-red-400"></p>
-=======
                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Persistent Chat Memory</li>
                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority Support</li>
             </ul>
 
             <button id="upgrade-button" class="w-full accent-bg text-white font-semibold py-3 px-4 rounded-md text-lg hover-scale disabled:opacity-50" disabled>Get Started</button>
             <p id="message" class="mt-4 text-sm text-red-400 h-5"></p>
->>>>>>> Stashed changes
         </div>
     </main>
 
     <script>
-<<<<<<< Updated upstream
-        // *** Ensure apiBaseUrl is defined globally by the script in <head> ***
-        const supabaseUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        // supabaseClient and apiBaseUrl are defined in /supabaseClient.js
         
-        // *** Use apiBaseUrl for the API endpoint ***
-        const API_ENDPOINT = `${apiBaseUrl}/create-checkout-session`;
-=======
-        // supabaseClient and apiBaseUrl are defined in supabaseClient.js
->>>>>>> Stashed changes
         const upgradeButton = document.getElementById('upgrade-button');
         const messageEl = document.getElementById('message');
         const authLinksContainer = document.getElementById('auth-links');
 
-<<<<<<< Updated upstream
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            if (!session) {
-                window.location.href = '/login.html';
-=======
         let userToken = null;
         let isLoggedIn = false;
 
@@ -132,7 +88,7 @@
                 isLoggedIn = true;
                 userToken = session.access_token;
                 authLinksContainer.innerHTML = `
-                    <a href="/dashboard.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 hover-scale">Access Dashboard</a>
+                    <a href="/dashboard.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 hover-scale text-sm">Access Dashboard</a>
                     <button id="logout-button-index" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
                 `;
                 
@@ -153,44 +109,16 @@
                 userToken = null;
                 authLinksContainer.innerHTML = `
                     <a href="/login.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign In</a>
-                    <a href="/signup.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 hover-scale">Get Started</a>
+                    <a href="/signup.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 hover-scale text-sm">Get Started</a>
                 `;
                 
                 upgradeButton.textContent = 'Get Started';
                 upgradeButton.disabled = false;
->>>>>>> Stashed changes
             }
         });
 
+        // --- Upgrade button handler ---
         upgradeButton.addEventListener('click', async () => {
-<<<<<<< Updated upstream
-            messageEl.textContent = 'Redirecting to checkout...';
-            
-            const { data, error } = await supabaseClient.auth.getSession();
-            if (error || !data.session) {
-                messageEl.textContent = 'Error: You must be logged in.';
-                return;
-            }
-            const token = data.session.access_token;
-
-            try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Could not create checkout session.');
-                }
-                
-                const { url } = await response.json();
-                window.location.href = url;
-
-            } catch (err) {
-                messageEl.textContent = `Error: ${err.message}`;
-=======
             messageEl.textContent = '';
             upgradeButton.disabled = true;
 
@@ -206,8 +134,8 @@
                     });
 
                     if (!response.ok) {
-                        const err = await response.json().catch(() => 'Checkout failed');
-                        throw new Error(err.detail || 'Checkout failed');
+                        const err = await response.json().catch(() => ({ detail: 'Checkout failed. Please try again.' }));
+                        throw new Error(err.detail);
                     }
 
                     const { url } = await response.json();
@@ -222,7 +150,6 @@
             } else {
                 // User is not logged in, send to signup
                 window.location.href = '/signup.html';
->>>>>>> Stashed changes
             }
         });
     </script>

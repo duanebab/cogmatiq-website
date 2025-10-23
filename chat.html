@@ -316,6 +316,7 @@
                 const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
                 document.getElementById('history-loading')?.remove();
                 
+                // *** THIS IS THE FIX: The backend returns {"messages": [...]}, so we get the .messages property ***
                 chatHistory = data.messages || []; 
                 
                 if (chatHistory.length === 0) {
