@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
+<<<<<<< Updated upstream
     <script>
         // --- START: Environment Detection ---
         let apiBaseUrl;
@@ -37,8 +38,11 @@
         }
         // --- END: Environment Detection ---
     </script>
+=======
+>>>>>>> Stashed changes
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/supabaseClient.js"></script>
 
     <style>
         body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
@@ -55,22 +59,23 @@
         .card { background: #1F2A44; border: 1px solid #2D3748; }
     </style>
 </head>
-<body class="w-full">
+<body class="w-full min-h-screen">
 
-    <header class="py-6 px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
+        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-90">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div class="flex items-center gap-6">
-            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
+        <div id="auth-links" class="flex items-center gap-4">
+            <a href="/login.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign In</a>
+            <a href="/signup.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300">Get Started</a>
         </div>
     </header>
 
-    <main class="section-padding pt-24 bg-gradient-dark animate-fade-in">
+    <main class="section-padding pt-32 bg-gradient-dark animate-fade-in">
         <div class="max-w-md mx-auto text-center card p-8 rounded-lg">
             <h1 class="text-3xl font-extrabold mb-2">Upgrade to Cogmatiq Pro</h1>
-            <p class="text-gray-400 mb-6">Unlock unlimited access to your AI-powered knowledge platform.</p>
+            <p class="text-gray-400 mb-6">Unlock the full power of your AI Synthesist.</p>
 
             <div class="text-5xl font-bold mb-4">
                 $10<span class="text-lg font-medium text-gray-400">/month</span>
@@ -79,15 +84,25 @@
             <ul class="text-left space-y-3 mb-8">
                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited Document Uploads</li>
                 <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited Cortices</li>
+<<<<<<< Updated upstream
                  <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority Support</li>
             </ul>
 
             <button id="upgrade-button" class="w-full accent-bg text-white font-semibold py-3 px-4 rounded-md text-lg hover-scale">Upgrade Now</button>
             <p id="message" class="mt-4 text-sm text-red-400"></p>
+=======
+                <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Persistent Chat Memory</li>
+                <li class="flex items-center gap-3"><svg class="w-5 h-5 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority Support</li>
+            </ul>
+
+            <button id="upgrade-button" class="w-full accent-bg text-white font-semibold py-3 px-4 rounded-md text-lg hover-scale disabled:opacity-50" disabled>Get Started</button>
+            <p id="message" class="mt-4 text-sm text-red-400 h-5"></p>
+>>>>>>> Stashed changes
         </div>
     </main>
 
     <script>
+<<<<<<< Updated upstream
         // *** Ensure apiBaseUrl is defined globally by the script in <head> ***
         const supabaseUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA';
@@ -95,16 +110,60 @@
         
         // *** Use apiBaseUrl for the API endpoint ***
         const API_ENDPOINT = `${apiBaseUrl}/create-checkout-session`;
+=======
+        // supabaseClient and apiBaseUrl are defined in supabaseClient.js
+>>>>>>> Stashed changes
         const upgradeButton = document.getElementById('upgrade-button');
         const messageEl = document.getElementById('message');
+        const authLinksContainer = document.getElementById('auth-links');
 
+<<<<<<< Updated upstream
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (!session) {
                 window.location.href = '/login.html';
+=======
+        let userToken = null;
+        let isLoggedIn = false;
+
+        // This listener handles the header and button state
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                // User is signed in
+                isLoggedIn = true;
+                userToken = session.access_token;
+                authLinksContainer.innerHTML = `
+                    <a href="/dashboard.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 hover-scale">Access Dashboard</a>
+                    <button id="logout-button-index" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
+                `;
+                
+                const logoutButton = document.getElementById('logout-button-index');
+                if (logoutButton) {
+                    logoutButton.addEventListener('click', async () => {
+                        await supabaseClient.auth.signOut();
+                        // This listener will fire again and update the UI
+                    });
+                }
+                
+                upgradeButton.textContent = 'Upgrade Now';
+                upgradeButton.disabled = false;
+
+            } else {
+                // User is signed out
+                isLoggedIn = false;
+                userToken = null;
+                authLinksContainer.innerHTML = `
+                    <a href="/login.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign In</a>
+                    <a href="/signup.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 hover-scale">Get Started</a>
+                `;
+                
+                upgradeButton.textContent = 'Get Started';
+                upgradeButton.disabled = false;
+>>>>>>> Stashed changes
             }
         });
 
         upgradeButton.addEventListener('click', async () => {
+<<<<<<< Updated upstream
             messageEl.textContent = 'Redirecting to checkout...';
             
             const { data, error } = await supabaseClient.auth.getSession();
@@ -131,6 +190,39 @@
 
             } catch (err) {
                 messageEl.textContent = `Error: ${err.message}`;
+=======
+            messageEl.textContent = '';
+            upgradeButton.disabled = true;
+
+            if (isLoggedIn) {
+                // User is logged in, create checkout session
+                messageEl.textContent = 'Redirecting to checkout...';
+                messageEl.classList.remove('text-red-400');
+                
+                try {
+                    const response = await fetch(`${apiBaseUrl}/create-checkout-session`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${userToken}` }
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => 'Checkout failed');
+                        throw new Error(err.detail || 'Checkout failed');
+                    }
+
+                    const { url } = await response.json();
+                    window.location.href = url;
+                } catch (err) {
+                    console.error('Upgrade error:', err);
+                    messageEl.textContent = `Error: ${err.message}`;
+                    messageEl.classList.add('text-red-400');
+                    upgradeButton.disabled = false;
+                }
+
+            } else {
+                // User is not logged in, send to signup
+                window.location.href = '/signup.html';
+>>>>>>> Stashed changes
             }
         });
     </script>

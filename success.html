@@ -18,45 +18,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <script>
-        // --- START: Environment Detection ---
-        let apiBaseUrl;
-        // *** Verify/Update these hostnames if yours are different ***
-        const stagingHostname = 'staging.cogmatiq.com'; 
-        const productionHostname = 'cogmatiq.com';      
-        const currentHostname = window.location.hostname;
-
-        if (currentHostname === stagingHostname || currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-          // Use staging API for staging domain or local development
-          apiBaseUrl = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app'; 
-          console.log('Environment: Staging | API:', apiBaseUrl); 
-        } else {
-          // Default to production API for any other hostname (like cogmatiq.com)
-          apiBaseUrl = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app'; 
-          console.log('Environment: Production | API:', apiBaseUrl);
-        }
-        // --- END: Environment Detection ---
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
+        body { font-family: 'Manrope', sans-serif; background: linear-gradient(to bottom, #1A2533, #111827); color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
         .animate-fade-in { animation: fadeIn 1s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
         .hover-scale { transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.05); }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        .card { background: #1F2A44; border: 1px solid #2D3748; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen text-center p-4 bg-gradient-dark animate-fade-in">
+<body class="flex flex-col items-center justify-center min-h-screen text-center p-4 animate-fade-in">
     <div class="max-w-lg card p-8 rounded-lg">
-        <h1 class="text-4xl font-extrabold mb-4">Payment Successful!</h1>
-        <p class="text-lg text-gray-400 mb-8">Welcome to Cogmatiq Pro. Your account is now upgraded, unlocking unlimited document analysis and advanced features.</p>
+        <h1 class="text-3xl md:text-4xl font-extrabold mb-4">Payment Successful!</h1>
+        <p class="text-lg text-gray-400 mb-8">Welcome to Cogmatiq Pro. Your account is now upgraded with unlimited Cortices, document uploads, and persistent chat memory.</p>
         <a href="/dashboard.html" class="accent-bg text-white font-semibold py-3 px-6 rounded-lg text-lg hover-scale">Go to Your Dashboard</a>
     </div>
-    </body>
+</body>
 </html>

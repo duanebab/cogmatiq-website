@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account - Cogmatiq</title>
-    <meta name="description" content="Securely manage your Cogmatiq account and subscription. Access advanced AI-powered knowledge base features.">
+    <meta name="description" content="Securely manage your Cogmatiq account and subscription.">
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -18,44 +18,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <script>
-        // --- START: Environment Detection ---
-        let apiBaseUrl;
-        // *** Verify/Update these hostnames if yours are different ***
-        const stagingHostname = 'staging.cogmatiq.com'; 
-        const productionHostname = 'cogmatiq.com';      
-        const currentHostname = window.location.hostname;
-
-        if (currentHostname === stagingHostname || currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-          // Use staging API for staging domain or local development
-          apiBaseUrl = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app'; 
-          console.log('Environment: Staging | API:', apiBaseUrl); 
-        } else {
-          // Default to production API for any other hostname (like cogmatiq.com)
-          apiBaseUrl = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app'; 
-          console.log('Environment: Production | API:', apiBaseUrl);
-        }
-        // --- END: Environment Detection ---
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
+        body { font-family: 'Manrope', sans-serif; background: linear-gradient(to bottom, #1A2533, #111827); color: #E5E7EB; }
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
-        .section-padding { padding: 5rem 2rem; }
-        @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
-        .animate-fade-in { animation: fadeIn 1s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
         .hover-scale { transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.05); }
         .card { background: #1F2A44; border: 1px solid #2D3748; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="w-full">
+<body class="w-full min-h-screen">
 
     <header class="py-6 px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-10 shadow-sm">
         <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
@@ -63,12 +42,12 @@
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
-            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Back to Dashboard</a>
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Dashboard</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
 
-    <main class="section-padding pt-24 bg-gradient-dark animate-fade-in">
+    <main class="pt-32 pb-12 px-4 animate-fade-in">
         <div class="max-w-xl mx-auto">
             <h1 class="text-3xl font-bold mb-6">My Account</h1>
             <div class="card p-8 rounded-lg space-y-6">
@@ -91,10 +70,13 @@
     </main>
 
     <script>
+<<<<<<< Updated upstream
         const supabaseUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
         
+=======
+>>>>>>> Stashed changes
         const userEmailEl = document.getElementById('user-email');
         const subStatusEl = document.getElementById('sub-status');
         const billingButton = document.getElementById('billing-button');
@@ -103,59 +85,73 @@
 
         let userToken = null;
 
-        async function main() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                userToken = session.access_token;
-                userEmailEl.textContent = session.user.email;
-                fetchSubscriptionStatus();
-            } else {
-                window.location.href = '/login.html';
-            }
+        async function initializeAccount() {
+            const session = await getSessionOrRedirect();
+            if (!session) return; // Redirect will happen inside helper
+
+            userToken = session.access_token;
+            userEmailEl.textContent = session.user.email;
+            fetchSubscriptionStatus();
         }
-        main();
 
         async function fetchSubscriptionStatus() {
-            // *** Use apiBaseUrl here ***
-            const res = await fetch(`${apiBaseUrl}/subscription-status`, { headers: { 'Authorization': `Bearer ${userToken}` } });
-            const data = await res.json();
-            
-            billingButton.disabled = false;
+            try {
+                const res = await fetch(`${apiBaseUrl}/subscription-status`, { headers: { 'Authorization': `Bearer ${userToken}` } });
+                if (!res.ok) throw new Error('Could not load subscription status.');
+                
+                const data = await res.json();
+                
+                billingButton.disabled = false;
 
-            if (data.is_pro) {
-                subStatusEl.textContent = 'Pro Plan';
-                subStatusEl.classList.add('text-green-400');
-                billingButton.textContent = 'Manage Subscription';
-                
-                billingButton.addEventListener('click', async () => {
-                    messageEl.textContent = 'Redirecting to billing portal...';
-                    billingButton.disabled = true;
-                    try {
-                        // *** Use apiBaseUrl here ***
-                        const response = await fetch(`${apiBaseUrl}/create-customer-portal-session`, {
-                            method: 'POST',
-                            headers: { 'Authorization': `Bearer ${userToken}` }
-                        });
-                        if (!response.ok) throw new Error('Could not create portal session.');
-                        const { url } = await response.json();
-                        window.location.href = url;
-                    } catch (err) {
-                        messageEl.textContent = `Error: ${err.message}`;
-                        billingButton.disabled = false;
-                    }
-                });
-            } else {
-                subStatusEl.textContent = 'Free Plan';
-                subStatusEl.classList.add('text-gray-400');
-                billingButton.textContent = 'Upgrade to Pro';
-                
-                billingButton.addEventListener('click', () => {
-                    window.location.href = '/pricing.html';
-                });
+                if (data.is_pro) {
+                    subStatusEl.textContent = 'Pro Plan';
+                    subStatusEl.classList.add('text-green-400');
+                    billingButton.textContent = 'Manage Subscription';
+                    billingButton.addEventListener('click', manageSubscription);
+                } else {
+                    subStatusEl.textContent = 'Free Plan';
+                    subStatusEl.classList.add('text-gray-400');
+                    billingButton.textContent = 'Upgrade to Pro';
+                    billingButton.addEventListener('click', () => {
+                        window.location.href = '/pricing.html';
+                    });
+                }
+            } catch (err) {
+                subStatusEl.textContent = 'Error';
+                subStatusEl.classList.add('text-red-400');
+                billingButton.textContent = 'Retry';
+                billingButton.disabled = false;
+                billingButton.addEventListener('click', fetchSubscriptionStatus);
             }
         }
         
-        logoutButton.addEventListener('click', async () => { await supabaseClient.auth.signOut(); window.location.href = '/'; });
+        async function manageSubscription() {
+            messageEl.textContent = 'Redirecting to billing portal...';
+            billingButton.disabled = true;
+            try {
+                const response = await fetch(`${apiBaseUrl}/create-customer-portal-session`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({detail: 'Could not create portal session.'}));
+                    throw new Error(err.detail);
+                }
+                const { url } = await response.json();
+                window.location.href = url;
+            } catch (err) {
+                messageEl.textContent = `Error: ${err.message}`;
+                billingButton.disabled = false;
+            }
+        }
+        
+        logoutButton.addEventListener('click', async () => { 
+            await supabaseClient.auth.signOut(); 
+            window.location.href = '/'; 
+        });
+
+        // Run initialization
+        initializeAccount();
     </script>
 </body>
 </html>
