@@ -1,10 +1,15 @@
 // supabaseClient.js
 
 // --- 1. DEFINE API & SUPABASE CREDENTIALS ---
-const apiBaseUrlProd = 'https://cogmatiq-api-849853960395.us-central1.run.app';
-const supabaseUrlProd = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-const supabaseAnonKeyProd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU'; // *** REPLACE THIS! ***
 
+// --- Production ---
+// This is your live API service URL from the 'cogmatiq-staging' project
+const apiBaseUrlProd = 'https://cogmatiq-api-6wh3xe6bsa-uc.a.run.app';
+const supabaseUrlProd = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
+// This is your correct public anon key
+const supabaseAnonKeyProd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU';
+
+// --- Staging ---
 const apiBaseUrlStaging = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app';
 const supabaseUrlStaging = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
 const supabaseAnonKeyStaging = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA';
