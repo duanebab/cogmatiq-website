@@ -3,7 +3,7 @@
 // --- 1. DEFINE API & SUPABASE CREDENTIALS ---
 const apiBaseUrlProd = 'https://cogmatiq-api-849853960395.us-central1.run.app';
 const supabaseUrlProd = 'https://wzekdxvvynpvisbvkiqg.supabase.co';
-const supabaseAnonKeyProd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDQ3MDk3MCwiZXhwIjoyMDc2MDQ2OTcwfQ.H3dEicndkfRvlw2ycpbtYkUfZ9hWu0CFzJCzagTmj2s'; // *** REPLACE THIS! ***
+const supabaseAnonKeyProd = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6ZWtkeHZ2eW5wdmlzYnZraXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzA5NzAsImV4cCI6MjA3NjA0Njk3MH0.CGXF6Txv-OATQdaus08GohMHRyytye59hqaD0Q4BOSU'; // *** REPLACE THIS! ***
 
 const apiBaseUrlStaging = 'https://cogmatiq-api-staging-xdw7ikkfbq-uc.a.run.app';
 const supabaseUrlStaging = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
