@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cogmatiq</title>
-    <meta name="description" content="Manage your AI-powered Cortices with Cogmatiq. Create, organize, and query documents for actionable insights.">
+    <meta name="description" content="Your central hub for managing your AI-powered knowledge cortices.">
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="msapplication-TileColor" content="#1A2533">
     <meta name="theme-color" content="#1A2533">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabaseClient.js"></script>
@@ -26,134 +26,89 @@
         .accent-text { color: #00B5AD; }
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
-        .section-padding { padding: 5rem 1rem; } /* Mobile-friendly padding */
-        @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
-        .animate-fade-in { animation: fadeIn 1s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .bg-gradient-dark { background: linear-gradient(to bottom, #1A2533, #111827); }
-        .hover-scale { transition: transform 0.3s ease; }
-        .hover-scale:hover { transform: scale(1.05); }
         .card { background: #1F2A44; border: 1px solid #2D3748; }
-        
-        /* Modal Tab Styles */
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.03); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .modal-tab {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: -1px;
             font-weight: 600;
-            color: #9CA3AF; /* gray-400 */
+            color: #9CA3AF;
             border-bottom: 2px solid transparent;
-            cursor: pointer;
-            transition: color 0.2s, border-color 0.2s;
+            transition: all 0.2s;
         }
-        .modal-tab:hover { color: #D1D5DB; }
+        .modal-tab:hover {
+            color: #E5E7EB;
+        }
         .modal-tab.active {
-            color: #E5E7EB; /* gray-200 */
-            border-bottom-color: #00B5AD; /* accent-text */
+            color: #00B5AD;
+            border-bottom-color: #00B5AD;
         }
         .modal-panel { display: none; }
         .modal-panel.active { display: block; }
-
-         /* Tooltip */
-        [title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-bottom: 5px;
-            background-color: #111827;
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 50;
-        }
-        [title] {
-            position: relative;
-        }
     </style>
 </head>
 <body class="w-full min-h-screen">
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-40 shadow-sm">
-        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div class="flex items-center gap-2 md:gap-6">
-            <div id="nav-links-container" class="flex items-center gap-2 md:gap-6">
-                </div>
-            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
+        <div class="flex items-center gap-6">
+            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">My Library</a>
             <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
 
-    <main class="section-padding pt-32 animate-fade-in">
-        <div class="max-w-5xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
-                <h1 class="text-3xl md:text-4xl font-bold">Your Cortices</h1>
-                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale disabled:opacity-50 w-full md:w-auto" disabled> 
-                    + Create New Cortex
-                </button>
+    <main class="pt-32 pb-12 px-4 md:px-8 animate-fade-in">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="mb-8 p-6 card rounded-lg flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm font-semibold text-gray-400">Account</p>
+                    <p id="user-email" class="font-semibold text-white">Loading...</p>
+                </div>
+                <div id="account-status" class="text-center md:text-right">
+                    <p class="text-sm text-gray-500">Loading subscription...</p>
+                </div>
             </div>
 
-            <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5 mb-4">
-                <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">My Cortices</h1>
+                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale">
+                    + New Cortex
+                </button>
             </div>
-            <p id="progress-text" class="text-center text-sm text-gray-400 mb-4 hidden"></p>
             
-            <div id="cortex-list" class="space-y-6">
-                <p id="loading-text" class="text-gray-400 text-center py-8">Authenticating and loading data...</p>
+            <div id="cortex-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="cortex-loader" class="card rounded-lg p-6">
+                    <div class="animate-pulse">
+                        <div class="h-6 bg-gray-700 rounded-md w-3/4 mb-4"></div>
+                        <div class="h-4 bg-gray-700 rounded-md w-1/2 mb-6"></div>
+                        <div class="h-10 bg-gray-700 rounded-md w-full"></div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </main>
     
-    <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.txt,.md,.epub">
-
-    <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="cortex-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="modal-content">
-            <h2 id="modal-title" class="text-xl font-semibold mb-4 px-6 pt-6 text-white">Add Sources to Cortex</h2>
+            <h2 id="modal-title" class="text-xl font-semibold mb-6 px-6 pt-6 text-white">Create New Cortex</h2>
             
-            <div class="border-b border-gray-700">
-                <nav class="flex -mb-px px-6" aria-label="Tabs">
-                    <button id="modal-tab-library" role="tab" aria-controls="modal-panel-library" aria-selected="true" class="modal-tab active">From Library</button>
-                    <button id="modal-tab-upload" role="tab" aria-controls="modal-panel-upload" aria-selected="false" class="modal-tab">Upload New</button>
-                    <button id="modal-tab-url" role="tab" aria-controls="modal-panel-url" aria-selected="false" class="modal-tab">From Web URL</button>
-                </nav>
-            </div>
-
-             <div class="modal-panels-container max-h-[70vh] overflow-y-auto">
-                <div id="modal-panel-library" role="tabpanel" class="modal-panel active p-6">
-                    <p class="text-gray-400 text-sm mb-4">Select existing documents from your library to link to this Cortex.</p>
-                    <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border border-gray-700 rounded-md p-3 bg-gray-800/50 mb-4">
-                        <p class="text-gray-500 italic">Loading library...</p> 
-                    </div>
-                    <div class="flex justify-end gap-4">
-                        <button type="button" id="modal-cancel-button-library" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                        <button type="button" id="modal-add-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Add Selected</button> 
-                    </div>
-                </div>
-
-                <div id="modal-panel-upload" role="tabpanel" class="modal-panel p-6">
-                    <p class="text-gray-400 text-sm mb-4">Upload a new PDF, DOCX, TXT, MD, or EPUB file. It will be added to your library and this Cortex.</p>
-                    <button type="button" id="modal-upload-trigger-button" class="w-full text-center accent-text font-semibold p-8 rounded-md border-2 border-dashed border-gray-600 hover:border-accent-text hover:bg-gray-700/50 transition-colors">
-                        Click or Drag File Here
-                    </button>
-                     <p class="text-xs text-center text-gray-500 mt-2">Max file size: 100MB</p> 
-                     <div class="flex justify-end gap-4 mt-6">
-                        <button type="button" id="modal-cancel-button-upload" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                    </div>
-                </div>
-
-                <div id="modal-panel-url" role="tabpanel" class="modal-panel p-6">
-                    <p class="text-gray-400 text-sm mb-4">Add a single webpage. We'll scrape its content and add it as a document to your library and this Cortex.</p>
-                    <input type="url" id="modal-url-input" placeholder="https://example.com/article" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                    <p id="modal-url-message" class="text-sm text-red-400 mt-2 h-4"></p>
-                    <div class="flex justify-end gap-4 mt-2">
-                        <button type="button" id="modal-cancel-button-url" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                        <button type="button" id="modal-add-url-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Add Webpage</button> 
-                    </div>
+             <div class="px-6 pb-6">
+                <label for="cortex-name-input" class="text-sm font-semibold text-gray-400 mb-2 block">Cortex Name</label>
+                <input type="text" id="cortex-name-input" placeholder="e.g., 'Project Titan' or 'Philosophy Notes'" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                <p id="modal-message" class="text-sm text-red-400 mt-2 h-4"></p>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="modal-cancel-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
+                    <button type="button" id="modal-create-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Create</button> 
                 </div>
             </div>
         </div>
@@ -161,652 +116,242 @@
 
 
     <script>
-        // --- 1. ALL GLOBAL VARIABLES ---
+        // --- GLOBALS (from supabaseClient.js) ---
+        // - supabaseClient
+        // - apiBaseUrl
+        // - getSessionOrRedirect
         
-        // Supabase client and API base URL are loaded from supabaseClient.js
-        
-        // --- DOM Elements ---
-        const createCortexButton = document.getElementById('create-cortex-button');
-        const fileInput = document.getElementById('file-input');
-        const cortexList = document.getElementById('cortex-list');
-        const loadingText = document.getElementById('loading-text');
+        // --- API ENDPOINTS ---
+        const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
+        const DOCS_API_ENDPOINT = `${apiBaseUrl}/documents`; 
+        const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
+
+        // --- DOM ELEMENTS ---
+        const userEmailEl = document.getElementById('user-email');
+        const accountStatusEl = document.getElementById('account-status');
         const logoutButton = document.getElementById('logout-button');
-        const navLinksContainer = document.getElementById('nav-links-container');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-        // Modal elements
-        const addDocModal = document.getElementById('add-doc-modal');
+        const cortexListContainer = document.getElementById('cortex-list-container');
+        const cortexLoader = document.getElementById('cortex-loader');
+        
+        // Modal Elements
+        const cortexModal = document.getElementById('cortex-modal');
         const modalContent = document.getElementById('modal-content');
-        const modalDocList = document.getElementById('modal-doc-list');
-        const modalAddButton = document.getElementById('modal-add-button');
-        const modalUrlInput = document.getElementById('modal-url-input');
-        const modalAddUrlButton = document.getElementById('modal-add-url-button');
-        const modalUrlMessage = document.getElementById('modal-url-message');
-        const modalTabs = {
-            library: document.getElementById('modal-tab-library'),
-            upload: document.getElementById('modal-tab-upload'),
-            url: document.getElementById('modal-tab-url')
-        };
-        const modalPanels = {
-            library: document.getElementById('modal-panel-library'),
-            upload: document.getElementById('modal-panel-upload'),
-            url: document.getElementById('modal-panel-url')
-        };
-        const modalCancelButtons = {
-            library: document.getElementById('modal-cancel-button-library'),
-            upload: document.getElementById('modal-cancel-button-upload'),
-            url: document.getElementById('modal-cancel-button-url')
-        };
-        const modalUploadTriggerButton = document.getElementById('modal-upload-trigger-button');
-        
-        // --- State Variables ---
+        const createCortexButton = document.getElementById('create-cortex-button');
+        const modalCancelButton = document.getElementById('modal-cancel-button');
+        const modalCreateButton = document.getElementById('modal-create-button');
+        const cortexNameInput = document.getElementById('cortex-name-input');
+        const modalMessage = document.getElementById('modal-message');
+
+        // --- STATE ---
         let userToken = null;
-        let currentCortexId = null; 
-        let allLibraryDocs = []; 
-        let isLibraryLoaded = false;
-        const activePolls = {};
+        let allCortices = [];
 
-        // --- 2. AUTHENTICATION & INITIALIZATION ---
-        
-        function initializeDashboard() {
-            console.log("Dashboard loaded. Setting up auth listener...");
-            
-            // supabaseClient is loaded from supabaseClient.js
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                console.log(`Auth Event: ${event}`);
-
-                if (event === 'SIGNED_OUT') {
-                    console.warn("Auth state: SIGNED_OUT. Redirecting to login.");
-                    window.location.href = '/login.html';
-                    return;
-                }
-                
-                if (session && session.access_token) {
-                    if (userToken !== session.access_token) {
-                        userToken = session.access_token;
-                        console.log("Token set/updated. Starting progressive data fetch...");
-                        
-                        // --- This is the fast-loading logic ---
-                        fetchSubscriptionAndCortices(); 
-                        fetchLibraryDocumentsInBackground();
-                    }
-                } else if (!session && event === 'INITIAL_SESSION') { 
-                    console.warn("Auth state: No session on load. Redirecting to login.");
-                    window.location.href = '/login.html';
-                }
-            });
-        }
-        
-        // --- 3. DATA FETCHING (PROGRESSIVE) ---
-
+        // --- API HELPER ---
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
-            const headers = {
-                ...options.headers,
-                'Authorization': `Bearer ${userToken}`
+            
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                    'Content-Type': 'application/json'
+                }
             };
             
-            // apiBaseUrl is loaded from supabaseClient.js
-            const response = await fetch(`${apiBaseUrl}${endpoint}`, { ...options, headers });
+            const mergedOptions = {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers
+                }
+            };
+
+            const response = await fetch(endpoint, mergedOptions);
             
             if (!response.ok) {
                 let errorDetail = `API Error: ${response.status} ${response.statusText}`;
                 try {
                     const errorData = await response.json();
                     errorDetail = errorData.detail || errorDetail;
-                } catch (e) {}
+                } catch (e) {
+                    // Try to get text if JSON parsing fails
+                    errorDetail = await response.text() || errorDetail;
+                }
                 throw new Error(errorDetail);
             }
-            
-            // Handle 202 (Accepted) or 204 (No Content)
-            if (response.status === 202 || response.status === 204) {
-                return null;
-            }
-            
+            if (response.status === 202 || response.status === 204) return null;
             return response.json();
         }
 
-        // STEP 1: Fetch and render the most critical UI elements
-        async function fetchSubscriptionAndCortices() {
-            loadingText.textContent = 'Loading your Cortices...';
-            loadingText.classList.remove('hidden');
-            cortexList.innerHTML = ''; 
-            createCortexButton.disabled = true;
+        // --- INITIALIZATION ---
+        async function initializeDashboard() {
+            const session = await getSessionOrRedirect();
+            if (!session) return; 
 
+            userToken = session.access_token;
+            userEmailEl.textContent = session.user.email;
+
+            setupListeners();
+            
+            // Fetch critical data in parallel
             try {
-                // Fetch in parallel for speed
-                const [subStatus, cortices] = await Promise.all([
-                    fetchApi('/subscription-status'),
-                    fetchApi('/cortices')
-                ]);
-                
-                renderSubscriptionStatus(subStatus.is_pro);
-                renderCortices(cortices);
-                
-                createCortexButton.disabled = false; 
-                loadingText.classList.add('hidden');
-
+                // We only await the most critical data.
+                await fetchSubscriptionAndCortices();
             } catch (error) {
                 console.error("Fetch Critical Data Error:", error);
-                loadingText.textContent = `Error loading data: ${error.message}`;
-                loadingText.classList.add('text-red-400');
-                createCortexButton.disabled = false; 
-            }
-        }
-
-        // STEP 2: Fetch the (slower) document library in the background
-        async function fetchLibraryDocumentsInBackground() {
-            isLibraryLoaded = false;
-            try {
-                allLibraryDocs = await fetchApi('/documents'); 
-                isLibraryLoaded = true;
-                console.log("Document library loaded in background.");
+                // Try to parse a JSON error message if one exists
+                let detail = error.message;
+                try {
+                    const errorJson = JSON.parse(error.message.match(/{.*}/)[0]);
+                    detail = errorJson.details || errorJson.message || "Unknown error";
+                } catch(e) {}
                 
-                // If modal is already open, re-render its content
-                if (!addDocModal.classList.contains('hidden') && modalPanels.library.classList.contains('active')) {
-                    renderLibraryModal();
-                }
-
-            } catch (error) {
-                console.error("Fetch Library Docs Error:", error);
-                if (!addDocModal.classList.contains('hidden') && modalPanels.library.classList.contains('active')) {
-                    modalDocList.innerHTML = `<p class="text-red-400 text-center">Error loading document library: ${error.message}</p>`;
-                }
+                cortexListContainer.innerHTML = `<p class="text-red-400">Error loading dashboard: ${detail}</p>`;
             }
         }
         
-        // --- 4. UI RENDERING ---
-        
+        function setupListeners() {
+            logoutButton.addEventListener('click', async () => { 
+                await supabaseClient.auth.signOut(); 
+                window.location.href = '/login.html'; 
+            });
+            
+            // Modal Listeners
+            createCortexButton.addEventListener('click', openCreateModal);
+            modalCancelButton.addEventListener('click', closeCreateModal);
+            cortexModal.addEventListener('click', (e) => {
+                if (e.target === cortexModal) closeCreateModal();
+            });
+            
+            cortexNameInput.addEventListener('input', () => {
+                modalCreateButton.disabled = cortexNameInput.value.trim().length < 3;
+                modalMessage.textContent = '';
+            });
+            
+            modalCreateButton.addEventListener('click', createCortex);
+        }
+
+        // --- DATA FETCHING ---
+        async function fetchSubscriptionAndCortices() {
+            cortexLoader.classList.remove('hidden');
+            cortexListContainer.innerHTML = ''; 
+            cortexListContainer.appendChild(cortexLoader);
+
+            // Fetch status and cortices at the same time
+            const [statusData, corticesData] = await Promise.all([
+                fetchApi(STATUS_API_ENDPOINT),
+                fetchApi(CORTICES_API_ENDPOINT)
+            ]);
+            
+            // Render Status
+            renderSubscriptionStatus(statusData.is_pro);
+            
+            // Render Cortices
+            allCortices = corticesData || [];
+            renderCortexList();
+        }
+
+        // --- RENDERING ---
         function renderSubscriptionStatus(isPro) {
-             if (isPro) {
-                navLinksContainer.innerHTML = `
-                    <span class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50">
-                        Pro Plan
-                    </span>
+            let statusHTML = '';
+            if (isPro) {
+                statusHTML = `
+                    <p class="text-sm font-semibold text-green-400">Pro Plan</p>
+                    <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
                 `;
             } else {
-                navLinksContainer.innerHTML = `
-                    <span class="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-gray-600/20 text-gray-400 border border-gray-600/50">
-                        Free Plan
-                    </span>
-                    <a href="/pricing.html" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale hidden md:inline-block">
-                        Upgrade to Pro
-                    </a>
+                statusHTML = `
+                    <p class="text-sm font-semibold text-gray-400">Free Plan</p>
+                    <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
                 `;
             }
+            accountStatusEl.innerHTML = statusHTML;
         }
 
-        function renderCortices(cortices) {
-            loadingText.classList.add('hidden');
-            cortexList.innerHTML = ''; 
-            if (!cortices || cortices.length === 0) {
-                cortexList.innerHTML = '<p class="text-gray-400 text-center py-8">No Cortices yet. Click "Create New Cortex" to get started.</p>';
+        function renderCortexList() {
+            cortexLoader.remove(); // Remove skeleton loader
+            
+            if (allCortices.length === 0) {
+                cortexListContainer.innerHTML = `
+                    <div class="card rounded-lg p-8 text-center col-span-1 md:col-span-2 lg:col-span-3">
+                        <h3 class="text-xl font-bold mb-2">Welcome to Cogmatiq</h3>
+                        <p class="text-gray-400 mb-6">You don't have any Cortices yet. A Cortex is an AI-powered knowledge base.</p>
+                        <button onclick="openCreateModal()" class="accent-bg text-white font-semibold py-3 px-6 rounded-md hover-scale">
+                            Create Your First Cortex
+                        </button>
+                    </div>
+                `;
                 return;
             }
-            
-            cortices.forEach(cortex => {
-                const cortexElementId = `cortex-${cortex.id}`; 
-                const docListHTML = cortex.documents && cortex.documents.length > 0 
-                    ? cortex.documents.map(doc => {
-                        const docElementId = `doc-${doc.id}-${cortex.id}`; 
-                        let statusIndicator = '';
-                        // Start polling for any doc that is "processing"
-                        if (doc.status === 'processing') {
-                            statusIndicator = `<span class="text-xs font-semibold text-yellow-400 animate-pulse ml-2">(Processing...)</span>`;
-                            pollDocumentStatus(doc.id, cortex.id, doc.file_name); 
-                        } else if (doc.status === 'error') {
-                            statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2" title="${doc.error_message || 'Processing failed'}">(Error)</span>`; 
-                        }
-                        
-                        const actionButtonHTML = (doc.status === 'ready' || doc.status === 'ready_no_graph') ? 
-                            `<button title="Remove from this Cortex" onclick="unlinkDocument(event, '${cortex.id}', '${doc.id}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto p-1">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
-                             </button>` : '';
 
-                        return `<li id="${docElementId}" class="flex justify-between items-center group/doc py-1 text-sm text-gray-300"> 
-                                    <span class="truncate pr-2" title="${doc.file_name}">${doc.file_name}${statusIndicator}</span> 
-                                    <div class="doc-status flex-shrink-0">${actionButtonHTML}</div>
-                                </li>`;
-                    }).join('') 
-                    : '<li class="text-gray-500 text-sm italic">No documents added yet.</li>'; 
-
-                const cortexElement = document.createElement('div');
-                cortexElement.id = cortexElementId; 
-                cortexElement.className = 'card p-6 rounded-lg hover:shadow-lg transition-shadow group/cortex'; 
-                cortexElement.innerHTML = `
-                    <div class="flex flex-col md:flex-row justify-between md:items-start mb-4 gap-4">
-                        <div class="flex-grow min-w-0">
-                            <h3 class="text-xl font-semibold text-white mb-1 truncate" title="${cortex.name}">${cortex.name}</h3> 
-                            <p class="text-xs text-gray-500">Created: ${new Date(cortex.created_at).toLocaleDateString()}</p> 
+            cortexListContainer.innerHTML = allCortices.map(cortex => {
+                const docCount = cortex.documents ? cortex.documents.length : 0;
+                const docText = docCount === 1 ? '1 document' : `${docCount} documents`;
+                
+                return `
+                    <div class="card rounded-lg p-6 flex flex-col justify-between hover-scale transition-all duration-300 shadow-lg hover:shadow-cyan-500/10">
+                        <div>
+                            <h3 class="text-xl font-bold truncate mb-2" title="${cortex.name}">${cortex.name}</h3>
+                            <p class="text-sm text-gray-400 mb-6">${docText}</p>
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0 w-full md:w-auto"> 
-                            <button title="Delete Cortex" class="text-sm font-semibold text-red-500 opacity-0 group-hover/cortex:opacity-100 transition-opacity hover:text-red-400 p-1" onclick="deleteCortex(event, '${cortex.id}')"> 
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
-                            </button>
-                            <button class="text-sm font-semibold accent-text hover:underline whitespace-nowrap" onclick="openAddDocumentModal('${cortex.id}')">+ Add Source</button> 
-                            <a href="/chat.html?cortex_id=${cortex.id}" class="text-sm font-semibold accent-bg text-white py-2 px-4 rounded-md hover-scale whitespace-nowrap w-full text-center md:w-auto">Open Chat</a>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-700 pt-4">
-                        <h4 class="text-sm font-semibold text-gray-400 mb-2">Sources:</h4> 
-                        <ul class="space-y-1">${docListHTML}</ul>
+                        <a href="/chat.html?cortex_id=${cortex.id}" class="block text-center w-full accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm">
+                            Open Cortex
+                        </a>
                     </div>
                 `;
-                cortexList.appendChild(cortexElement);
-            });
+            }).join('');
         }
 
-        async function pollDocumentStatus(docId, cortexId, originalFileName) {
-            if (activePolls[docId]) return; 
-            console.log(`Polling status for doc: ${docId} in cortex ${cortexId}`);
+        // --- MODAL & CORTEX ACTIONS ---
+        function openCreateModal() {
+            cortexNameInput.value = '';
+            modalMessage.textContent = '';
+            modalCreateButton.disabled = true;
             
-            activePolls[docId] = setInterval(async () => {
-                try {
-                    const doc = await fetchApi(`/documents/${docId}`);
-                    const docElement = document.getElementById(`doc-${docId}-${cortexId}`);
-
-                    // Stop polling if doc is ready or errored
-                    if (doc.status === 'ready' || doc.status === 'ready_no_graph' || doc.status === 'error') {
-                        clearInterval(activePolls[docId]);
-                        delete activePolls[docId];
-                        console.log(`Polling finished for doc: ${docId}, status: ${doc.status}`);
-
-                        if (docElement) {
-                             const statusSpan = docElement.querySelector('span'); 
-                             const statusDiv = docElement.querySelector('.doc-status');
-                             if (statusSpan && statusDiv) {
-                                let statusIndicator = '';
-                                let actionButtonHTML = '';
-                                const fileName = doc.file_name || originalFileName;
-                                
-                                if(doc.status === 'ready' || doc.status === 'ready_no_graph') {
-                                     actionButtonHTML = `<button title="Remove from this Cortex" onclick="unlinkDocument(event, '${cortexId}', '${docId}')" class="text-gray-500 hover:text-red-400 opacity-0 group-hover/doc:opacity-100 transition-opacity ml-auto p-1">
-                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
-                                                      </button>`;
-                                } else { // Error status
-                                    statusIndicator = `<span class="text-xs font-semibold text-red-400 ml-2" title="${doc.error_message || 'Processing failed'}">(Error)</span>`;
-                                }
-                                
-                                statusSpan.title = fileName;
-                                statusSpan.innerHTML = `${fileName}${statusIndicator}`; 
-                                statusDiv.innerHTML = actionButtonHTML; 
-                             }
-                        }
-                        
-                        // Refresh library docs in background
-                        fetchLibraryDocumentsInBackground();
-                    }
-                    // Keep polling if status is still 'processing'
-                } catch (error) {
-                    console.error(`Polling error for ${docId}:`, error);
-                    clearInterval(activePolls[docId]);
-                    delete activePolls[docId];
-                    
-                    const docElement = document.getElementById(`doc-${docId}-${cortexId}`);
-                     if (docElement) {
-                         const statusSpan = docElement.querySelector('span'); 
-                         if (statusSpan) {
-                            statusSpan.innerHTML = `${originalFileName} <span class="text-xs font-semibold text-red-400 ml-2">(Polling Error)</span>`;
-                         }
-                     }
-                }
-            }, 5000); 
-        }
-        
-        // --- 9. API ACTIONS (Refactored for Speed) ---
-        
-        // *** THIS FUNCTION IS THE FIX ***
-        async function createCortex() {
-             const cortexName = prompt('Enter a name for your new Cortex (at least 3 characters):');
-            if (!cortexName || cortexName.trim().length < 3 || !userToken) {
-                 if (cortexName !== null && cortexName.trim().length < 3) alert("Cortex name must be at least 3 characters.");
-                 return;
-             }
-            
-            createCortexButton.disabled = true; 
-            createCortexButton.textContent = 'Creating...'; 
-
-            try {
-                const newCortex = await fetchApi('/cortices', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: cortexName.trim() }) 
-                });
-
-                // *** RELIABILITY FIX: Re-fetch the list from the server ***
-                // This avoids the 'null' pointer bug in the old optimistic render.
-                await fetchSubscriptionAndCortices();
-                
-            } catch (error) {
-                 console.error("Create Cortex Error:", error);
-                alert(`Error creating Cortex: ${error.message}`);
-            } finally {
-                 createCortexButton.disabled = false;
-                 createCortexButton.textContent = '+ Create New Cortex'; 
-            }
-        }
-        
-        async function unlinkDocument(event, cortexId, docId) { 
-             if (!userToken) return;
-            if (confirm('Remove this document from this Cortex? (The document will remain in your library).')) {
-                 const button = event.target.closest('button');
-                 if(button) button.disabled = true;
-
-                try {
-                    // This endpoint returns 202, so fetchApi will return null
-                    await fetchApi(`/cortices/${cortexId}/documents/${docId}`, { method: 'DELETE' });
-                    
-                    console.log(`Document ${docId} unlinked from Cortex ${cortexId}.`);
-                    
-                    // *** SPEED FIX: Optimistic UI Update ***
-                    const listItem = document.getElementById(`doc-${docId}-${cortexId}`);
-                    if (listItem) {
-                        const ul = listItem.parentElement;
-                        listItem.remove();
-                        if (ul && ul.children.length === 0) { 
-                            ul.innerHTML = '<li class="text-gray-500 text-sm italic">No documents added yet.</li>';
-                        }
-                    }
-                } catch (error) {
-                     console.error("Unlink Document Error:", error);
-                    alert(`Error removing document: ${error.message}`);
-                    if(button) button.disabled = false;
-                }
-            }
-        }
-
-        async function deleteCortex(event, cortexId) { 
-             if (!userToken) return;
-            if (confirm('Are you sure you want to delete this Cortex?\n\nThis action cannot be undone. Documents within it will NOT be deleted from your library.')) {
-                 const button = event.target.closest('button');
-                 if(button) button.disabled = true;
-
-                try {
-                    await fetchApi(`/cortices/${cortexId}`, { method: 'DELETE' });
-                    console.log(`Cortex ${cortexId} deleted.`);
-                    
-                     // *** SPEED FIX: Optimistic UI Update ***
-                     const cardElement = document.getElementById(`cortex-${cortexId}`); 
-                     if(cardElement) {
-                         cardElement.remove();
-                         if (cortexList.children.length === 0) {
-                             cortexList.innerHTML = '<p class="text-gray-400 text-center py-8">No Cortices yet. Click "Create New Cortex" to get started.</p>';
-                         }
-                     }
-                } catch (error) {
-                    console.error("Delete Cortex Error:", error);
-                    alert(`Error deleting Cortex: ${error.message}`);
-                     if(button) button.disabled = false;
-                }
-            }
-        }
-        
-        // --- 10. MODAL LOGIC ---
-        function openAddDocumentModal(cortexId) { 
-            currentCortexId = cortexId; 
-            switchModalTab('library'); 
-            
-            renderLibraryModal(); // This will show "Loading..." if not ready
-            
-            addDocModal.classList.remove('hidden');
+            cortexModal.classList.remove('hidden');
             requestAnimationFrame(() => { 
-                 addDocModal.classList.remove('opacity-0');
+                 cortexModal.classList.remove('opacity-0');
                  modalContent.classList.remove('scale-95', 'opacity-0');
             });
-             modalUrlInput.value = ''; 
-             modalUrlMessage.textContent = ''; 
         }
-        
-        function closeAddDocumentModal() {
-            addDocModal.classList.add('opacity-0');
+
+        function closeCreateModal() {
+            cortexModal.classList.add('opacity-0');
             modalContent.classList.add('scale-95', 'opacity-0');
             setTimeout(() => { 
-                addDocModal.classList.add('hidden');
-                 modalUrlInput.value = '';
-                 modalUrlMessage.textContent = '';
-                 modalAddButton.disabled = true; 
-                 modalAddUrlButton.disabled = true; 
-                 modalAddUrlButton.textContent = 'Add Webpage'; 
+                cortexModal.classList.add('hidden');
             }, 300); 
         }
 
-        function renderLibraryModal() {
-             modalDocList.innerHTML = ''; 
-             modalAddButton.disabled = true; 
-
-            if (!isLibraryLoaded) {
-                 modalDocList.innerHTML = '<p class="text-gray-400 text-center italic">Loading document library...</p>';
-                 return;
+        async function createCortex() {
+            const name = cortexNameInput.value.trim();
+            if (name.length < 3) {
+                modalMessage.textContent = "Name must be at least 3 characters.";
+                return;
             }
-
-            if (allLibraryDocs.length === 0) {
-                modalDocList.innerHTML = '<p class="text-gray-400 text-center italic">Your document library is empty. Use the "Upload New" or "From Web URL" tab.</p>';
-            } else {
-                 const cortexElement = document.getElementById(`cortex-${currentCortexId}`); 
-                 const existingDocIds = cortexElement ? Array.from(cortexElement.querySelectorAll('ul li[id^="doc-"]')).map(li => li.id.split('-')[1]) : [];
-
-                modalDocList.innerHTML = allLibraryDocs.map(doc => {
-                    const isLinked = existingDocIds.includes(doc.id);
-                    // Disable checkbox if linked OR if doc is not ready
-                    const isDisabled = isLinked || (doc.status !== 'ready' && doc.status !== 'ready_no_graph');
-                    const disabledAttr = isDisabled ? 'disabled' : '';
-                    const labelClass = isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700/50 cursor-pointer';
-                    
-                    let statusIndicator = '';
-                    if (doc.status === 'processing') statusIndicator = '<span class="text-xs text-yellow-400 ml-1">(Processing...)</span>';
-                    else if (doc.status === 'error') statusIndicator = '<span class="text-xs text-red-400 ml-1">(Error)</span>';
-
-                    return `
-                    <label class="flex items-center gap-3 p-2 rounded-md ${labelClass}">
-                        <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text focus:ring-offset-0 focus:ring-1" ${disabledAttr}>
-                        <span class="truncate" title="${doc.file_name}">${doc.file_name}${statusIndicator}</span>
-                        ${isLinked ? '<span class="text-xs text-gray-500 ml-auto">(Already Added)</span>' : ''}
-                    </label>
-                `;
-                }).join('');
-
-                 modalDocList.removeEventListener('change', updateAddButtonState); 
-                 modalDocList.addEventListener('change', updateAddButtonState); 
-            }
-        }
-
-        function updateAddButtonState() {
-             const selectedCount = modalDocList.querySelectorAll('input:checked:not(:disabled)').length;
-             modalAddButton.disabled = selectedCount === 0;
-        }
-        
-        Object.keys(modalTabs).forEach(key => {
-            modalTabs[key].addEventListener('click', () => switchModalTab(key));
-        });
-
-        function switchModalTab(activeTabKey) {
-              Object.keys(modalTabs).forEach(key => {
-                modalTabs[key].classList.toggle('active', key === activeTabKey);
-                modalTabs[key].setAttribute('aria-selected', key === activeTabKey);
-                modalPanels[key].classList.toggle('active', key === activeTabKey);
-            });
-             if (activeTabKey === 'library') {
-                renderLibraryModal(); 
-            }
-             if (activeTabKey === 'url') {
-                modalUrlInput.value = ''; 
-                modalUrlMessage.textContent = ''; 
-                modalAddUrlButton.disabled = true; 
-             }
-        }
-
-         Object.values(modalCancelButtons).forEach(button => {
-            button.addEventListener('click', closeAddDocumentModal);
-         });
-
-        modalUploadTriggerButton.addEventListener('click', () => {
-             if (!currentCortexId) return; 
-            fileInput.dataset.cortexId = currentCortexId; 
-            fileInput.click(); 
-        });
-
-        modalAddButton.addEventListener('click', async () => {
-             if (!currentCortexId || !userToken) return;
-            const selectedDocs = Array.from(modalDocList.querySelectorAll('input:checked:not(:disabled)')).map(input => input.value); 
             
-            if (selectedDocs.length === 0) {
-                closeAddDocumentModal();
-                return; 
-            }
-
-            modalAddButton.disabled = true; 
-            modalAddButton.textContent = 'Linking...';
+            modalCreateButton.disabled = true;
+            modalCreateButton.textContent = "Creating...";
+            modalMessage.textContent = '';
 
             try {
-                await fetchApi(`/cortices/${currentCortexId}/link`, {
+                const newCortex = await fetchApi(CORTICES_API_ENDPOINT, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ document_ids: selectedDocs })
+                    body: JSON.stringify({ name: name })
                 });
                 
-                closeAddDocumentModal();
-                await fetchSubscriptionAndCortices();
-
+                // Redirect to the new chat page
+                window.location.href = `/chat.html?cortex_id=${newCortex[0].id}`;
+                
             } catch (error) {
-                console.error("Link Document Error:", error);
-                alert(`Error linking documents: ${error.message}`);
-                 modalAddButton.disabled = false; 
-                 modalAddButton.textContent = 'Add Selected';
-            } 
-        });
-        
-        modalUrlInput.addEventListener('input', () => { 
-             const url = modalUrlInput.value.trim();
-             // Simple check for http/https
-             modalAddUrlButton.disabled = !(url.startsWith('http://') || url.startsWith('https://'));
-             modalUrlMessage.textContent = ''; 
-        });
-
-        modalAddUrlButton.addEventListener('click', async () => {
-              if (!currentCortexId || !userToken) return;
-            const url = modalUrlInput.value.trim();
-
-            modalUrlMessage.textContent = ''; 
-            modalAddUrlButton.disabled = true;
-            modalAddUrlButton.textContent = 'Adding...';
-
-            try {
-                await fetchApi(`/cortices/${currentCortexId}/webpage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url })
-                });
-                
-                closeAddDocumentModal();
-                modalUrlInput.value = '';
-                
-                await fetchSubscriptionAndCortices(); 
-                fetchLibraryDocumentsInBackground(); 
-
-            } catch (error) {
-                 console.error("Add URL Error:", error);
-                 // Handle specific errors from the backend
-                 if (error.message.includes("403")) {
-                     alert('You have reached your document limit. Please upgrade to Pro.');
-                     window.location.href = '/pricing.html';
-                 } else {
-                    modalUrlMessage.textContent = `Error: ${error.message}`;
-                 }
-                 modalAddUrlButton.disabled = false;
-                 modalAddUrlButton.textContent = 'Add Webpage';
-            }
-        });
-
-        createCortexButton.addEventListener('click', createCortex); 
-
-        fileInput.addEventListener('change', () => {
-            const targetCortexId = fileInput.dataset.cortexId;
-            if (fileInput.files.length) {
-                 if (fileInput.files[0].size > 100 * 1024 * 1024) { // 100MB check
-                     alert('File is too large. The maximum upload size is 100MB.');
-                     fileInput.value = ''; 
-                     delete fileInput.dataset.cortexId;
-                     return;
-                 }
-                 if(targetCortexId) {
-                    handleFileUpload(fileInput.files[0], targetCortexId);
-                 }
-            }
-            delete fileInput.dataset.cortexId; 
-        });
-
-        // --- 11. FILE UPLOAD (Refactored for speed) ---
-        async function handleFileUpload(file, cortexId) {
-            if (!userToken || !cortexId) return;
-            closeAddDocumentModal(); 
-            progressContainer.classList.remove('hidden');
-            progressText.classList.remove('hidden');
-            progressText.textContent = `Uploading ${file.name}...`;
-            progressBar.style.width = '25%'; 
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                // Use fetch for modern upload handling
-                const response = await fetch(`${apiBaseUrl}/cortices/${cortexId}/documents`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${userToken}` },
-                    body: formData,
-                });
-
-                progressBar.style.width = '100%';
-
-                if (response.status === 403) {
-                    throw new Error('Upload failed: Limit reached. Please upgrade to Pro.');
-                } else if (response.status === 413) {
-                    throw new Error('Upload failed: File is too large (Max 100MB).');
-                } else if (!response.ok) {
-                    const err = await response.json().catch(() => ({ detail: 'Upload failed. Please check file type/size.' }));
-                    throw new Error(err.detail);
-                }
-
-                progressText.textContent = 'Upload complete. Processing started...';
-                
-                await fetchSubscriptionAndCortices();
-                fetchLibraryDocumentsInBackground();
-                
-                setTimeout(resetUploadUI, 2000); 
-
-            } catch (error) {
-                console.error("Upload Error:", error);
-                progressBar.style.width = '100%';
-                progressBar.classList.add('bg-red-500');
-                progressText.textContent = error.message;
-                if (error.message.includes('Limit reached')) {
-                    setTimeout(() => window.location.href = '/pricing.html', 2000);
-                }
-                setTimeout(resetUploadUI, 4000); 
+                console.error("Create Cortex Error:", error);
+                modalMessage.textContent = `Error: ${error.message}`;
+                modalCreateButton.disabled = false;
+                modalCreateButton.textContent = "Create";
             }
         }
-        
-        function resetUploadUI() {
-             progressContainer.classList.add('hidden');
-            progressText.classList.add('hidden');
-            progressBar.style.width = '0%';
-             progressBar.classList.remove('bg-red-500');
-            fileInput.value = ''; 
-        }
 
-        logoutButton.addEventListener('click', async () => { 
-            console.log("Signing out...");
-            userToken = null; 
-            await supabaseClient.auth.signOut(); 
-             // onAuthStateChange will handle the redirect
-        });
-        
-        // --- 12. Global Function Definitions ---
-        window.openAddDocumentModal = openAddDocumentModal;
-        window.deleteCortex = deleteCortex;
-        window.unlinkDocument = unlinkDocument;
-        
-        // --- 13. Run Initialization ---
+        // --- RUN INITIALIZATION ---
         initializeDashboard();
 
     </script>
