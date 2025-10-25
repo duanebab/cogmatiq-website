@@ -456,6 +456,7 @@
         
         // --- 9. API ACTIONS (Refactored for Speed) ---
         
+        // *** THIS FUNCTION IS THE FIX ***
         async function createCortex() {
              const cortexName = prompt('Enter a name for your new Cortex (at least 3 characters):');
             if (!cortexName || cortexName.trim().length < 3 || !userToken) {
@@ -473,31 +474,9 @@
                     body: JSON.stringify({ name: cortexName.trim() }) 
                 });
 
-                // *** SPEED FIX: Optimistically render the new cortex ***
-                // We add the new cortex to the UI without a full page refetch
-                const newCortexData = newCortex[0]; // API returns a list
-                newCortexData.documents = []; // New cortices are empty
-                
-                // Clear the "empty" message if it exists
-                const emptyMessage = cortexList.querySelector('p');
-                if (emptyMessage) emptyMessage.remove();
-                
-                renderCortices([newCortexData, ...Array.from(cortexList.children)
-                    .filter(c => c.id) // Filter out any non-cortex elements
-                    .map(c => {
-                        const docSpans = Array.from(c.querySelectorAll('ul li[id^="doc-"] span'));
-                        return {
-                            id: c.id.replace('cortex-', ''),
-                            name: c.querySelector('h3').title,
-                            created_at: new Date(c.querySelector('p').textContent.replace('Created: ', '')).toISOString(),
-                            documents: docSpans.map(span => ({
-                                id: span.parentElement.id.split('-')[1],
-                                file_name: span.title,
-                                status: span.textContent.includes('Processing') ? 'processing' : (span.textContent.includes('Error') ? 'error' : 'ready')
-                            }))
-                        };
-                    })
-                ]);
+                // *** RELIABILITY FIX: Re-fetch the list from the server ***
+                // This avoids the 'null' pointer bug in the old optimistic render.
+                await fetchSubscriptionAndCortices();
                 
             } catch (error) {
                  console.error("Create Cortex Error:", error);
