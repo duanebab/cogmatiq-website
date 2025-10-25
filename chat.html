@@ -645,6 +645,7 @@
             chatTabButton.dataset.listener = 'true';
         }
         
+        // *** MODIFIED: handleChatSubmit ***
         async function handleChatSubmit(e) {
             e.preventDefault();
             const question = messageInput.value.trim();
@@ -660,20 +661,46 @@
             const historyToSend = chatHistory.slice(0, -1).slice(-10);
             formData.append('chat_history_json', JSON.stringify(historyToSend));
             try {
-                const data = await fetchApi(API_ENDPOINT, {
+                // Use standard fetch for streaming, not fetchApi
+                const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` },
                     body: formData
                 });
-                updateAIMessage(aiMessageElement, data.answer);
-                chatHistory.push({ role: 'ai', content: data.answer });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Failed to fetch stream');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResponse = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    fullResponse += chunk;
+                    
+                    // Update the UI element with the new chunk
+                    updateAIMessage(aiMessageElement, fullResponse, true);
+                }
+                
+                // Add the final full response to chat history
+                chatHistory.push({ role: 'ai', content: fullResponse });
+
             } catch (error) {
-                console.error("Chat API Error:", error);
+                console.error("Chat Stream API Error:", error);
                 const errorMessage = `Sorry, something went wrong: ${error.message}. Please try again.`;
-                updateAIMessage(aiMessageElement, errorMessage);
+                updateAIMessage(aiMessageElement, errorMessage); // Final update with error
                 chatHistory.push({ role: 'ai', content: errorMessage });
             } finally {
                 submitButton.disabled = false;
                 messageInput.focus();
+                // Finalize the message in the UI (show copy button, etc.)
+                updateAIMessage(aiMessageElement, null, false, true);
             }
         }
         
@@ -837,20 +864,44 @@
             return messageWrapper;
         }
 
-        function updateAIMessage(element, text) {
+        // *** MODIFIED: updateAIMessage ***
+        function updateAIMessage(element, text, isStreamChunk = false, isFinalize = false) {
             const typingIndicator = element.querySelector('.typing-indicator');
             const responseContent = element.querySelector('.response-content');
             const copyButton = element.querySelector('.copy-button');
-            if (element) {
+
+            if (isStreamChunk) {
+                // This is a streaming chunk
+                if (typingIndicator) typingIndicator.classList.add('hidden');
+                if (responseContent) {
+                    responseContent.classList.remove('hidden');
+                    // Set the full text content so far
+                    element.dataset.content = text; 
+                    responseContent.innerHTML = marked.parse(text);
+                }
+            } else if (isFinalize) {
+                // This is the end of the stream
+                if (typingIndicator) typingIndicator.classList.add('hidden');
+                if (copyButton) copyButton.classList.remove('hidden');
+                
+                // Final parse of the full content stored in the element
+                const fullText = element.dataset.content || "No response received.";
+                if (responseContent) {
+                    responseContent.innerHTML = marked.parse(fullText);
+                }
+            } else {
+                // This is the original logic (e.g., for history or a non-streamed error)
                 element.dataset.content = text;
+                if (typingIndicator) typingIndicator.classList.add('hidden');
+                if (responseContent) {
+                    responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false });
+                    responseContent.classList.remove('hidden');
+                }
+                if (copyButton) copyButton.classList.remove('hidden');
             }
-            if (typingIndicator) typingIndicator.classList.add('hidden');
-            if (responseContent) {
-                responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false });
-                responseContent.classList.remove('hidden');
-            }
-            if (copyButton) copyButton.classList.remove('hidden');
-            scrollChatToBottom();
+
+            // Always scroll to bottom
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
 
         function copyToClipboard(buttonElement) {
