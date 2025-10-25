@@ -20,6 +20,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="/supabaseClient.js"></script>
 
     <style>
@@ -70,13 +71,10 @@
     </main>
 
     <script>
-<<<<<<< Updated upstream
-        const supabaseUrl = 'https://qcsjjhmbjajgidhqpgdj.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc2pqaG1iamFqZ2lkaHFwZ2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI3NzYsImV4cCI6MjA3NjM4ODc3Nn0.QI4JyOoRc-FBxrZXZHo3EpS7okrXRssuCAW_ZzYjMuA'
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        // *** FIX: All broken, hardcoded keys have been removed ***
+        // We now use the global 'supabaseClient', 'apiBaseUrl', 
+        // and 'getSessionOrRedirect' from supabaseClient.js
         
-=======
->>>>>>> Stashed changes
         const userEmailEl = document.getElementById('user-email');
         const subStatusEl = document.getElementById('sub-status');
         const billingButton = document.getElementById('billing-button');
@@ -86,7 +84,8 @@
         let userToken = null;
 
         async function initializeAccount() {
-            const session = await getSessionOrRedirect();
+            // 'getSessionOrRedirect' is now available from supabaseClient.js
+            const session = await getSessionOrRedirect(); 
             if (!session) return; // Redirect will happen inside helper
 
             userToken = session.access_token;
@@ -96,6 +95,7 @@
 
         async function fetchSubscriptionStatus() {
             try {
+                // 'apiBaseUrl' is now available from supabaseClient.js
                 const res = await fetch(`${apiBaseUrl}/subscription-status`, { headers: { 'Authorization': `Bearer ${userToken}` } });
                 if (!res.ok) throw new Error('Could not load subscription status.');
                 
@@ -146,6 +146,7 @@
         }
         
         logoutButton.addEventListener('click', async () => { 
+            // 'supabaseClient' is now available from supabaseClient.js
             await supabaseClient.auth.signOut(); 
             window.location.href = '/'; 
         });
