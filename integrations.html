@@ -9,7 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#1A2533">
+    <meta name="theme-color" content="#1A2533">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabaseClient.js"></script>
@@ -48,24 +55,24 @@
                 
                 <div class="card p-6 rounded-lg flex flex-col justify-between">
                     <div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Gmail (Read-Only)</h3>
+                        <h3 class="text-xl font-semibold text-white mb-2">Google Drive (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
-                            Connect your Gmail to include emails as <strong>Artifacts</strong> in a new <strong>Knowledge Node</strong>. This is perfect for synthesizing insights from client communication and project threads.
+                            Auto-sync your Google Drive files (Docs, PDFs, etc.) to a dedicated <strong>Knowledge Node</strong>. The Synthesist can then query this node.
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button id="connect-gmail-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
-                            Connect Gmail
+                        <button id="connect-drive-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
+                            Connect Google Drive
                         </button>
                     </div>
                 </div>
 
                 <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed">
                     <div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Google Drive (Auto-Sync)</h3>
+                        <h3 class="text-xl font-semibold text-white mb-2">Gmail (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
-                            Auto-sync selected files and folders to a dedicated <strong>Knowledge Node</strong>. (Coming Soon)
-                        </g>
+                            Connect your Gmail to include emails as <strong>Artifacts</strong> in a new **Knowledge Node**. (Coming Soon)
+                        </p>
                     </div>
                     <div class="mt-4">
                         <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
@@ -76,6 +83,7 @@
 
             </div>
             
+            <p id="message" class="text-green-400 mt-6 hidden"></p>
             <p id="error-message" class="text-red-400 mt-6 hidden"></p>
         </div>
     </main>
@@ -86,10 +94,11 @@
         // const apiBaseUrl
         // const getSessionOrRedirect 
 
-        // API Endpoint for starting the Google OAuth flow
-        const GOOGLE_AUTH_ENDPOINT = `${apiBaseUrl}/integrations/google/connect/gmail`;
-
-        const connectGmailButton = document.getElementById('connect-gmail-button');
+        // *** FIX: Updated endpoint and button ID ***
+        const GOOGLE_AUTH_ENDPOINT = `${apiBaseUrl}/integrations/google/connect/drive`;
+        const connectDriveButton = document.getElementById('connect-drive-button');
+        
+        const messageEl = document.getElementById('message');
         const errorMessageEl = document.getElementById('error-message');
         const logoutButton = document.getElementById('logout-button');
         let userToken = null;
@@ -99,11 +108,11 @@
             if (!session) return;
             userToken = session.access_token;
             
-            // Check for OAuth callback messages (e.g., from a redirect after connecting)
             handleCallbackMessage();
             
-            // Setup listener for the Gmail button
-            connectGmailButton.addEventListener('click', startGmailOAuth);
+            // *** FIX: Updated listener ***
+            connectDriveButton.addEventListener('click', startGoogleDriveOAuth);
+
             logoutButton.addEventListener('click', async () => {
                 await supabaseClient.auth.signOut();
                 window.location.href = '/login.html';
@@ -116,20 +125,24 @@
             const error = params.get('error');
 
             if (success === 'google_auth') {
-                errorMessageEl.textContent = '✅ Gmail successfully connected! Your Node will begin syncing shortly.';
-                errorMessageEl.classList.remove('hidden', 'text-red-400');
-                errorMessageEl.classList.add('text-green-400');
+                messageEl.textContent = '✅ Google Drive successfully connected! Your Node will begin syncing shortly.';
+                messageEl.classList.remove('hidden');
             } else if (error) {
-                errorMessageEl.textContent = `❌ Connection Failed: ${error.replace(/_/g, ' ')}`;
-                errorMessageEl.classList.remove('hidden', 'text-green-400');
-                errorMessageEl.classList.add('text-red-400');
+                let errorText = "Connection failed. Please try again.";
+                if (error === 'google_auth_failed_no_refresh') {
+                    errorText = "Connection Failed: You must grant 'offline access' for the sync to work. Please try again.";
+                }
+                errorMessageEl.textContent = `❌ ${errorText}`;
+                errorMessageEl.classList.remove('hidden');
             }
         }
 
-        async function startGmailOAuth() {
+        // *** FIX: Renamed function ***
+        async function startGoogleDriveOAuth() {
             errorMessageEl.classList.add('hidden');
-            connectGmailButton.disabled = true;
-            connectGmailButton.textContent = 'Initiating Connection...';
+            messageEl.classList.add('hidden');
+            connectDriveButton.disabled = true;
+            connectDriveButton.textContent = 'Initiating Connection...';
 
             try {
                 const response = await fetch(GOOGLE_AUTH_ENDPOINT, { 
@@ -144,14 +157,14 @@
                 
                 const data = await response.json();
                 
-                // CRITICAL: Redirect the user to the Google Consent Screen
+                // Redirect the user to the Google Consent Screen
                 window.location.href = data.authorization_url;
 
             } catch (err) {
                 errorMessageEl.textContent = `Error: ${err.message}`;
                 errorMessageEl.classList.remove('hidden');
-                connectGmailButton.disabled = false;
-                connectGmailButton.textContent = 'Connect Gmail';
+                connectDriveButton.disabled = false;
+                connectDriveButton.textContent = 'Connect Google Drive';
             }
         }
 
