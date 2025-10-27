@@ -31,6 +31,24 @@
         .hover-scale:hover { transform: scale(1.03); }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal-tab {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: -1px;
+            font-weight: 600;
+            color: #9CA3AF;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .modal-tab:hover {
+            color: #E5E7EB;
+        }
+        .modal-tab.active {
+            color: #00B5AD;
+            border-bottom-color: #00B5AD;
+        }
+        .modal-panel { display: none; }
+        .modal-panel.active { display: block; }
     </style>
 </head>
 <body class="w-full min-h-screen">
@@ -40,10 +58,8 @@
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div class="flex items-center gap-2 md:gap-6">
-            <div id="nav-links-container" class="flex items-center gap-2 md:gap-6">
-                <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a> 
-            </div>
+        <div class="flex items-center gap-6">
+            <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a> 
             <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">My Library</a>
             <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
@@ -65,8 +81,8 @@
 
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold">My Knowledge Nodes</h1>
-                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale disabled:opacity-50" disabled> 
-                    + Create New Node
+                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale">
+                    + New Node
                 </button>
             </div>
             
@@ -258,7 +274,7 @@
                 cortexListContainer.innerHTML = `
                     <div class="card rounded-lg p-8 text-center col-span-1 md:col-span-2 lg:col-span-3">
                         <h3 class="text-xl font-bold mb-2">Welcome to Cogmatiq</h3>
-                        <p class="text-gray-400 mb-6">You don't have any Knowledge Nodes yet. A Node is a dedicated, AI-powered knowledge container.</p>
+                        <p class="text-gray-400 mb-6">You don't have any Knowledge Nodes yet. A Node is a dedicated, AI-powered knowledge <strong>container</strong>.</p>
                         <button onclick="openCreateModal()" class="accent-bg text-white font-semibold py-3 px-6 rounded-md hover-scale">
                             Create Your First Node
                         </button>
@@ -272,7 +288,7 @@
                 const docText = docCount === 1 ? '1 Artifact' : `${docCount} Artifacts`;
                 
                 return `
-                    <div class="card p-6 rounded-lg flex flex-col justify-between hover-scale transition-all duration-300 shadow-lg hover:shadow-cyan-500/10">
+                    <div class="card rounded-lg p-6 flex flex-col justify-between hover-scale transition-all duration-300 shadow-lg hover:shadow-cyan-500/10">
                         <div>
                             <h3 class="text-xl font-bold truncate mb-2" title="${cortex.name}">${cortex.name}</h3>
                             <p class="text-sm text-gray-400 mb-6">${docText}</p>
