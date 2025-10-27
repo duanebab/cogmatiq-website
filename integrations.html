@@ -40,7 +40,11 @@
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
-            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Dashboard</a>
+            <a href="/synthesist.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Synthesist</a>
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
+            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
+            <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a>
+            <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
@@ -54,17 +58,17 @@
 
             <div id="integration-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div class="card p-6 rounded-lg flex flex-col justify-between" data-provider="google_drive">
+                <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed" data-provider="google_drive">
                     <div>
-                        <span id="status-google_drive" class="status-pill bg-gray-700 text-gray-400">Not Connected</span>
+                        <span id="status-google_drive" class="status-pill bg-gray-700 text-gray-400">Coming Soon</span>
                         <h3 class="text-xl font-semibold text-white mt-2 mb-2">Google Drive (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
                             Auto-sync your Google Drive files (Docs, PDFs, etc.) to a dedicated <strong>Knowledge Node</strong>. This provides a dynamic, auto-updated source for your Synthesist.
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button id="connect-google_drive-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
-                            Connect Google Drive
+                        <button id="connect-google_drive-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                            Coming Soon
                         </button>
                     </div>
                 </div>
@@ -132,8 +136,8 @@
         const INTEGRATIONS_API_ENDPOINT = `${apiBaseUrl}/integrations/google/connect`;
         const USER_INTEGRATIONS_API_ENDPOINT = `${apiBaseUrl}/integrations/user`;
 
-        const connectDriveButton = document.getElementById('connect-google_drive-button');
-        const connectGmailButton = document.getElementById('connect-google_gmail-button'); // This will be null, but we keep it for consistency
+        // --- FIX: We can remove the button listener for now ---
+        // const connectDriveButton = document.getElementById('connect-google_drive-button');
         
         const messageEl = document.getElementById('message');
         const errorMessageEl = document.getElementById('error-message');
@@ -168,10 +172,10 @@
             handleCallbackMessage();
             renderIntegrationStatus();
             
-            // Set up active listener for Google Drive
-            if (connectDriveButton) {
-                connectDriveButton.addEventListener('click', () => startGoogleOAuth('drive'));
-            }
+            // --- FIX: No active listeners required, as all buttons are disabled ---
+            // if (connectDriveButton) {
+            //     connectDriveButton.addEventListener('click', () => startGoogleOAuth('drive'));
+            // }
 
             logoutButton.addEventListener('click', async () => {
                 await supabaseClient.auth.signOut();
@@ -181,9 +185,7 @@
         
         async function fetchConnectedProviders() {
             try {
-                // Fetch the list of providers the user has already connected
                 const data = await fetchApi(USER_INTEGRATIONS_API_ENDPOINT, { method: 'GET' });
-                // Database stores 'google_drive', 'google_gmail', etc.
                 connectedProviders = data.map(p => p.provider) || [];
             } catch (error) {
                 console.error("Error fetching user integrations:", error);
@@ -191,7 +193,8 @@
         }
 
         function renderIntegrationStatus() {
-            // Define all integration names corresponding to the data-provider attributes
+            // This function will still run, correctly labeling any
+            // *already connected* integrations as "Connected"
             const integrations = ['google_drive', 'google_gmail', 'notion', 'microsoft'];
 
             integrations.forEach(providerName => {
@@ -212,6 +215,7 @@
                         statusPill.classList.add('bg-green-600/50', 'text-green-300');
                     }
                 }
+                // --- FIX: No 'else' block needed. The default state is "Coming Soon". ---
             });
         }
 
@@ -226,7 +230,6 @@
             }
 
             if (success === 'google_auth') {
-                // Clean up provider name for display
                 const displayName = provider.replace('google_drive', 'Google Drive').replace('google_gmail', 'Gmail');
                 messageEl.textContent = `✅ ${displayName} successfully connected! Your Node will begin syncing shortly.`;
                 messageEl.classList.remove('hidden');
@@ -242,6 +245,7 @@
             }
         }
 
+        // This function will no longer be called, but is safe to leave in
         async function startGoogleOAuth(providerType) { // 'drive' or 'gmail'
             errorMessageEl.classList.add('hidden');
             messageEl.classList.add('hidden');
@@ -255,7 +259,6 @@
             }
 
             try {
-                // Endpoint is /integrations/google/connect/drive or /gmail
                 const response = await fetch(`${INTEGRATIONS_API_ENDPOINT}/${providerType}`, { 
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${userToken}` }
@@ -268,7 +271,6 @@
                 
                 const data = await response.json();
                 
-                // Redirect the user to the Google Consent Screen
                 window.location.href = data.authorization_url;
 
             } catch (err) {

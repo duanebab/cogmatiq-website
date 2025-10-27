@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthesist - Cogmatiq</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#1A2533">
+    <meta name="theme-color" content="#1A2533">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script src="/supabaseClient.js"></script>
+
+    <style>
+        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
+        .accent-text { color: #00B5AD; }
+        .accent-bg { background-color: #00B5AD; }
+        .accent-bg:hover { background-color: #009A94; }
+        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        
+        #chat-container::-webkit-scrollbar { width: 8px; }
+        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
+        #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
+
+        .prose { color: #E5E7EB; }
+        .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
+        .prose ul { list-style-type: disc; margin-left: 1.5rem; }
+        .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
+        .prose strong { font-weight: 800; }
+        .prose a { color: #00B5AD; text-decoration: underline; } 
+        .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } 
+        .prose code { font-family: monospace; }
+        .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
+
+        /* Node List Item */
+        .node-link {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #9CA3AF;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .node-link:hover {
+            background-color: #2D3748;
+            color: #E5E7EB;
+        }
+        
+        /* Mobile Sidebar */
+        #mobile-sidebar-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #mobile-sidebar {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden"> 
+
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+                <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="cortex-name" class="text-gray-300 font-semibold text-sm md:text-base">The Synthesist</span>
+            <a href="/integrations.html" class="text-sm font-semibold accent-text hover:underline whitespace-nowrap">
+                + Manage Integrations
+            </a>
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Dashboard</a>
+        </div>
+    </header>
+
+    <div class="flex flex-grow pt-24 overflow-hidden"> 
+        
+        <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
+            
+            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+                <div id="account-status-desktop">
+                    <p class="text-sm text-gray-500">Loading account...</p>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 pt-4">
+                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Interface</h3>
+                <nav class="flex flex-col space-y-2">
+                    <a href="/synthesist.html" class="node-link" style="background-color: #1F2A44; color: #E5E7EB;">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                        Synthesist
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="border-t border-gray-700 my-4"></div>
+            
+            <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
+                <h3 class="text-xs uppercase text-gray-500 font-semibold">Knowledge Nodes</h3>
+                <a href="/dashboard.html" title="Manage Nodes" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </a>
+            </div>
+            <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
+                <p class="text-gray-500 text-sm px-4 py-2">Loading Nodes...</p>
+            </nav>
+        </aside>
+
+        <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
+        <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-gray-700 bg-[#1A2533] z-50 flex flex-col">
+            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+                <div id="account-status-mobile">
+                    <p class="text-sm text-gray-500">Loading account...</p>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 mt-6">
+                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Interface</h3>
+                <nav class="flex flex-col space-y-2">
+                    <a href="/synthesist.html" class="node-link" style="background-color: #1F2A44; color: #E5E7EB;">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                        Synthesist
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="border-t border-gray-700 my-4"></div>
+            
+            <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
+                <h3 class="text-xs uppercase text-gray-500 font-semibold">Knowledge Nodes</h3>
+                <a href="/dashboard.html" title="Manage Nodes" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </a>
+            </div>
+            <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
+                <p class="text-gray-500 text-sm px-4 py-2">Loading Nodes...</p>
+            </nav>
+        </aside>
+
+        <main class="flex flex-col w-full md:pl-64 h-full" onclick="closeMobileMenu()">
+            
+            <div id="chat-panel" class="panel active flex-col h-full">
+            
+                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6 pb-16 md:pb-0">
+                    </div>
+                
+                <div class="flex-shrink-0 p-4 md:p-8 border-t border-gray-700 bg-[#1A2533] fixed bottom-0 left-0 md:relative w-full md:pl-72"> 
+                    <form id="chat-form" class="flex items-center gap-4">
+                        <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            </main>
+    </div>
+<script>
+        // --- apiBaseUrl and supabaseClient are loaded from supabaseClient.js ---
+        
+        // --- 4. Define API endpoints ---
+        const API_ENDPOINT = `${apiBaseUrl}/synthesist/query`;
+        const NODES_API_ENDPOINT = `${apiBaseUrl}/synthesist/nodes`;
+        const HISTORY_API_ENDPOINT = `${apiBaseUrl}/synthesist/history`; 
+        const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
+
+        // --- 5. DOM ELEMENTS ---
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const submitButton = document.getElementById('submit-button');
+        const cortexNameEl = document.getElementById('cortex-name');
+        
+        // Desktop elements
+        const desktopCortexList = document.getElementById('cortex-list-sidebar');
+        const desktopAccountStatus = document.getElementById('account-status-desktop');
+        
+        // Mobile menu elements
+        const mobileMenuOpenButton = document.getElementById('mobile-menu-open-button');
+        const mobileMenuCloseButton = document.getElementById('mobile-menu-close-button');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const mobileSidebarOverlay = document.getElementById('mobile-sidebar-overlay');
+        const mobileCortexList = document.getElementById('mobile-cortex-list-sidebar');
+        const mobileAccountStatus = document.getElementById('account-status-mobile');
+
+        // --- 6. STATE VARIABLES ---
+        let userToken = null;
+        let chatHistory = []; 
+        let allKnowledgeNodes = [];
+        
+        // --- 7. FUNCTIONS ---
+        
+        async function fetchApi(endpoint, options = {}) {
+            if (!userToken) throw new Error("Authentication token is missing.");
+            const headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${userToken}`
+            };
+            const response = await fetch(endpoint, { ...options, headers });
+            if (!response.ok) {
+                let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorDetail = errorData.detail || errorDetail;
+                } catch (e) {}
+                throw new Error(errorDetail);
+            }
+            if (response.status === 202 || response.status === 204) return null;
+            return response.json();
+        }
+
+        // --- 8. FETCH LOGIC ---
+        async function fetchChatHistory() {
+            if (!userToken) {
+                console.warn('Cannot fetch chat history: Missing token');
+                chatContainer.innerHTML = '';
+                addMessageToUI("I am the Synthesist. Ask me anything, and I will query all your Knowledge Nodes to find an answer.", 'ai');
+                return;
+            }
+            
+            chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
+            
+            try {
+                const data = await fetchApi(HISTORY_API_ENDPOINT);
+                document.getElementById('history-loading')?.remove();
+                
+                chatHistory = data.messages || []; 
+                
+                if (chatHistory.length === 0) {
+                    addMessageToUI("I am the Synthesist. Ask me anything, and I will query all your Knowledge Nodes to find an answer.", 'ai');
+                } else {
+                    chatHistory.forEach(message => {
+                        addMessageToUI(message.content, message.role);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching chat history:', error);
+                document.getElementById('history-loading')?.remove();
+                addMessageToUI(`Error loading chat history: ${error.message}. You can still chat.`, 'ai');
+            }
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function fetchAndRenderNodes() {
+            try {
+                allKnowledgeNodes = await fetchApi(NODES_API_ENDPOINT);
+                renderNodeSidebarList();
+            } catch (error) {
+                console.error("Error fetching nodes:", error);
+                const errorHTML = `<p class="text-red-400 text-sm px-4 py-2">Error loading Nodes</p>`;
+                desktopCortexList.innerHTML = errorHTML;
+                mobileCortexList.innerHTML = errorHTML;
+            }
+        }
+        
+        async function fetchAndRenderSubscriptionStatus() {
+            try {
+                const data = await fetchApi(STATUS_API_ENDPOINT);
+                renderSubscriptionStatus(data.is_pro);
+            } catch (error) {
+                console.error("Error fetching subscription status:", error);
+                renderSubscriptionStatus(null, true); 
+            }
+        }
+        
+        // --- 9. RENDERING FUNCTIONS ---
+        
+        function renderNodeSidebarList() {
+            if (!allKnowledgeNodes || allKnowledgeNodes.length === 0) {
+                const emptyHTML = `<p class="text-gray-500 text-sm px-4 py-2">No Knowledge Nodes found. <a href="/dashboard.html" class="accent-text hover:underline">Create one</a> or <a href="/integrations.html" class="accent-text hover:underline">connect one</a>.</p>`;
+                desktopCortexList.innerHTML = emptyHTML;
+                mobileCortexList.innerHTML = emptyHTML;
+                return;
+            }
+
+            const listHTML = allKnowledgeNodes.map(node => {
+                let icon;
+                if (node.node_type === 'cortex') {
+                    // Book icon for user-created nodes
+                    icon = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"></path></svg>`;
+                } else {
+                    // Globe icon for integrations
+                    icon = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 9.8l.22.22M12 6v.01M16.2 9.8l-.22.22M18.945 11H19a2 2 0 012 2v1a2 2 0 01-2 2h-1M5.055 11H5a2 2 0 00-2 2v1a2 2 0 002 2h1m0-6a9 9 0 0118 0v0"></path></svg>`;
+                }
+
+                return `
+                    <div class="node-link" title="${node.name} (Type: ${node.node_type})">
+                        ${icon}
+                        <span class="truncate">${node.name}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            desktopCortexList.innerHTML = listHTML;
+            mobileCortexList.innerHTML = listHTML;
+        }
+        
+        function renderSubscriptionStatus(isPro, isError = false) {
+            let statusHTML = '';
+
+            if (isError) {
+                statusHTML = `<p class="text-sm text-red-400">Error loading status.</p>`;
+            } else if (isPro) {
+                statusHTML = `
+                    <div>
+                        <p class="text-sm font-semibold text-green-400">Pro Plan</p>
+                        <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
+                    </div>
+                `;
+            } else {
+                statusHTML = `
+                    <div>
+                        <p class="text-sm font-semibold text-gray-400">Free Plan</p>
+                        <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
+                    </div>
+                `;
+            }
+            
+            if (desktopAccountStatus) desktopAccountStatus.innerHTML = statusHTML;
+            if (mobileAccountStatus) mobileAccountStatus.innerHTML = statusHTML;
+        }
+
+        // --- 10. INITIALIZE CHAT ---
+        function initializeChat() {
+            console.log("Synthesist page loaded. Setting up auth listener...");
+            
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                console.log(`Auth Event: ${event}`);
+
+                if (event === 'SIGNED_OUT') {
+                    console.warn("Auth state: SIGNED_OUT. Redirecting to login.");
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (session && session.access_token) {
+                    if (userToken !== session.access_token) {
+                        userToken = session.access_token;
+                        console.log("Token set/updated. Initializing listeners and fetching data...");
+                        initializeListeners();
+                        fetchChatHistory();
+                        fetchAndRenderNodes();
+                        fetchAndRenderSubscriptionStatus();
+                    }
+                } else if (!session && event === 'INITIAL_SESSION') { 
+                    console.warn("Auth state: No session on load. Redirecting to login.");
+                    window.location.href = '/login.html';
+                }
+            });
+        }
+
+        // --- 11. INITIALIZE LISTENERS ---
+        function initializeListeners() {
+            if (chatForm.dataset.listener) return; 
+
+            // Mobile Menu Listeners
+            mobileMenuOpenButton.addEventListener('click', openMobileMenu);
+            mobileMenuCloseButton.addEventListener('click', closeMobileMenu);
+            mobileSidebarOverlay.addEventListener('click', closeMobileMenu);
+
+            // Chat Form Listener
+            chatForm.addEventListener('submit', handleChatSubmit);
+
+            chatForm.dataset.listener = 'true';
+        }
+        
+        // --- 12. STREAMING CHAT SUBMIT ---
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const question = messageInput.value.trim();
+            if (!question || !userToken) return;
+
+            addMessageToUI(question, 'user');
+            chatHistory.push({ role: 'user', content: question });
+            messageInput.value = '';
+            submitButton.disabled = true;
+
+            const aiMessageElement = addMessageToUI('', 'ai'); // Create the empty "typing" bubble
+            
+            const formData = new FormData();
+            formData.append('question', question);
+            
+            const historyToSend = chatHistory.slice(0, -1).slice(-10); // Send last 10 messages, minus the one we just added
+            formData.append('chat_history_json', JSON.stringify(historyToSend));
+
+            try {
+                // Use standard fetch for streaming, not our custom fetchApi wrapper
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Failed to fetch stream');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResponse = "";
+
+                // Read the stream
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break; // Stream finished
+                    
+                    const chunk = decoder.decode(value);
+                    fullResponse += chunk;
+                    
+                    // Update the AI message bubble in real-time
+                    updateAIMessage(aiMessageElement, fullResponse, true);
+                }
+                
+                // Add the final full response to our state
+                chatHistory.push({ role: 'ai', content: fullResponse });
+
+            } catch (error) {
+                console.error("Chat Stream API Error:", error);
+                const errorMessage = `Sorry, something went wrong: ${error.message}. Please try again.`;
+                updateAIMessage(aiMessageElement, errorMessage); // Final update with error
+                chatHistory.push({ role: 'ai', content: errorMessage });
+            } finally {
+                submitButton.disabled = false;
+                messageInput.focus();
+                // Finalize the message in the UI (show copy button, etc.)
+                updateAIMessage(aiMessageElement, null, false, true);
+            }
+        }
+        
+        // --- 13. UI/NAV FUNCTIONS ---
+        
+        function openMobileMenu() {
+            mobileSidebarOverlay.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                mobileSidebarOverlay.classList.remove('opacity-0');
+                mobileSidebar.style.transform = 'translateX(0)';
+            });
+        }
+
+        function closeMobileMenu() {
+            mobileSidebarOverlay.classList.add('opacity-0');
+            mobileSidebar.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                mobileSidebarOverlay.classList.add('hidden');
+            }, 300); 
+        }
+
+        // --- 14. ADD/UPDATE MESSAGE UI (STREAMING COMPATIBLE) ---
+        function addMessageToUI(text, sender) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4', 'message-wrapper');
+            messageWrapper.dataset.role = sender;
+            messageWrapper.dataset.content = text; 
+
+            if (sender === 'user') {
+                messageWrapper.classList.add('justify-end');
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'accent-bg rounded-lg p-4 max-w-lg';
+                const p = document.createElement('p');
+                p.textContent = text;
+                userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>');
+                messageWrapper.appendChild(userMessageDiv);
+            } else {
+                const aiIconDiv = document.createElement('div');
+                aiIconDiv.className = 'bg-gray-700/50 p-2 rounded-full flex-shrink-0';
+                aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>`;
+
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full';
+                
+                if (text === '') { // This is a new "typing..." message
+                    aiMessageDiv.innerHTML = `
+                        <div class="typing-indicator flex items-center space-x-1">
+                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+                        </div>
+                        <div class="prose max-w-none response-content hidden"></div>
+                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                    `;
+                } else { // This is a message from history
+                     aiMessageDiv.innerHTML = `
+                        <div class="typing-indicator hidden"></div>
+                        <div class="prose max-w-none response-content"></div> 
+                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                    `;
+                    aiMessageDiv.querySelector('.response-content').innerHTML = marked.parse(text, { sanitize: false });
+                }
+                
+                messageWrapper.appendChild(aiIconDiv);
+                messageWrapper.appendChild(aiMessageDiv);
+            }
+            chatContainer.appendChild(messageWrapper);
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            return messageWrapper;
+        }
+
+        function updateAIMessage(element, text, isStreamChunk = false, isFinalize = false) {
+            const typingIndicator = element.querySelector('.typing-indicator');
+            const responseContent = element.querySelector('.response-content');
+            const copyButton = element.querySelector('.copy-button');
+
+            if (isStreamChunk) {
+                // This is a streaming chunk
+                if (typingIndicator) typingIndicator.classList.add('hidden');
+                if (responseContent) {
+                    responseContent.classList.remove('hidden');
+                    // Set the full text content so far
+                    element.dataset.content = text; 
+                    responseContent.innerHTML = marked.parse(text);
+                }
+            } else if (isFinalize) {
+                // This is the end of the stream
+                if (typingIndicator) typingIndicator.classList.add('hidden');
+                if (copyButton) copyButton.classList.remove('hidden');
+                
+                // Final parse of the full content stored in the element
+                const fullText = element.dataset.content || "No response received.";
+                if (responseContent) {
+                    responseContent.innerHTML = marked.parse(fullText);
+                }
+            } else {
+                // This is the original logic (e.g., for history or a non-streamed error)
+                element.dataset.content = text;
+                if (typingIndicator) typingIndicator.classList.add('hidden');
+                if (responseContent) {
+                    responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false });
+                    responseContent.classList.remove('hidden');
+                }
+                if (copyButton) copyButton.classList.remove('hidden');
+            }
+
+            // Always scroll to bottom
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyToClipboard(buttonElement) {
+            const contentElement = buttonElement.parentElement.querySelector('.response-content');
+            if (contentElement) {
+                const textToCopy = contentElement.innerText || contentElement.textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    buttonElement.textContent = 'Copied!';
+                    setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    buttonElement.textContent = 'Copy Failed';
+                    setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
+                });
+            } else {
+                console.error('Could not find content element to copy.');
+            }
+        }
+        
+        // --- 15. RUN INITIALIZATION ---
+        initializeChat();
+
+        // Make functions globally accessible
+        window.openMobileMenu = openMobileMenu;
+        window.closeMobileMenu = closeMobileMenu;
+        window.copyToClipboard = copyToClipboard;
+        
+    </script>
+</body>
+</html>
