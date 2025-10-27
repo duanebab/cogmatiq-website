@@ -31,24 +31,6 @@
         .hover-scale:hover { transform: scale(1.03); }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .modal-tab {
-            padding: 0.75rem 1.25rem;
-            margin-bottom: -1px;
-            font-weight: 600;
-            color: #9CA3AF;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        .modal-tab:hover {
-            color: #E5E7EB;
-        }
-        .modal-tab.active {
-            color: #00B5AD;
-            border-bottom-color: #00B5AD;
-        }
-        .modal-panel { display: none; }
-        .modal-panel.active { display: block; }
     </style>
 </head>
 <body class="w-full min-h-screen">
@@ -58,7 +40,10 @@
             <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 md:gap-6">
+            <div id="nav-links-container" class="flex items-center gap-2 md:gap-6">
+                <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a> 
+            </div>
             <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">My Library</a>
             <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
@@ -79,9 +64,9 @@
             </div>
 
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold">My Cortices</h1>
-                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale">
-                    + New Cortex
+                <h1 class="text-3xl font-bold">My Knowledge Nodes</h1>
+                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-2 px-5 rounded-lg text-sm hover-scale disabled:opacity-50" disabled> 
+                    + Create New Node
                 </button>
             </div>
             
@@ -100,15 +85,15 @@
     
     <div id="cortex-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="modal-content">
-            <h2 id="modal-title" class="text-xl font-semibold mb-6 px-6 pt-6 text-white">Create New Cortex</h2>
+            <h2 id="modal-title" class="text-xl font-semibold mb-6 px-6 pt-6 text-white">Create New Knowledge Node</h2>
             
              <div class="px-6 pb-6">
-                <label for="cortex-name-input" class="text-sm font-semibold text-gray-400 mb-2 block">Cortex Name</label>
+                <label for="cortex-name-input" class="text-sm font-semibold text-gray-400 mb-2 block">Node Name</label>
                 <input type="text" id="cortex-name-input" placeholder="e.g., 'Project Titan' or 'Philosophy Notes'" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                 <p id="modal-message" class="text-sm text-red-400 mt-2 h-4"></p>
                 <div class="flex justify-end gap-4 mt-6">
                     <button type="button" id="modal-cancel-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                    <button type="button" id="modal-create-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Create</button> 
+                    <button type="button" id="modal-create-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50">Create</button> 
                 </div>
             </div>
         </div>
@@ -123,7 +108,6 @@
         
         // --- API ENDPOINTS ---
         const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
-        const DOCS_API_ENDPOINT = `${apiBaseUrl}/documents`; 
         const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
 
         // --- DOM ELEMENTS ---
@@ -195,7 +179,6 @@
             
             // Fetch critical data in parallel
             try {
-                // We only await the most critical data.
                 await fetchSubscriptionAndCortices();
             } catch (error) {
                 console.error("Fetch Critical Data Error:", error);
@@ -223,6 +206,7 @@
                 if (e.target === cortexModal) closeCreateModal();
             });
             
+            // Input Listener to enable/disable button
             cortexNameInput.addEventListener('input', () => {
                 modalCreateButton.disabled = cortexNameInput.value.trim().length < 3;
                 modalMessage.textContent = '';
@@ -231,7 +215,7 @@
             modalCreateButton.addEventListener('click', createCortex);
         }
 
-        // --- DATA FETCHING ---
+        // --- DATA FETCHING & RENDERING ---
         async function fetchSubscriptionAndCortices() {
             cortexLoader.classList.remove('hidden');
             cortexListContainer.innerHTML = ''; 
@@ -251,7 +235,6 @@
             renderCortexList();
         }
 
-        // --- RENDERING ---
         function renderSubscriptionStatus(isPro) {
             let statusHTML = '';
             if (isPro) {
@@ -275,9 +258,9 @@
                 cortexListContainer.innerHTML = `
                     <div class="card rounded-lg p-8 text-center col-span-1 md:col-span-2 lg:col-span-3">
                         <h3 class="text-xl font-bold mb-2">Welcome to Cogmatiq</h3>
-                        <p class="text-gray-400 mb-6">You don't have any Cortices yet. A Cortex is an AI-powered knowledge base.</p>
+                        <p class="text-gray-400 mb-6">You don't have any Knowledge Nodes yet. A Node is a dedicated, AI-powered knowledge container.</p>
                         <button onclick="openCreateModal()" class="accent-bg text-white font-semibold py-3 px-6 rounded-md hover-scale">
-                            Create Your First Cortex
+                            Create Your First Node
                         </button>
                     </div>
                 `;
@@ -286,16 +269,16 @@
 
             cortexListContainer.innerHTML = allCortices.map(cortex => {
                 const docCount = cortex.documents ? cortex.documents.length : 0;
-                const docText = docCount === 1 ? '1 document' : `${docCount} documents`;
+                const docText = docCount === 1 ? '1 Artifact' : `${docCount} Artifacts`;
                 
                 return `
-                    <div class="card rounded-lg p-6 flex flex-col justify-between hover-scale transition-all duration-300 shadow-lg hover:shadow-cyan-500/10">
+                    <div class="card p-6 rounded-lg flex flex-col justify-between hover-scale transition-all duration-300 shadow-lg hover:shadow-cyan-500/10">
                         <div>
                             <h3 class="text-xl font-bold truncate mb-2" title="${cortex.name}">${cortex.name}</h3>
                             <p class="text-sm text-gray-400 mb-6">${docText}</p>
                         </div>
                         <a href="/chat.html?cortex_id=${cortex.id}" class="block text-center w-full accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm">
-                            Open Cortex
+                            Open Node
                         </a>
                     </div>
                 `;
@@ -335,13 +318,15 @@
             modalMessage.textContent = '';
 
             try {
-                const newCortex = await fetchApi(CORTICES_API_ENDPOINT, {
+                // The API call is to /cortices, but we call the result a Node.
+                await fetchApi(CORTICES_API_ENDPOINT, {
                     method: 'POST',
                     body: JSON.stringify({ name: name })
                 });
                 
-                // Redirect to the new chat page
-                window.location.href = `/chat.html?cortex_id=${newCortex[0].id}`;
+                // --- FIX: After creation, refresh the list completely ---
+                closeCreateModal();
+                await fetchSubscriptionAndCortices();
                 
             } catch (error) {
                 console.error("Create Cortex Error:", error);
