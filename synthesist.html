@@ -29,9 +29,6 @@
         .accent-bg:hover { background-color: #009A94; }
         .card { background: #1F2A44; border: 1px solid #2D3748; }
         
-        #chat-container::-webkit-scrollbar { width: 8px; }
-        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
-        #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
         .sidebar-scroll-container::-webkit-scrollbar { width: 4px; }
         .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
         .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
@@ -70,6 +67,40 @@
             transition: transform 0.3s ease-in-out;
             transform: translateX(-100%);
         }
+
+        /* Chat panel layout */
+        #chat-panel {
+            flex-direction: column;
+            height: 100%;
+        }
+        #chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 0;
+            padding-bottom: 2rem;
+        }
+        #chat-form-container {
+            position: sticky;
+            bottom: 0;
+            background: #1A2533;
+            padding: 1rem;
+            z-index: 10;
+        }
+
+        @media (max-width: 767px) {
+            #chat-container {
+                padding-bottom: 11rem;
+            }
+            #chat-form-container {
+                padding: 0.75rem;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+                z-index: 20;
+            }
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden"> 
@@ -96,7 +127,6 @@
     <div class="flex flex-grow pt-24 overflow-hidden"> 
         
         <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
-            
             <div class="flex-shrink-0 p-4 border-b border-gray-700">
                 <div id="account-status-desktop">
                     <p class="text-sm text-gray-500">Loading account...</p>
@@ -162,13 +192,9 @@
         </aside>
 
         <main class="flex flex-col w-full md:pl-64 h-full" onclick="closeMobileMenu()">
-            
-            <div id="chat-panel" class="panel active flex-col h-full">
-            
-                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6 pb-16 md:pb-0">
-                    </div>
-                
-                <div class="flex-shrink-0 p-4 md:p-8 border-t border-gray-700 bg-[#1A2533] fixed bottom-0 left-0 md:relative w-full md:pl-72"> 
+            <div id="chat-panel" class="panel active flex flex-col h-full">
+                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6"></div>
+                <div id="chat-form-container" class="flex-shrink-0">
                     <form id="chat-form" class="flex items-center gap-4">
                         <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                         <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
@@ -177,10 +203,10 @@
                     </form>
                 </div>
             </div>
-
-            </main>
+        </main>
     </div>
-<script>
+
+    <script>
         // --- apiBaseUrl and supabaseClient are loaded from supabaseClient.js ---
         
         // --- 4. Define API endpoints ---
@@ -234,6 +260,18 @@
             return response.json();
         }
 
+        // Utility to scroll chat container to bottom
+        function scrollChatToBottom() {
+            requestAnimationFrame(() => {
+                const chatFormContainer = document.getElementById('chat-form-container');
+                const extraOffset = chatFormContainer ? chatFormContainer.offsetHeight : 0;
+                chatContainer.scrollTo({ 
+                    top: chatContainer.scrollHeight + extraOffset, 
+                    behavior: 'smooth' 
+                });
+            });
+        }
+
         // --- 8. FETCH LOGIC ---
         async function fetchChatHistory() {
             if (!userToken) {
@@ -258,12 +296,13 @@
                         addMessageToUI(message.content, message.role);
                     });
                 }
+                scrollChatToBottom();
             } catch (error) {
                 console.error('Error fetching chat history:', error);
                 document.getElementById('history-loading')?.remove();
                 addMessageToUI(`Error loading chat history: ${error.message}. You can still chat.`, 'ai');
+                scrollChatToBottom();
             }
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
         }
 
         async function fetchAndRenderNodes() {
@@ -505,7 +544,7 @@
                         <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
                     `;
                 } else { // This is a message from history
-                     aiMessageDiv.innerHTML = `
+                    aiMessageDiv.innerHTML = `
                         <div class="typing-indicator hidden"></div>
                         <div class="prose max-w-none response-content"></div> 
                         <button class="copy-button mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
@@ -517,7 +556,7 @@
                 messageWrapper.appendChild(aiMessageDiv);
             }
             chatContainer.appendChild(messageWrapper);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            scrollChatToBottom();
             return messageWrapper;
         }
 
@@ -555,9 +594,7 @@
                 }
                 if (copyButton) copyButton.classList.remove('hidden');
             }
-
-            // Always scroll to bottom
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            scrollChatToBottom();
         }
 
         function copyToClipboard(buttonElement) {
@@ -584,7 +621,6 @@
         window.openMobileMenu = openMobileMenu;
         window.closeMobileMenu = closeMobileMenu;
         window.copyToClipboard = copyToClipboard;
-        
     </script>
 </body>
 </html>
