@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat - Cogmatiq</title>
+    <title>Dashboard - Cogmatiq</title>
+    <meta name="description" content="Your central hub for managing your AI-powered knowledge cortices.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,11 +19,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
-    
     <script src="/supabaseClient.js"></script>
 
     <style>
@@ -31,241 +27,342 @@
         .accent-bg { background-color: #00B5AD; }
         .accent-bg:hover { background-color: #009A94; }
         .card { background: #1F2A44; border: 1px solid #2D3748; }
-        
-        #chat-container::-webkit-scrollbar { width: 8px; }
-        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
-        #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
-        .sidebar-scroll-container::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
-        .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.03); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .prose { color: #E5E7EB; }
-        .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
-        .prose ul { list-style-type: disc; margin-left: 1.5rem; }
-        .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
-        .prose strong { font-weight: 800; }
-        .prose a { color: #00B5AD; text-decoration: underline; } 
-        .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } 
-        .prose code { font-family: monospace; }
-        .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
-
-        /* Sidebar Button */
-        .sidebar-button {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
+        .modal-tab {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: -1px;
             font-weight: 600;
             color: #9CA3AF;
-            transition: background-color 0.2s, color 0.2s;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
         }
-        .sidebar-button:hover {
-            background-color: #2D3748;
+        .modal-tab:hover {
             color: #E5E7EB;
         }
-        .sidebar-button.active {
-            background-color: #1F2A44;
-            color: #E5E7EB;
+        .modal-tab.active {
+            color: #00B5AD;
+            border-bottom-color: #00B5AD;
         }
-
-        /* Cortex List Link */
-        .cortex-link {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            color: #9CA3AF;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .cortex-link:hover {
-            background-color: #2D3748;
-            color: #E5E7EB;
-        }
-        .cortex-link.active {
-            background-color: #1F2A44;
-            color: #E5E7EB;
-        }
-        
-        .panel { display: none; }
-        .panel.active { display: flex; }
-        
-        #graph-container { width: 100%; height: 100%; min-height: 500px; background-color: #111827; }
-        
-        [title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-bottom: 5px;
-            background-color: #111827;
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 50;
-        }
-        [title] { position: relative; }
-
-        /* Mobile Sidebar */
-        #mobile-sidebar-overlay {
-            transition: opacity 0.3s ease-in-out;
-        }
-        #mobile-sidebar {
-            transition: transform 0.3s ease-in-out;
-            transform: translateX(-100%);
-        }
-
-        /* Chat panel layout */
-        #chat-panel {
-            flex-direction: column;
-            height: 100%;
-        }
-        #chat-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            min-height: 0;
-            padding-bottom: 2rem; 
-        }
-        #chat-form-container {
-            position: sticky;
-            bottom: 0;
-            background: #1A2533;
-            padding: 1rem;
-            z-index: 10;
-        }
-
-        @media (max-width: 767px) {
-            #chat-container {
-                padding-bottom: 11rem; 
-            }
-            #chat-form-container {
-                padding: 0.75rem;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-                z-index: 20; 
-            }
-        }
+        .modal-panel { display: none; }
+        .modal-panel.active { display: block; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden"> 
+<body class="w-full min-h-screen">
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm flex-shrink-0">
-        <div class="flex items-center gap-3">
-            <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-            <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-                <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-                <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
-            </a>
-        </div>
-        <div class="flex items-center gap-4">
-            <span id="cortex-name" class="text-gray-300 font-semibold text-sm md:text-base truncate max-w-[150px] md:max-w-xs">Loading...</span>
-            <button id="add-source-header-button" class="text-sm font-semibold accent-text hover:underline whitespace-nowrap">
-                + Add Source
-            </button>
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm">
+        <a href="/synthesist.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <span class="text-2xl font-bold text-white">Cogmatiq</span>
+        </a>
+        <div class="flex items-center gap-6">
             <a href="/synthesist.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Synthesist</a>
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
+            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
+            <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a>
+            <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
+            <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
-    <div class="flex flex-grow pt-24 h-full overflow-hidden"> 
-        
-        <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
-            <div class="flex-shrink-0 p-4 border-b border-gray-700">
-                <div id="account-status-desktop">
-                    <p class="text-sm text-gray-500">Loading account...</p>
+
+    <main class="pt-32 pb-12 px-4 md:px-8 animate-fade-in">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="mb-8 p-6 card rounded-lg flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm font-semibold text-gray-400">Account</p>
+                    <p id="user-email" class="font-semibold text-white">Loading...</p>
+                </div>
+                <div id="account-status" class="text-center md:text-right">
+                    <p class="text-sm text-gray-500">Loading subscription...</p>
                 </div>
             </div>
-            <div class="flex-shrink-0 pt-4">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
-                <nav class="flex flex-col space-y-2">
-                    <button id="chat-tab-button" class="sidebar-button active">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        Chat
-                    </button>
-                    <button id="graph-tab-button" class="sidebar-button">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
-                        Neural Map
-                    </button>
-                </nav>
-            </div>
-            <div class="border-t border-gray-700 my-4"></div>
-            <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold">Your Nodes</h3>
-                <button id="create-cortex-sidebar-button" title="Create New Node" class="text-gray-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">My Knowledge Nodes</h1>
+                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale">
+                    + New Node
                 </button>
             </div>
-            <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
-            </nav>
-        </aside>
-
-        <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
-        <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-gray-700 bg-[#1A2533] z-50 flex flex-col">
-            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <div class="flex-shrink-0 p-4 border-b border-gray-700">
-                <div id="account-status-mobile">
-                    <p class="text-sm text-gray-500">Loading account...</p>
-                </div>
-            </div>
-            <div class="flex-shrink-0 mt-6">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
-                <nav class="flex flex-col space-y-2">
-                    <button id="mobile-chat-tab-button" class="sidebar-button active">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        Chat
-                    </button>
-                    <button id="mobile-graph-tab-button" class="sidebar-button">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
-                        Neural Map
-                    </button>
-                </nav>
-            </div>
-            <div class="border-t border-gray-700 my-4"></div>
-            <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold">Your Nodes</h3>
-                <button id="create-cortex-sidebar-button-mobile" title="Create New Node" class="text-gray-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                </button>
-            </div>
-            <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
-            </nav>
-        </aside>
-
-        <main class="flex flex-col w-full md:pl-64 h-full">
-            <div id="chat-panel" class="panel active flex-col h-full">
-                <div class="flex-shrink-0 p-4 md:p-8 md:pb-4">
-                    <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5">
-                        <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
+            
+            <div id="cortex-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="cortex-loader" class="card rounded-lg p-6">
+                    <div class="animate-pulse">
+                        <div class="h-6 bg-gray-700 rounded-md w-3/4 mb-4"></div>
+                        <div class="h-4 bg-gray-700 rounded-md w-1/2 mb-6"></div>
+                        <div class="h-10 bg-gray-700 rounded-md w-full"></div>
                     </div>
-                    <p id="progress-text" class="text-center text-sm text-gray-400 mt-2 hidden"></p>
-                </div>
-                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6"></div>
-                <div id="chat-form-container" class="flex-shrink-0">
-                    <form id="chat-form" class="flex items-center gap-4">
-                        <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                        </button>
-                    </form>
                 </div>
             </div>
-            <div id="graph-panel" class="panel flex-col h-full card rounded-lg overflow-hidden">
-                <div id="graph-container" class="flex-grow overflow-y-auto">
-                    <p id="graph-loading-text" class="text-gray-400 text-center p-10">Loading Neural Map...</p>
+
+        </div>
+    </main>
+    
+    <div id="cortex-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="modal-content">
+            <h2 id="modal-title" class="text-xl font-semibold mb-6 px-6 pt-6 text-white">Create New Knowledge Node</h2>
+            
+             <div class="px-6 pb-6">
+                <label for="cortex-name-input" class="text-sm font-semibold text-gray-400 mb-2 block">Node Name</label>
+                <input type="text" id="cortex-name-input" placeholder="e.g., 'Project Titan' or 'Philosophy Notes'" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                <p id="modal-message" class="text-sm text-red-400 mt-2 h-4"></p>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="modal-cancel-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
+                    <button type="button" id="modal-create-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50">Create</button> 
                 </div>
             </div>
-        </main>
+        </div>
     </div>
+
+
+    <script>
+        // --- GLOBALS (from supabaseClient.js) ---
+        // - supabaseClient
+        // - apiBaseUrl
+        // - getSessionOrRedirect
+        
+        // --- API ENDPOINTS ---
+        const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
+        const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
+
+        // --- DOM ELEMENTS ---
+        const userEmailEl = document.getElementById('user-email');
+        const accountStatusEl = document.getElementById('account-status');
+        const logoutButton = document.getElementById('logout-button');
+        const cortexListContainer = document.getElementById('cortex-list-container');
+        const cortexLoader = document.getElementById('cortex-loader');
+        
+        // Modal Elements
+        const cortexModal = document.getElementById('cortex-modal');
+        const modalContent = document.getElementById('modal-content');
+        const createCortexButton = document.getElementById('create-cortex-button');
+        const modalCancelButton = document.getElementById('modal-cancel-button');
+        const modalCreateButton = document.getElementById('modal-create-button');
+        const cortexNameInput = document.getElementById('cortex-name-input');
+        const modalMessage = document.getElementById('modal-message');
+
+        // --- STATE ---
+        let userToken = null;
+        let allCortices = [];
+
+        // --- API HELPER ---
+        async function fetchApi(endpoint, options = {}) {
+            if (!userToken) throw new Error("Authentication token is missing.");
+            
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            const mergedOptions = {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers
+                }
+            };
+
+            const response = await fetch(endpoint, mergedOptions);
+            
+            if (!response.ok) {
+                let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorDetail = errorData.detail || errorDetail;
+                } catch (e) {
+                    // Try to get text if JSON parsing fails
+                    errorDetail = await response.text() || errorDetail;
+                }
+                throw new Error(errorDetail);
+            }
+            if (response.status === 202 || response.status === 204) return null;
+            return response.json();
+        }
+
+        // --- INITIALIZATION ---
+        async function initializeDashboard() {
+            const session = await getSessionOrRedirect();
+            if (!session) return; 
+
+            userToken = session.access_token;
+            userEmailEl.textContent = session.user.email;
+
+            setupListeners();
+            
+            // Fetch critical data in parallel
+            try {
+                await fetchSubscriptionAndCortices();
+            } catch (error) {
+                console.error("Fetch Critical Data Error:", error);
+                // Try to parse a JSON error message if one exists
+                let detail = error.message;
+                try {
+                    const errorJson = JSON.parse(error.message.match(/{.*}/)[0]);
+                    detail = errorJson.details || errorJson.message || "Unknown error";
+                } catch(e) {}
+                
+                cortexListContainer.innerHTML = `<p class="text-red-400">Error loading dashboard: ${detail}</p>`;
+            }
+        }
+        
+        // --- THIS IS THE FUNCTION THAT WAS 'NOT DEFINED' ---
+        function setupListeners() {
+            logoutButton.addEventListener('click', async () => { 
+                await supabaseClient.auth.signOut(); 
+                window.location.href = '/login.html'; 
+            });
+            
+            // Modal Listeners
+            createCortexButton.addEventListener('click', openCreateModal);
+            modalCancelButton.addEventListener('click', closeCreateModal);
+            cortexModal.addEventListener('click', (e) => {
+                if (e.target === cortexModal) closeCreateModal();
+            });
+            
+            // Input Listener to enable/disable button
+            cortexNameInput.addEventListener('input', () => {
+                modalCreateButton.disabled = cortexNameInput.value.trim().length < 3;
+                modalMessage.textContent = '';
+            });
+            
+            modalCreateButton.addEventListener('click', createCortex);
+        }
+
+        // --- DATA FETCHING & RENDERING ---
+        async function fetchSubscriptionAndCortices() {
+            cortexLoader.classList.remove('hidden');
+            cortexListContainer.innerHTML = ''; 
+            cortexListContainer.appendChild(cortexLoader);
+
+            // Fetch status and cortices at the same time
+            const [statusData, corticesData] = await Promise.all([
+                fetchApi(STATUS_API_ENDPOINT),
+                fetchApi(CORTICES_API_ENDPOINT)
+            ]);
+            
+            // Render Status
+            renderSubscriptionStatus(statusData.is_pro);
+            
+            // Render Cortices
+            allCortices = corticesData || [];
+            renderCortexList();
+        }
+
+        function renderSubscriptionStatus(isPro) {
+            let statusHTML = '';
+            if (isPro) {
+                statusHTML = `
+                    <p class="text-sm font-semibold text-green-400">Pro Plan</p>
+                    <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
+                `;
+            } else {
+                statusHTML = `
+                    <p class="text-sm font-semibold text-gray-400">Free Plan</p>
+                    <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
+                `;
+            }
+            accountStatusEl.innerHTML = statusHTML;
+        }
+
+        function renderCortexList() {
+            cortexLoader.remove(); // Remove skeleton loader
+            
+            if (allCortices.length === 0) {
+                cortexListContainer.innerHTML = `
+                    <div class="card rounded-lg p-8 text-center col-span-1 md:col-span-2 lg:col-span-3">
+                        <h3 class="text-xl font-bold mb-2">Welcome to Cogmatiq</h3>
+                        <p class="text-gray-400 mb-6">You don't have any Knowledge Nodes yet. A Node is a dedicated, AI-powered knowledge container.</p>
+                        <button onclick="openCreateModal()" class="accent-bg text-white font-semibold py-3 px-6 rounded-md hover-scale">
+                            Create Your First Node
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            cortexListContainer.innerHTML = allCortices.map(cortex => {
+                const docCount = cortex.documents ? cortex.documents.length : 0;
+                const docText = docCount === 1 ? '1 Artifact' : `${docCount} Artifacts`;
+                
+                return `
+                    <div class="card rounded-lg p-6 flex flex-col justify-between hover-scale transition-all duration-300 shadow-lg hover:shadow-cyan-500/10">
+                        <div>
+                            <h3 class="text-xl font-bold truncate mb-2" title="${cortex.name}">${cortex.name}</h3>
+                            <p class="text-sm text-gray-400 mb-6">${docText}</p>
+                        </div>
+                        <a href="/chat.html?cortex_id=${cortex.id}" class="block text-center w-full accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm">
+                            Open Node
+                        </a>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- MODAL & CORTEX ACTIONS ---
+        function openCreateModal() {
+            cortexNameInput.value = '';
+            modalMessage.textContent = '';
+            modalCreateButton.disabled = true;
+            
+            cortexModal.classList.remove('hidden');
+            requestAnimationFrame(() => { 
+                 cortexModal.classList.remove('opacity-0');
+                 modalContent.classList.remove('scale-95', 'opacity-0');
+            });
+        }
+
+        function closeCreateModal() {
+            cortexModal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { 
+                cortexModal.classList.add('hidden');
+            }, 300); 
+        }
+        
+        // --- THIS FUNCTION IS THE FIX for the TypeError ---
+        async function createCortex() {
+            const name = cortexNameInput.value.trim();
+            if (name.length < 3) {
+                modalMessage.textContent = "Name must be at least 3 characters.";
+                return;
+            }
+            
+            modalCreateButton.disabled = true;
+            modalCreateButton.textContent = "Creating...";
+            modalMessage.textContent = '';
+
+            try {
+                // The API call is to /cortices
+                await fetchApi(CORTICES_API_ENDPOINT, {
+                    method: 'POST',
+                    body: JSON.stringify({ name: name })
+                });
+                
+                // --- FIX: After creation, just re-fetch the list ---
+                // This avoids the "Cannot read properties of null" bug
+                closeCreateModal();
+                await fetchSubscriptionAndCortices();
+                
+            } catch (error) {
+                console.error("Create Cortex Error:", error);
+                modalMessage.textContent = `Error: ${error.message}`;
+                modalCreateButton.disabled = false;
+                modalCreateButton.textContent = "Create";
+            }
+        }
+        
+        // --- Global functions (for inline HTML) ---
+        window.openCreateModal = openCreateModal;
+
+        // --- RUN INITIALIZATION ---
+        initializeDashboard();
+
+    </script>
+</body>
+</html>
