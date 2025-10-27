@@ -9,14 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <meta name="msapplication-TileColor" content="#1A2533">
-    <meta name="theme-color" content="#1A2533">
-
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabaseClient.js"></script>
@@ -29,6 +22,7 @@
         .hover-scale { transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.03); }
         .card { background: #1F2A44; border: 1px solid #2D3748; }
+        .status-pill { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; display: inline-block; }
     </style>
 </head>
 <body class="w-full min-h-screen">
@@ -53,30 +47,32 @@
 
             <div id="integration-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div class="card p-6 rounded-lg flex flex-col justify-between">
+                <div class="card p-6 rounded-lg flex flex-col justify-between" data-provider="google_drive">
                     <div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Google Drive (Read-Only)</h3>
+                        <span id="status-google_drive" class="status-pill bg-gray-700 text-gray-400">Not Connected</span>
+                        <h3 class="text-xl font-semibold text-white mt-2 mb-2">Google Drive (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
                             Auto-sync your Google Drive files (Docs, PDFs, etc.) to a dedicated <strong>Knowledge Node</strong>. The Synthesist can then query this node.
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button id="connect-drive-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
+                        <button id="connect-google_drive-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
                             Connect Google Drive
                         </button>
                     </div>
                 </div>
 
-                <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed">
+                <div class="card p-6 rounded-lg flex flex-col justify-between" data-provider="google_gmail">
                     <div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Gmail (Read-Only)</h3>
+                        <span id="status-google_gmail" class="status-pill bg-gray-700 text-gray-400">Not Connected</span>
+                        <h3 class="text-xl font-semibold text-white mt-2 mb-2">Gmail (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
-                            Connect your Gmail to include emails as <strong>Artifacts</strong> in a new <strong>Knowledge Node</strong>. (Coming Soon)
+                            Connect your Gmail to include emails as <strong>Artifacts</strong> in a new <strong>Knowledge Node</strong>. This is perfect for synthesizing insights from communication.
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
-                            Coming Soon
+                        <button id="connect-google_gmail-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
+                            Connect Gmail
                         </button>
                     </div>
                 </div>
@@ -94,58 +90,129 @@
         // const apiBaseUrl
         // const getSessionOrRedirect 
 
-        // *** FIX: Updated endpoint and button ID ***
-        const GOOGLE_AUTH_ENDPOINT = `${apiBaseUrl}/integrations/google/connect/drive`;
-        const connectDriveButton = document.getElementById('connect-drive-button');
-        
+        // API Endpoints
+        const INTEGRATIONS_API_ENDPOINT = `${apiBaseUrl}/integrations/google/connect`;
+        const USER_INTEGRATIONS_API_ENDPOINT = `${apiBaseUrl}/integrations/user`;
+
+        const connectDriveButton = document.getElementById('connect-google_drive-button');
+        const connectGmailButton = document.getElementById('connect-google_gmail-button');
         const messageEl = document.getElementById('message');
         const errorMessageEl = document.getElementById('error-message');
         const logoutButton = document.getElementById('logout-button');
         let userToken = null;
+        let connectedProviders = [];
+
+        async function fetchApi(endpoint, options = {}) {
+            if (!userToken) throw new Error("Authentication token is missing.");
+            const headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${userToken}`
+            };
+            const response = await fetch(endpoint, { ...options, headers });
+            if (!response.ok) {
+                let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorDetail = errorData.detail || errorDetail;
+                } catch (e) {}
+                throw new Error(errorDetail);
+            }
+            return response.json();
+        }
 
         async function initializeIntegrations() {
             const session = await getSessionOrRedirect();
             if (!session) return;
             userToken = session.access_token;
             
+            await fetchConnectedProviders();
             handleCallbackMessage();
+            renderIntegrationStatus();
             
-            // *** FIX: Updated listener ***
-            connectDriveButton.addEventListener('click', startGoogleDriveOAuth);
-
+            connectDriveButton.addEventListener('click', () => startGoogleOAuth('drive'));
+            connectGmailButton.addEventListener('click', () => startGoogleOAuth('gmail'));
             logoutButton.addEventListener('click', async () => {
                 await supabaseClient.auth.signOut();
                 window.location.href = '/login.html';
             });
         }
         
+        async function fetchConnectedProviders() {
+            try {
+                // Fetch the list of providers the user has already connected
+                const data = await fetchApi(USER_INTEGRATIONS_API_ENDPOINT, { method: 'GET' });
+                connectedProviders = data.map(p => p.provider) || [];
+            } catch (error) {
+                console.error("Error fetching user integrations:", error);
+            }
+        }
+
+        function renderIntegrationStatus() {
+            // Define all integration names corresponding to the data-provider attributes and DB values
+            const integrations = ['google_drive', 'google_gmail'];
+
+            integrations.forEach(providerName => {
+                const button = document.getElementById(`connect-${providerName}-button`);
+                const statusPill = document.getElementById(`status-${providerName}`);
+
+                if (connectedProviders.includes(providerName)) {
+                    // Connected State
+                    if (button) {
+                        button.disabled = true;
+                        button.textContent = 'Connected';
+                        button.classList.remove('accent-bg');
+                        button.classList.add('bg-green-600');
+                    }
+                    if (statusPill) {
+                        statusPill.textContent = 'Connected';
+                        statusPill.classList.remove('bg-gray-700', 'text-gray-400');
+                        statusPill.classList.add('bg-green-600/50', 'text-green-300');
+                    }
+                } else {
+                    // Not Connected State (Default styling is fine)
+                }
+            });
+        }
+
         function handleCallbackMessage() {
             const params = new URLSearchParams(window.location.search);
             const success = params.get('success');
             const error = params.get('error');
+            const provider = params.get('provider');
+            
+            // Clear URL parameters to prevent re-displaying the message on refresh
+            if (success || error) {
+                history.replaceState(null, null, window.location.pathname);
+            }
 
             if (success === 'google_auth') {
-                messageEl.textContent = '✅ Google Drive successfully connected! Your Node will begin syncing shortly.';
+                messageEl.textContent = `✅ ${provider.replace('google_', '')} successfully connected! Your Node will begin syncing shortly.`;
                 messageEl.classList.remove('hidden');
+                errorMessageEl.classList.add('hidden');
             } else if (error) {
                 let errorText = "Connection failed. Please try again.";
-                if (error === 'google_auth_failed_no_refresh') {
-                    errorText = "Connection Failed: You must grant 'offline access' for the sync to work. Please try again.";
+                if (error.includes('no_refresh')) {
+                    errorText = "Connection Failed: You must grant 'offline access' for the sync to work.";
                 }
                 errorMessageEl.textContent = `❌ ${errorText}`;
                 errorMessageEl.classList.remove('hidden');
+                messageEl.classList.add('hidden');
             }
         }
 
-        // *** FIX: Renamed function ***
-        async function startGoogleDriveOAuth() {
+        async function startGoogleOAuth(providerName) {
             errorMessageEl.classList.add('hidden');
             messageEl.classList.add('hidden');
-            connectDriveButton.disabled = true;
-            connectDriveButton.textContent = 'Initiating Connection...';
+            const button = document.getElementById(`connect-${providerName}-button`);
+
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Initiating Connection...';
+            }
 
             try {
-                const response = await fetch(GOOGLE_AUTH_ENDPOINT, { 
+                // Endpoint is /integrations/google/connect/drive or /gmail
+                const response = await fetch(`${INTEGRATIONS_API_ENDPOINT}/${providerName}`, { 
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
@@ -163,8 +230,10 @@
             } catch (err) {
                 errorMessageEl.textContent = `Error: ${err.message}`;
                 errorMessageEl.classList.remove('hidden');
-                connectDriveButton.disabled = false;
-                connectDriveButton.textContent = 'Connect Google Drive';
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = `Connect ${providerName.replace('google_', '')}`;
+                }
             }
         }
 
