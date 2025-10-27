@@ -31,24 +31,6 @@
         .hover-scale:hover { transform: scale(1.03); }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .modal-tab {
-            padding: 0.75rem 1.25rem;
-            margin-bottom: -1px;
-            font-weight: 600;
-            color: #9CA3AF;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        .modal-tab:hover {
-            color: #E5E7EB;
-        }
-        .modal-tab.active {
-            color: #00B5AD;
-            border-bottom-color: #00B5AD;
-        }
-        .modal-panel { display: none; }
-        .modal-panel.active { display: block; }
     </style>
 </head>
 <body class="w-full min-h-screen">
@@ -132,16 +114,16 @@
         const userEmailEl = document.getElementById('user-email');
         const accountStatusEl = document.getElementById('account-status');
         const logoutButton = document.getElementById('logout-button');
-        const nodeListContainer = document.getElementById('node-list-container'); // <-- FIX
-        const nodeLoader = document.getElementById('node-loader'); // <-- FIX
+        const nodeListContainer = document.getElementById('node-list-container');
+        const nodeLoader = document.getElementById('node-loader');
         
         // Modal Elements
-        const nodeModal = document.getElementById('node-modal'); // <-- FIX
+        const nodeModal = document.getElementById('node-modal');
         const modalContent = document.getElementById('modal-content');
-        const createNodeButton = document.getElementById('create-cortex-button'); // <-- FIX (ID is from old file)
+        const createNodeButton = document.getElementById('create-node-button'); // <-- FIX
         const modalCancelButton = document.getElementById('modal-cancel-button');
         const modalCreateButton = document.getElementById('modal-create-button');
-        const nodeNameInput = document.getElementById('node-name-input'); // <-- FIX
+        const nodeNameInput = document.getElementById('node-name-input');
         const modalMessage = document.getElementById('modal-message');
 
         // --- STATE ---
@@ -205,7 +187,6 @@
                     detail = errorJson.details || errorJson.message || "Unknown error";
                 } catch(e) {}
                 
-                // --- FIX: Use correct variable name ---
                 nodeListContainer.innerHTML = `<p class="text-red-400">Error loading dashboard: ${detail}</p>`;
             }
         }
@@ -282,7 +263,6 @@
                 return;
             }
 
-            // --- FIX: Use correct variable name ---
             nodeListContainer.innerHTML = allKnowledgeNodes.map(node => {
                 const docCount = node.documents ? node.documents.length : 0;
                 const docText = docCount === 1 ? '1 Artifact' : `${docCount} Artifacts`;
