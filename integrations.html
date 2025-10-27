@@ -1,12 +1,161 @@
 <!DOCTYPE html>
-<html lang="">
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    <header></header>
-    <main></main>
-    <footer></footer>
-  </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrations - Cogmatiq</title>
+    <meta name="description" content="Connect external services like Google Drive and Gmail to your AI Synthesist.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/supabaseClient.js"></script>
+
+    <style>
+        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
+        .accent-text { color: #00B5AD; }
+        .accent-bg { background-color: #00B5AD; }
+        .accent-bg:hover { background-color: #009A94; }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.03); }
+        .card { background: #1F2A44; border: 1px solid #2D3748; }
+    </style>
+</head>
+<body class="w-full min-h-screen">
+
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-40 shadow-sm">
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <span class="text-2xl font-bold text-white">Cogmatiq</span>
+        </a>
+        <div class="flex items-center gap-6">
+            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Dashboard</a>
+            <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
+        </div>
+    </header>
+
+    <main class="pt-32 pb-12 px-4 md:px-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl md:text-4xl font-bold mb-8">Connect External Knowledge</h1>
+            <p class="text-gray-400 mb-10 max-w-2xl">
+                Connect your external data sources here. The **Synthesist** uses these live connections to build a complete model of your knowledge and generate insights across all your accounts.
+            </p>
+
+            <div id="integration-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="card p-6 rounded-lg flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Gmail (Read-Only)</h3>
+                        <p class="text-sm text-gray-400 mb-4">
+                            Connect your Gmail to include emails as **Artifacts** in a new **Knowledge Node**. This is perfect for synthesizing insights from client communication and project threads.
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <button id="connect-gmail-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
+                            Connect Gmail
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Google Drive (Auto-Sync)</h3>
+                        <p class="text-sm text-gray-400 mb-4">
+                            Auto-sync selected files and folders to a dedicated **Knowledge Node**. (Coming Soon)
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            
+            <p id="error-message" class="text-red-400 mt-6 hidden"></p>
+        </div>
+    </main>
+
+    <script>
+        // Global variables from supabaseClient.js
+        // const supabaseClient
+        // const apiBaseUrl
+        // const getSessionOrRedirect 
+
+        // API Endpoint for starting the Google OAuth flow
+        const GOOGLE_AUTH_ENDPOINT = `${apiBaseUrl}/integrations/google/connect/gmail`;
+
+        const connectGmailButton = document.getElementById('connect-gmail-button');
+        const errorMessageEl = document.getElementById('error-message');
+        const logoutButton = document.getElementById('logout-button');
+        let userToken = null;
+
+        async function initializeIntegrations() {
+            const session = await getSessionOrRedirect();
+            if (!session) return;
+            userToken = session.access_token;
+            
+            // Check for OAuth callback messages (e.g., from a redirect after connecting)
+            handleCallbackMessage();
+            
+            // Setup listener for the Gmail button
+            connectGmailButton.addEventListener('click', startGmailOAuth);
+            logoutButton.addEventListener('click', async () => {
+                await supabaseClient.auth.signOut();
+                window.location.href = '/login.html';
+            });
+        }
+        
+        function handleCallbackMessage() {
+            const params = new URLSearchParams(window.location.search);
+            const success = params.get('success');
+            const error = params.get('error');
+
+            if (success === 'google_auth') {
+                errorMessageEl.textContent = '✅ Gmail successfully connected! Your Node will begin syncing shortly.';
+                errorMessageEl.classList.remove('hidden', 'text-red-400');
+                errorMessageEl.classList.add('text-green-400');
+            } else if (error) {
+                errorMessageEl.textContent = `❌ Connection Failed: ${error.replace(/_/g, ' ')}`;
+                errorMessageEl.classList.remove('hidden', 'text-green-400');
+                errorMessageEl.classList.add('text-red-400');
+            }
+        }
+
+        async function startGmailOAuth() {
+            errorMessageEl.classList.add('hidden');
+            connectGmailButton.disabled = true;
+            connectGmailButton.textContent = 'Initiating Connection...';
+
+            try {
+                const response = await fetch(GOOGLE_AUTH_ENDPOINT, { 
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({detail: 'Unknown API error.'}));
+                    throw new Error(errorData.detail || 'Failed to get authorization URL.');
+                }
+                
+                const data = await response.json();
+                
+                // CRITICAL: Redirect the user to the Google Consent Screen
+                window.location.href = data.authorization_url;
+
+            } catch (err) {
+                errorMessageEl.textContent = `Error: ${err.message}`;
+                errorMessageEl.classList.remove('hidden');
+                connectGmailButton.disabled = false;
+                connectGmailButton.textContent = 'Connect Gmail';
+            }
+        }
+
+        initializeIntegrations();
+    </script>
+</body>
 </html>
