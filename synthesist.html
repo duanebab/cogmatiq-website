@@ -106,23 +106,25 @@
 <body class="flex flex-col h-screen overflow-hidden"> 
 
     <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm flex-shrink-0">
-        <div class="flex items-center gap-3">
-            <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-            <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-                <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-                <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
-            </a>
-        </div>
-        <div class="flex items-center gap-4">
-            <span id="cortex-name" class="text-gray-300 font-semibold text-sm md:text-base">The Synthesist</span>
-            <a href="/integrations.html" class="text-sm font-semibold accent-text hover:underline whitespace-nowrap">
-                + Manage Integrations
-            </a>
-            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Dashboard</a>
-        </div>
-    </header>
+    <div class="flex items-center gap-3">
+        <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
+        </a>
+    </div>
+    <div class="flex items-center gap-4">
+        <span id="cortex-name" class="text-gray-300 font-semibold text-sm md:text-base">The Synthesist</span>
+        <a href="/integrations.html" class="text-sm font-semibold accent-text hover:underline whitespace-nowrap">
+            + Manage Integrations
+        </a>
+        <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
+        <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
+        <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
+    </div>
+</header>
 
     <div class="flex flex-grow pt-24 overflow-hidden"> 
         

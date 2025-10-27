@@ -31,6 +31,14 @@
         .hover-scale:hover { transform: scale(1.03); }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* For the collapse/expand chevron */
+        .toggle-chevron {
+            transition: transform 0.2s ease-in-out;
+        }
+        .collapsed .toggle-chevron {
+            transform: rotate(-90deg);
+        }
     </style>
 </head>
 <body class="w-full min-h-screen">
@@ -110,7 +118,7 @@
         const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`; // API still uses /cortices
         const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
 
-        // --- DOM ELEMENTS (Corrected Variable Names) ---
+        // --- DOM ELEMENTS ---
         const userEmailEl = document.getElementById('user-email');
         const accountStatusEl = document.getElementById('account-status');
         const logoutButton = document.getElementById('logout-button');
@@ -120,7 +128,7 @@
         // Modal Elements
         const nodeModal = document.getElementById('node-modal');
         const modalContent = document.getElementById('modal-content');
-        const createNodeButton = document.getElementById('create-node-button'); // <-- FIX
+        const createNodeButton = document.getElementById('create-node-button');
         const modalCancelButton = document.getElementById('modal-cancel-button');
         const modalCreateButton = document.getElementById('modal-create-button');
         const nodeNameInput = document.getElementById('node-name-input');
@@ -276,14 +284,21 @@
                         } else if (doc.status === 'error') {
                             statusIndicator = '<span class="text-red-400 ml-1">(Error)</span>';
                         }
-                        return `<li class="text-sm text-gray-400 truncate" title="${doc.file_name}">${doc.file_name}${statusIndicator}</li>`;
+                        return `
+                            <li id="artifact-${doc.id}-from-node-${node.id}" class="flex justify-between items-center text-sm text-gray-400">
+                                <span class="truncate" title="${doc.file_name}">${doc.file_name}${statusIndicator}</span>
+                                <button onclick="unlinkArtifact(event, '${node.id}', '${doc.id}', '${doc.file_name}')" title="Remove from this Node" class="text-gray-500 hover:text-red-400 transition-colors p-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                </button>
+                            </li>
+                        `;
                     }).join('');
                 } else {
                     docListHTML = '<li class="text-sm text-gray-500 italic">No artifacts added yet.</li>';
                 }
 
                 return `
-                    <div class="card p-6 rounded-lg flex flex-col justify-between shadow-lg transition-all duration-300 hover:shadow-cyan-500/10 relative">
+                    <div id="node-card-${node.id}" class="card p-6 rounded-lg flex flex-col justify-between shadow-lg transition-all duration-300 hover:shadow-cyan-500/10 relative">
                         
                         <button onclick="deleteNode('${node.id}', '${node.name}')" title="Delete Node" class="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
@@ -291,11 +306,14 @@
                         
                         <div class="flex-grow">
                             <h3 class="text-xl font-bold truncate mb-2 pr-8" title="${node.name}">${node.name}</h3>
-                            <p class="text-sm text-gray-400 mb-4">${docText}</p>
+                            <p id="artifact-count-${node.id}" class="text-sm text-gray-400 mb-4">${docText}</p>
 
                             <div class="border-t border-gray-700 pt-4 mt-4">
-                                <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Artifacts</h4>
-                                <ul class="space-y-1 max-h-32 overflow-y-auto">
+                                <button onclick="toggleCollapse(event)" data-target="artifact-list-${node.id}" class="flex justify-between items-center w-full text-xs font-semibold text-gray-500 uppercase mb-2">
+                                    <span>Artifacts</span>
+                                    <svg class="w-4 h-4 toggle-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <ul id="artifact-list-${node.id}" class="space-y-1 max-h-32 overflow-y-auto">
                                     ${docListHTML}
                                 </ul>
                             </div>
@@ -380,9 +398,76 @@
             }
         }
         
+        // *** NEW: UNLINK ARTIFACT FUNCTION ***
+        async function unlinkArtifact(event, nodeId, artifactId, artifactName) {
+            event.stopPropagation(); // Stop the click from bubbling up to the card
+            if (!userToken) return;
+
+            const confirmation = prompt(`Are you sure you want to remove this artifact from this Node?\n\n"${artifactName}"\n\n(The artifact will remain in your main library).`);
+            if (confirmation === null) { // User clicked cancel
+                return;
+            }
+
+            const artifactElement = document.getElementById(`artifact-${artifactId}-from-node-${nodeId}`);
+            if (artifactElement) {
+                artifactElement.style.opacity = '0.5'; // Visually indicate loading
+            }
+
+            try {
+                // The API endpoint for unlinking is /cortices/{cortex_id}/documents/{doc_id}
+                await fetchApi(`${CORTICES_API_ENDPOINT}/${nodeId}/documents/${artifactId}`, {
+                    method: 'DELETE'
+                });
+                
+                // Optimistic UI Update: Remove the element from the list
+                if (artifactElement) {
+                    artifactElement.remove();
+                }
+
+                // Update the artifact count
+                const countElement = document.getElementById(`artifact-count-${nodeId}`);
+                const currentCount = allKnowledgeNodes.find(n => n.id === nodeId).documents.length;
+                const newCount = currentCount - 1;
+                
+                // Update the state
+                allKnowledgeNodes.find(n => n.id === nodeId).documents = allKnowledgeNodes.find(n => n.id === nodeId).documents.filter(d => d.id !== artifactId);
+                
+                if (countElement) {
+                    countElement.textContent = newCount === 1 ? '1 Artifact' : `${newCount} Artifacts`;
+                }
+
+                // If this was the last item, show the "empty" message
+                const listElement = document.getElementById(`artifact-list-${nodeId}`);
+                if (listElement && newCount === 0) {
+                    listElement.innerHTML = '<li class="text-sm text-gray-500 italic">No artifacts added yet.</li>';
+                }
+
+            } catch (error) {
+                console.error("Unlink Artifact Error:", error);
+                alert(`Error unlinking artifact: ${error.message}`);
+                if (artifactElement) {
+                    artifactElement.style.opacity = '1'; // Revert on failure
+                }
+            }
+        }
+        
+        // *** NEW: COLLAPSE TOGGLE FUNCTION ***
+        function toggleCollapse(event) {
+            const button = event.currentTarget;
+            const targetId = button.dataset.target;
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                const isHidden = targetElement.classList.toggle('hidden');
+                button.classList.toggle('collapsed', isHidden);
+            }
+        }
+        
         // --- Global functions (for inline HTML) ---
         window.openCreateModal = openCreateModal;
-        window.deleteNode = deleteNode; 
+        window.deleteNode = deleteNode;
+        window.unlinkArtifact = unlinkArtifact; // Expose the new unlink function
+        window.toggleCollapse = toggleCollapse; // Expose the new collapse function
 
         // --- RUN INITIALIZATION ---
         initializeDashboard();
