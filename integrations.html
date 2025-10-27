@@ -9,7 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#1A2533">
+    <meta name="theme-color" content="#1A2533">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabaseClient.js"></script>
@@ -52,7 +59,7 @@
                         <span id="status-google_drive" class="status-pill bg-gray-700 text-gray-400">Not Connected</span>
                         <h3 class="text-xl font-semibold text-white mt-2 mb-2">Google Drive (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
-                            Auto-sync your Google Drive files (Docs, PDFs, etc.) to a dedicated <strong>Knowledge Node</strong>. The Synthesist can then query this node.
+                            Auto-sync your Google Drive files (Docs, PDFs, etc.) to a dedicated <strong>Knowledge Node</strong>. This provides a dynamic, auto-updated source for your Synthesist.
                         </p>
                     </div>
                     <div class="mt-4">
@@ -62,20 +69,51 @@
                     </div>
                 </div>
 
-                <div class="card p-6 rounded-lg flex flex-col justify-between" data-provider="google_gmail">
+                <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed" data-provider="google_gmail">
                     <div>
-                        <span id="status-google_gmail" class="status-pill bg-gray-700 text-gray-400">Not Connected</span>
+                        <span id="status-google_gmail" class="status-pill bg-gray-700 text-gray-400">Coming Soon</span>
                         <h3 class="text-xl font-semibold text-white mt-2 mb-2">Gmail (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
-                            Connect your Gmail to include emails as <strong>Artifacts</strong> in a new <strong>Knowledge Node</strong>. This is perfect for synthesizing insights from communication.
+                            The Synthesist will soon be able to read and process the contents of your email threads to synthesize insights from communication history.
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button id="connect-google_gmail-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md text-sm hover-scale w-full">
-                            Connect Gmail
+                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                            Coming Soon
                         </button>
                     </div>
                 </div>
+                
+                <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed" data-provider="notion">
+                    <div>
+                        <span id="status-notion" class="status-pill bg-gray-700 text-gray-400">Coming Soon</span>
+                        <h3 class="text-xl font-semibold text-white mt-2 mb-2">Notion (Workspace Sync)</h3>
+                        <p class="text-sm text-gray-400 mb-4">
+                            Sync selected pages and databases from your Notion workspace to bring structured project knowledge into your Synthesist.
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+
+                 <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed" data-provider="microsoft">
+                    <div>
+                        <span id="status-microsoft" class="status-pill bg-gray-700 text-gray-400">Coming Soon</span>
+                        <h3 class="text-xl font-semibold text-white mt-2 mb-2">Microsoft 365 (OneDrive/SharePoint)</h3>
+                        <p class="text-sm text-gray-400 mb-4">
+                            Connect your OneDrive and SharePoint for enterprise-level document indexing and synthesis.
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+
 
             </div>
             
@@ -95,7 +133,8 @@
         const USER_INTEGRATIONS_API_ENDPOINT = `${apiBaseUrl}/integrations/user`;
 
         const connectDriveButton = document.getElementById('connect-google_drive-button');
-        const connectGmailButton = document.getElementById('connect-google_gmail-button');
+        const connectGmailButton = document.getElementById('connect-google_gmail-button'); // This will be null, but we keep it for consistency
+        
         const messageEl = document.getElementById('message');
         const errorMessageEl = document.getElementById('error-message');
         const logoutButton = document.getElementById('logout-button');
@@ -129,8 +168,11 @@
             handleCallbackMessage();
             renderIntegrationStatus();
             
-            connectDriveButton.addEventListener('click', () => startGoogleOAuth('drive'));
-            connectGmailButton.addEventListener('click', () => startGoogleOAuth('gmail'));
+            // Set up active listener for Google Drive
+            if (connectDriveButton) {
+                connectDriveButton.addEventListener('click', () => startGoogleOAuth('drive'));
+            }
+
             logoutButton.addEventListener('click', async () => {
                 await supabaseClient.auth.signOut();
                 window.location.href = '/login.html';
@@ -141,6 +183,7 @@
             try {
                 // Fetch the list of providers the user has already connected
                 const data = await fetchApi(USER_INTEGRATIONS_API_ENDPOINT, { method: 'GET' });
+                // Database stores 'google_drive', 'google_gmail', etc.
                 connectedProviders = data.map(p => p.provider) || [];
             } catch (error) {
                 console.error("Error fetching user integrations:", error);
@@ -148,8 +191,8 @@
         }
 
         function renderIntegrationStatus() {
-            // Define all integration names corresponding to the data-provider attributes and DB values
-            const integrations = ['google_drive', 'google_gmail'];
+            // Define all integration names corresponding to the data-provider attributes
+            const integrations = ['google_drive', 'google_gmail', 'notion', 'microsoft'];
 
             integrations.forEach(providerName => {
                 const button = document.getElementById(`connect-${providerName}-button`);
@@ -168,8 +211,6 @@
                         statusPill.classList.remove('bg-gray-700', 'text-gray-400');
                         statusPill.classList.add('bg-green-600/50', 'text-green-300');
                     }
-                } else {
-                    // Not Connected State (Default styling is fine)
                 }
             });
         }
@@ -180,13 +221,14 @@
             const error = params.get('error');
             const provider = params.get('provider');
             
-            // Clear URL parameters to prevent re-displaying the message on refresh
             if (success || error) {
                 history.replaceState(null, null, window.location.pathname);
             }
 
             if (success === 'google_auth') {
-                messageEl.textContent = `✅ ${provider.replace('google_', '')} successfully connected! Your Node will begin syncing shortly.`;
+                // Clean up provider name for display
+                const displayName = provider.replace('google_drive', 'Google Drive').replace('google_gmail', 'Gmail');
+                messageEl.textContent = `✅ ${displayName} successfully connected! Your Node will begin syncing shortly.`;
                 messageEl.classList.remove('hidden');
                 errorMessageEl.classList.add('hidden');
             } else if (error) {
@@ -200,11 +242,13 @@
             }
         }
 
-        async function startGoogleOAuth(providerName) {
+        async function startGoogleOAuth(providerType) { // 'drive' or 'gmail'
             errorMessageEl.classList.add('hidden');
             messageEl.classList.add('hidden');
+            
+            const providerName = `google_${providerType}`;
             const button = document.getElementById(`connect-${providerName}-button`);
-
+            
             if (button) {
                 button.disabled = true;
                 button.textContent = 'Initiating Connection...';
@@ -212,7 +256,7 @@
 
             try {
                 // Endpoint is /integrations/google/connect/drive or /gmail
-                const response = await fetch(`${INTEGRATIONS_API_ENDPOINT}/${providerName}`, { 
+                const response = await fetch(`${INTEGRATIONS_API_ENDPOINT}/${providerType}`, { 
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
@@ -232,7 +276,7 @@
                 errorMessageEl.classList.remove('hidden');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = `Connect ${providerName.replace('google_', '')}`;
+                    button.textContent = `Connect ${providerType.replace('google_', '')}`;
                 }
             }
         }
