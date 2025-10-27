@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Cogmatiq</title>
-    <meta name="description" content="Your central hub for managing your AI-powered knowledge cortices.">
+    <title>Knowledge Nodes - Cogmatiq</title>
+    <meta name="description" content="Manage your AI-powered Knowledge Nodes. Create, organize, and query documents for actionable insights.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,24 +31,6 @@
         .hover-scale:hover { transform: scale(1.03); }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .modal-tab {
-            padding: 0.75rem 1.25rem;
-            margin-bottom: -1px;
-            font-weight: 600;
-            color: #9CA3AF;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        .modal-tab:hover {
-            color: #E5E7EB;
-        }
-        .modal-tab.active {
-            color: #00B5AD;
-            border-bottom-color: #00B5AD;
-        }
-        .modal-panel { display: none; }
-        .modal-panel.active { display: block; }
     </style>
 </head>
 <body class="w-full min-h-screen">
@@ -83,13 +65,13 @@
 
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold">My Knowledge Nodes</h1>
-                <button id="create-cortex-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale">
+                <button id="create-node-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale">
                     + New Node
                 </button>
             </div>
             
-            <div id="cortex-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div id="cortex-loader" class="card rounded-lg p-6">
+            <div id="node-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="node-loader" class="card rounded-lg p-6">
                     <div class="animate-pulse">
                         <div class="h-6 bg-gray-700 rounded-md w-3/4 mb-4"></div>
                         <div class="h-4 bg-gray-700 rounded-md w-1/2 mb-6"></div>
@@ -101,13 +83,13 @@
         </div>
     </main>
     
-    <div id="cortex-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="node-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="modal-content">
             <h2 id="modal-title" class="text-xl font-semibold mb-6 px-6 pt-6 text-white">Create New Knowledge Node</h2>
             
              <div class="px-6 pb-6">
-                <label for="cortex-name-input" class="text-sm font-semibold text-gray-400 mb-2 block">Node Name</label>
-                <input type="text" id="cortex-name-input" placeholder="e.g., 'Project Titan' or 'Philosophy Notes'" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                <label for="node-name-input" class="text-sm font-semibold text-gray-400 mb-2 block">Node Name</label>
+                <input type="text" id="node-name-input" placeholder="e.g., 'Project Titan' or 'Philosophy Notes'" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
                 <p id="modal-message" class="text-sm text-red-400 mt-2 h-4"></p>
                 <div class="flex justify-end gap-4 mt-6">
                     <button type="button" id="modal-cancel-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
@@ -125,28 +107,28 @@
         // - getSessionOrRedirect
         
         // --- API ENDPOINTS ---
-        const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
+        const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`; // This endpoint is still correct
         const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
 
         // --- DOM ELEMENTS ---
         const userEmailEl = document.getElementById('user-email');
         const accountStatusEl = document.getElementById('account-status');
         const logoutButton = document.getElementById('logout-button');
-        const cortexListContainer = document.getElementById('cortex-list-container');
-        const cortexLoader = document.getElementById('cortex-loader');
+        const nodeListContainer = document.getElementById('node-list-container');
+        const nodeLoader = document.getElementById('node-loader');
         
         // Modal Elements
-        const cortexModal = document.getElementById('cortex-modal');
+        const nodeModal = document.getElementById('node-modal');
         const modalContent = document.getElementById('modal-content');
-        const createCortexButton = document.getElementById('create-cortex-button');
+        const createNodeButton = document.getElementById('create-cortex-button'); // ID from your original file
         const modalCancelButton = document.getElementById('modal-cancel-button');
         const modalCreateButton = document.getElementById('modal-create-button');
-        const cortexNameInput = document.getElementById('cortex-name-input');
+        const nodeNameInput = document.getElementById('cortex-name-input'); // ID from your original file
         const modalMessage = document.getElementById('modal-message');
 
         // --- STATE ---
         let userToken = null;
-        let allCortices = [];
+        let allKnowledgeNodes = [];
 
         // --- API HELPER ---
         async function fetchApi(endpoint, options = {}) {
@@ -195,19 +177,17 @@
 
             setupListeners();
             
-            // Fetch critical data in parallel
             try {
-                await fetchSubscriptionAndCortices();
+                await fetchSubscriptionAndNodes();
             } catch (error) {
                 console.error("Fetch Critical Data Error:", error);
-                // Try to parse a JSON error message if one exists
                 let detail = error.message;
                 try {
                     const errorJson = JSON.parse(error.message.match(/{.*}/)[0]);
                     detail = errorJson.details || errorJson.message || "Unknown error";
                 } catch(e) {}
                 
-                cortexListContainer.innerHTML = `<p class="text-red-400">Error loading dashboard: ${detail}</p>`;
+                nodeListContainer.innerHTML = `<p class="text-red-400">Error loading dashboard: ${detail}</p>`;
             }
         }
         
@@ -218,39 +198,37 @@
             });
             
             // Modal Listeners
-            createCortexButton.addEventListener('click', openCreateModal);
+            createNodeButton.addEventListener('click', openCreateModal);
             modalCancelButton.addEventListener('click', closeCreateModal);
-            cortexModal.addEventListener('click', (e) => {
-                if (e.target === cortexModal) closeCreateModal();
+            nodeModal.addEventListener('click', (e) => {
+                if (e.target === nodeModal) closeCreateModal();
             });
             
             // Input Listener to enable/disable button
-            cortexNameInput.addEventListener('input', () => {
-                modalCreateButton.disabled = cortexNameInput.value.trim().length < 3;
+            nodeNameInput.addEventListener('input', () => {
+                modalCreateButton.disabled = nodeNameInput.value.trim().length < 3;
                 modalMessage.textContent = '';
             });
             
-            modalCreateButton.addEventListener('click', createCortex);
+            modalCreateButton.addEventListener('click', createNode);
         }
 
         // --- DATA FETCHING & RENDERING ---
-        async function fetchSubscriptionAndCortices() {
-            cortexLoader.classList.remove('hidden');
-            cortexListContainer.innerHTML = ''; 
-            cortexListContainer.appendChild(cortexLoader);
+        async function fetchSubscriptionAndNodes() {
+            nodeLoader.classList.remove('hidden');
+            nodeListContainer.innerHTML = ''; 
+            nodeListContainer.appendChild(nodeLoader);
 
-            // Fetch status and cortices at the same time
-            const [statusData, corticesData] = await Promise.all([
+            // Fetch status and nodes at the same time
+            const [statusData, nodesData] = await Promise.all([
                 fetchApi(STATUS_API_ENDPOINT),
-                fetchApi(CORTICES_API_ENDPOINT)
+                fetchApi(CORTICES_API_ENDPOINT) // API still uses /cortices
             ]);
             
-            // Render Status
             renderSubscriptionStatus(statusData.is_pro);
             
-            // Render Cortices
-            allCortices = corticesData || [];
-            renderCortexList();
+            allKnowledgeNodes = nodesData || [];
+            renderNodeList();
         }
 
         function renderSubscriptionStatus(isPro) {
@@ -269,11 +247,11 @@
             accountStatusEl.innerHTML = statusHTML;
         }
 
-        function renderCortexList() {
-            cortexLoader.remove(); // Remove skeleton loader
+        function renderNodeList() {
+            nodeLoader.remove(); 
             
-            if (allCortices.length === 0) {
-                cortexListContainer.innerHTML = `
+            if (allKnowledgeNodes.length === 0) {
+                nodeListContainer.innerHTML = `
                     <div class="card rounded-lg p-8 text-center col-span-1 md:col-span-2 lg:col-span-3">
                         <h3 class="text-xl font-bold mb-2">Welcome to Cogmatiq</h3>
                         <p class="text-gray-400 mb-6">You don't have any Knowledge Nodes yet. A Node is a dedicated, AI-powered knowledge container.</p>
@@ -285,13 +263,13 @@
                 return;
             }
 
-            cortexListContainer.innerHTML = allCortices.map(cortex => {
-                const docCount = cortex.documents ? cortex.documents.length : 0;
+            nodeListContainer.innerHTML = allKnowledgeNodes.map(node => {
+                const docCount = node.documents ? node.documents.length : 0;
                 const docText = docCount === 1 ? '1 Artifact' : `${docCount} Artifacts`;
                 
                 let docListHTML = '';
                 if (docCount > 0) {
-                    docListHTML = cortex.documents.map(doc => {
+                    docListHTML = node.documents.map(doc => {
                         let statusIndicator = '';
                         if (doc.status === 'processing') {
                             statusIndicator = '<span class="text-yellow-400 ml-1">(Processing...)</span>';
@@ -307,12 +285,12 @@
                 return `
                     <div class="card p-6 rounded-lg flex flex-col justify-between shadow-lg transition-all duration-300 hover:shadow-cyan-500/10 relative">
                         
-                        <button onclick="deleteNode('${cortex.id}', '${cortex.name}')" title="Delete Node" class="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors">
+                        <button onclick="deleteNode('${node.id}', '${node.name}')" title="Delete Node" class="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
                         </button>
                         
                         <div class="flex-grow">
-                            <h3 class="text-xl font-bold truncate mb-2 pr-8" title="${cortex.name}">${cortex.name}</h3>
+                            <h3 class="text-xl font-bold truncate mb-2 pr-8" title="${node.name}">${node.name}</h3>
                             <p class="text-sm text-gray-400 mb-4">${docText}</p>
 
                             <div class="border-t border-gray-700 pt-4 mt-4">
@@ -323,7 +301,7 @@
                             </div>
                         </div>
 
-                        <a href="/chat.html?cortex_id=${cortex.id}" class="block text-center w-full accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm mt-6 hover-scale">
+                        <a href="/chat.html?cortex_id=${node.id}" class="block text-center w-full accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm mt-6 hover-scale">
                             Open Node
                         </a>
                     </div>
@@ -331,29 +309,29 @@
             }).join('');
         }
 
-        // --- MODAL & CORTEX ACTIONS ---
+        // --- MODAL & NODE ACTIONS ---
         function openCreateModal() {
-            cortexNameInput.value = '';
+            nodeNameInput.value = '';
             modalMessage.textContent = '';
             modalCreateButton.disabled = true;
             
-            cortexModal.classList.remove('hidden');
+            nodeModal.classList.remove('hidden');
             requestAnimationFrame(() => { 
-                 cortexModal.classList.remove('opacity-0');
+                 nodeModal.classList.remove('opacity-0');
                  modalContent.classList.remove('scale-95', 'opacity-0');
             });
         }
 
         function closeCreateModal() {
-            cortexModal.classList.add('opacity-0');
+            nodeModal.classList.add('opacity-0');
             modalContent.classList.add('scale-95', 'opacity-0');
             setTimeout(() => { 
-                cortexModal.classList.add('hidden');
+                nodeModal.classList.add('hidden');
             }, 300); 
         }
         
-        async function createCortex() {
-            const name = cortexNameInput.value.trim();
+        async function createNode() {
+            const name = nodeNameInput.value.trim();
             if (name.length < 3) {
                 modalMessage.textContent = "Name must be at least 3 characters.";
                 return;
@@ -370,10 +348,10 @@
                 });
                 
                 closeCreateModal();
-                await fetchSubscriptionAndCortices(); // Refresh the list
+                await fetchSubscriptionAndNodes(); // Refresh the list
                 
             } catch (error) {
-                console.error("Create Cortex Error:", error);
+                console.error("Create Node Error:", error);
                 modalMessage.textContent = `Error: ${error.message}`;
                 modalCreateButton.disabled = false;
                 modalCreateButton.textContent = "Create";
@@ -384,19 +362,19 @@
         async function deleteNode(cortexId, cortexName) {
             if (!userToken) return;
 
-            const confirmation = prompt(`Are you sure you want to delete this Knowledge Node?\n\n"${cortexName}"\n\nThis action cannot be undone. Type "delete" to confirm.`);
+            const confirmation = prompt(`Are you sure you want to delete this Knowledge Node?\n\n"${cortexName}"\n\nThis action cannot be undone. All associated artifacts will be unlinked (but not deleted from your library). Type "delete" to confirm.`);
             if (confirmation !== 'delete') {
                 return;
             }
 
             try {
-                // Call the API to delete the cortex
+                // Call the API to delete the cortex (Node)
                 await fetchApi(`${CORTICES_API_ENDPOINT}/${cortexId}`, {
                     method: 'DELETE'
                 });
                 
                 // Refresh the list to show the change
-                await fetchSubscriptionAndCortices();
+                await fetchSubscriptionAndNodes();
 
             } catch (error) {
                 console.error("Delete Node Error:", error);
