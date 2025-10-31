@@ -4,98 +4,177 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Cogmatiq</title>
-    <meta name="description" content="Create your Cogmatiq account to build your first AI Cortex.">
-
+    <meta name="description" content="Create your Cogmatiq account to build your Autonomous Synthesist.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="msapplication-TileColor" content="#1A2533">
     <meta name="theme-color" content="#1A2533">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background: linear-gradient(to bottom, #1A2533, #111827); color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
-        .card { background: #1F2A44; border: 1px solid #2D3748; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); }
+        /* 1. Global Reset & New Palette */
+        body {
+            background-color: #151D2A;
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00;
+            color: #151D2A;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700; 
+        }
+        .btn-primary:hover {
+            background-color: transparent;
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: #00F0FF;
+            border: 2px solid #00F0FF;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700;
+        }
+        .btn-outline:hover {
+            background-color: #00F0FF;
+            color: #151D2A;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
+        }
+
+
+        /* 4. Cards and Panels */
+        .card {
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+        
+        /* 5. Utility Classes */
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-gradient-dark { background: linear-gradient(to bottom, #151D2A, #0A111A); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4 animate-fade-in">
+<body class="w-full min-h-screen bg-gradient-dark">
 
-    <div class="w-full max-w-md">
-        <a href="/" class="flex items-center justify-center gap-3 mb-8 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg border-b border-[#00F0FF]/30">
+        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+            <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-
-        <div class="card">
-            <h1 class="text-2xl font-bold text-center mb-6">Create Your Account</h1>
-            <form id="signup-form" class="space-y-6">
-                <div>
-                    <label for="email" class="block text-sm font-semibold text-gray-400">Email</label>
-                    <input type="email" id="email" required class="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-semibold text-gray-400">Password</label>
-                    <input type="password" id="password" required minlength="6" placeholder="At least 6 characters" class="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                </div>
-                <div>
-                    <button type="submit" id="signup-button" class="w-full accent-bg text-white font-semibold py-3 px-4 rounded-md hover-scale transition-all duration-300 disabled:opacity-50">Sign Up</button>
-                </div>
-            </form>
-            <p id="message" class="mt-4 text-center text-sm h-5"></p>
-            <p class="mt-6 text-center text-sm text-gray-400">
-                Already have an account? <a href="/login.html" class="accent-text font-semibold hover:underline">Sign In</a>
-            </p>
+        <div class="flex items-center gap-6">
+            <a href="/login.html" class="btn-outline py-2 px-5 rounded-md text-sm">Log In</a>
         </div>
-    </div>
+    </header>
+
+    <main class="pt-32 pb-12 px-4 md:px-8 animate-fade-in flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md">
+            <div class="card rounded-lg p-8 md:p-10 shadow-xl">
+                <h1 class="text-3xl font-bold text-center mb-2 accent-primary">Create Your Account</h1>
+                <p class="text-center text-gray-400 mb-8">Begin building your Synthesist.</p>
+                
+                <form id="signup-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-300 mb-2">Email</label>
+                        <input type="email" id="email" name="email" required 
+                               class="w-full p-3 bg-[#151D2A] border border-[#00F0FF]/50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-300 mb-2">Password</label>
+                        <input type="password" id="password" name="password" required minlength="6"
+                               class="w-full p-3 bg-[#151D2A] border border-[#00F0FF]/50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
+                        <p class="text-xs text-gray-500 mt-1">Minimum 6 characters.</p>
+                    </div>
+
+                    <p id="error-message" class="text-red-400 text-sm hidden"></p>
+                    <p id="success-message" class="text-green-400 text-sm hidden">Success! Check your email for a confirmation link.</p>
+                    
+                    <div>
+                        <button type="submit" id="signup-button" class="w-full btn-primary py-3 px-5 rounded-md text-lg hover-scale">
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-gray-400">
+                        Already have an account? 
+                        <a href="/login.html" class="font-semibold accent-secondary hover:underline">Log In</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const form = document.getElementById('signup-form');
-        const messageEl = document.getElementById('message');
+        // const supabaseClient is loaded from /supabaseClient.js
+        const signupForm = document.getElementById('signup-form');
         const signupButton = document.getElementById('signup-button');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
 
-        form.addEventListener('submit', async (e) => {
+        signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            messageEl.textContent = '';
-            messageEl.classList.remove('text-red-400', 'text-green-400');
-            signupButton.disabled = true;
-            signupButton.textContent = 'Creating...';
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
             
-            const { data, error } = await supabaseClient.auth.signUp({ 
-                email, 
-                password,
-                options: {
-                    // This will redirect them to the login page after they click the email link
-                    emailRedirectTo: `${window.location.origin}/login.html`
-                }
-            });
+            signupButton.disabled = true;
+            signupButton.textContent = 'Processing...';
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
 
-            if (error) {
-                messageEl.textContent = `Error: ${error.message}`;
-                messageEl.classList.add('text-red-400');
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data.user && data.user.identities && data.user.identities.length === 0) {
+                    errorMessage.textContent = 'That email is already registered. Try logging in.';
+                    errorMessage.classList.remove('hidden');
+                } else if (data.user) {
+                    successMessage.textContent = 'Success! Please check your email for a confirmation link to log in.';
+                    successMessage.classList.remove('hidden');
+                    signupForm.reset();
+                }
+
+            } catch (error) {
+                console.error('Signup Error:', error);
+                errorMessage.textContent = error.message || 'An unknown error occurred.';
+                errorMessage.classList.remove('hidden');
+            } finally {
                 signupButton.disabled = false;
-                signupButton.textContent = 'Sign Up';
-            } else {
-                messageEl.textContent = 'Success! Please check your email for a confirmation link.';
-                messageEl.classList.add('text-green-400');
-                form.reset();
-                // We leave the button disabled on success to prevent re-submission
+                signupButton.textContent = 'Create Account';
             }
         });
     </script>

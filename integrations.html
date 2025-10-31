@@ -8,7 +8,8 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -22,53 +23,90 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
+        /* 1. Global Reset & New Palette */
+        body {
+            background-color: #151D2A;
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00;
+            color: #151D2A;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700; 
+        }
+        .btn-primary:hover {
+            background-color: transparent;
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+        .btn-disabled {
+            background-color: #4A5568;
+            color: #A0AEC0;
+            border: 1px solid #4A5568;
+            cursor: not-allowed;
+        }
+
+        /* 4. Cards and Panels */
+        .card {
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+        
+        /* 5. Utility Classes */
         .hover-scale { transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.03); }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .status-pill { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; display: inline-block; }
     </style>
 </head>
 <body class="w-full min-h-screen">
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-40 shadow-sm">
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg flex-shrink-0 border-b border-[#00F0FF]/30">
         <a href="/synthesist.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
             <a href="/synthesist.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Synthesist</a>
             <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
             <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
-            <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a>
-            <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
+            <a href="/integrations.html" class="text-white font-medium hover:text-white transition-colors text-sm">Integrations</a> <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
 
-    <main class="pt-32 pb-12 px-4 md:px-8">
+    <main class="pt-32 pb-12 px-4 md:px-8 animate-fade-in">
         <div class="max-w-4xl mx-auto">
-            <h1 class="text-3xl md:text-4xl font-bold mb-8">Connect External Knowledge</h1>
+            <h1 class="text-3xl md:text-4xl font-bold mb-8 accent-primary">Connect External Knowledge</h1>
             <p class="text-gray-400 mb-10 max-w-2xl">
                 Connect your external data sources here. The <strong>Synthesist</strong> uses these live connections to build a complete model of your knowledge and generate insights across all your accounts.
             </p>
 
             <div id="integration-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div class="card p-6 rounded-lg flex flex-col justify-between opacity-50 cursor-not-allowed" data-provider="google_drive">
+                <div class="card p-6 rounded-lg flex flex-col justify-between" data-provider="google_drive">
                     <div>
-                        <span id="status-google_drive" class="status-pill bg-gray-700 text-gray-400">Coming Soon</span>
+                        <span id="status-google_drive" class="status-pill bg-gray-700 text-gray-400">Not Connected</span>
                         <h3 class="text-xl font-semibold text-white mt-2 mb-2">Google Drive (Read-Only)</h3>
                         <p class="text-sm text-gray-400 mb-4">
                             Auto-sync your Google Drive files (Docs, PDFs, etc.) to a dedicated <strong>Knowledge Node</strong>. This provides a dynamic, auto-updated source for your Synthesist.
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button id="connect-google_drive-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
-                            Coming Soon
+                        <button id="connect-google_drive-button" class="btn-primary py-2 px-4 rounded-md text-sm hover-scale w-full">
+                            Connect Google Drive
                         </button>
                     </div>
                 </div>
@@ -82,7 +120,7 @@
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                        <button class="btn-disabled font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
                             Coming Soon
                         </button>
                     </div>
@@ -97,7 +135,7 @@
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                        <button class="btn-disabled font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
                             Coming Soon
                         </button>
                     </div>
@@ -112,12 +150,11 @@
                         </p>
                     </div>
                     <div class="mt-4">
-                        <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
+                        <button class="btn-disabled font-semibold py-2 px-4 rounded-md text-sm w-full" disabled>
                             Coming Soon
                         </button>
                     </div>
                 </div>
-
 
             </div>
             
@@ -136,9 +173,7 @@
         const INTEGRATIONS_API_ENDPOINT = `${apiBaseUrl}/integrations/google/connect`;
         const USER_INTEGRATIONS_API_ENDPOINT = `${apiBaseUrl}/integrations/user`;
 
-        // --- FIX: We can remove the button listener for now ---
-        // const connectDriveButton = document.getElementById('connect-google_drive-button');
-        
+        const connectDriveButton = document.getElementById('connect-google_drive-button');
         const messageEl = document.getElementById('message');
         const errorMessageEl = document.getElementById('error-message');
         const logoutButton = document.getElementById('logout-button');
@@ -147,10 +182,7 @@
 
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
-            const headers = {
-                ...options.headers,
-                'Authorization': `Bearer ${userToken}`
-            };
+            const headers = { ...options.headers, 'Authorization': `Bearer ${userToken}` };
             const response = await fetch(endpoint, { ...options, headers });
             if (!response.ok) {
                 let errorDetail = `API Error: ${response.status} ${response.statusText}`;
@@ -172,10 +204,9 @@
             handleCallbackMessage();
             renderIntegrationStatus();
             
-            // --- FIX: No active listeners required, as all buttons are disabled ---
-            // if (connectDriveButton) {
-            //     connectDriveButton.addEventListener('click', () => startGoogleOAuth('drive'));
-            // }
+            if (connectDriveButton) {
+                connectDriveButton.addEventListener('click', () => startGoogleOAuth('drive'));
+            }
 
             logoutButton.addEventListener('click', async () => {
                 await supabaseClient.auth.signOut();
@@ -189,34 +220,31 @@
                 connectedProviders = data.map(p => p.provider) || [];
             } catch (error) {
                 console.error("Error fetching user integrations:", error);
+                errorMessageEl.textContent = "Error: Could not fetch your connection status.";
+                errorMessageEl.classList.remove('hidden');
             }
         }
 
         function renderIntegrationStatus() {
-            // This function will still run, correctly labeling any
-            // *already connected* integrations as "Connected"
-            const integrations = ['google_drive', 'google_gmail', 'notion', 'microsoft'];
+            // This function only cares about ACTIVE integrations.
+            // "Coming Soon" ones are handled by default HTML.
+            if (connectedProviders.includes('google_drive')) {
+                const button = document.getElementById(`connect-google_drive-button`);
+                const statusPill = document.getElementById(`status-google_drive`);
 
-            integrations.forEach(providerName => {
-                const button = document.getElementById(`connect-${providerName}-button`);
-                const statusPill = document.getElementById(`status-${providerName}`);
-
-                if (connectedProviders.includes(providerName)) {
-                    // Connected State
-                    if (button) {
-                        button.disabled = true;
-                        button.textContent = 'Connected';
-                        button.classList.remove('accent-bg');
-                        button.classList.add('bg-green-600');
-                    }
-                    if (statusPill) {
-                        statusPill.textContent = 'Connected';
-                        statusPill.classList.remove('bg-gray-700', 'text-gray-400');
-                        statusPill.classList.add('bg-green-600/50', 'text-green-300');
-                    }
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Connected';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('bg-green-600', 'text-white', 'border-green-600');
                 }
-                // --- FIX: No 'else' block needed. The default state is "Coming Soon". ---
-            });
+                if (statusPill) {
+                    statusPill.textContent = 'Connected';
+                    statusPill.classList.remove('bg-gray-700', 'text-gray-400');
+                    statusPill.classList.add('bg-green-600/50', 'text-green-300');
+                }
+            }
+            // We can add more `if (connectedProviders.includes('...'))` blocks here as we activate them.
         }
 
         function handleCallbackMessage() {
@@ -245,7 +273,6 @@
             }
         }
 
-        // This function will no longer be called, but is safe to leave in
         async function startGoogleOAuth(providerType) { // 'drive' or 'gmail'
             errorMessageEl.classList.add('hidden');
             messageEl.classList.add('hidden');
@@ -259,6 +286,7 @@
             }
 
             try {
+                // Endpoint is /integrations/google/connect/drive
                 const response = await fetch(`${INTEGRATIONS_API_ENDPOINT}/${providerType}`, { 
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${userToken}` }
@@ -271,6 +299,7 @@
                 
                 const data = await response.json();
                 
+                // Redirect the user to the Google Consent Screen
                 window.location.href = data.authorization_url;
 
             } catch (err) {
@@ -278,7 +307,7 @@
                 errorMessageEl.classList.remove('hidden');
                 if (button) {
                     button.disabled = false;
-                    button.textContent = `Connect ${providerType.replace('google_', '')}`;
+                    button.textContent = `Connect Google Drive`;
                 }
             }
         }

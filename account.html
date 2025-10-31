@@ -4,42 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account - Cogmatiq</title>
-    <meta name="description" content="Securely manage your Cogmatiq account and subscription.">
-
+    <meta name="description" content="Manage your Cogmatiq account, subscription, and billing details.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="msapplication-TileColor" content="#1A2533">
     <meta name="theme-color" content="#1A2533">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background: linear-gradient(to bottom, #1A2533, #111827); color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
-        .hover-scale { transition: transform 0.3s ease; }
-        .hover-scale:hover { transform: scale(1.05); }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        /* 1. Global Reset & New Palette */
+        body {
+            background-color: #151D2A;
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00;
+            color: #151D2A;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700; 
+        }
+        .btn-primary:hover {
+            background-color: transparent;
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+         .btn-danger {
+            background-color: #e53e3e; /* Red */
+            color: #151D2A;
+            border: 2px solid #e53e3e;
+            box-shadow: 0 0 10px rgba(229, 62, 62, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700;
+        }
+        .btn-danger:hover {
+            background-color: transparent;
+            color: #e53e3e;
+            box-shadow: 0 0 15px rgba(229, 62, 62, 0.7);
+        }
+
+        /* 4. Cards and Panels */
+        .card {
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+        
+        /* 5. Utility Classes */
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="w-full min-h-screen">
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-40 shadow-sm">
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg flex-shrink-0 border-b border-[#00F0FF]/30">
         <a href="/synthesist.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
@@ -47,116 +87,175 @@
             <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
             <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
             <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a>
-            <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
-            <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
+            <a href="/account.html" class="text-white font-medium hover:text-white transition-colors text-sm">Account</a> <button id="logout-button-header" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
     </header>
 
-    <main class="pt-32 pb-12 px-4 animate-fade-in">
-        <div class="max-w-xl mx-auto">
-            <h1 class="text-3xl font-bold mb-6">My Account</h1>
-            <div class="card p-8 rounded-lg space-y-6">
-                <div>
-                    <p class="text-sm font-semibold text-gray-400">Email</p>
-                    <p id="user-email" class="font-semibold text-white">Loading...</p>
+    <main class="pt-32 pb-12 px-4 md:px-8 animate-fade-in">
+        <div class="max-w-4xl mx-auto">
+            
+            <h1 class="text-3xl md:text-4xl font-bold mb-8 accent-primary">My Account</h1>
+            
+            <div class="space-y-6">
+                <div class="card rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-white mb-4">Account Information</h2>
+                    <div class="space-y-2">
+                        <p class="text-sm text-gray-400">EMAIL</p>
+                        <p id="user-email" class="font-semibold text-lg text-white">Loading...</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-sm font-semibold text-gray-400">Subscription</p>
-                    <p id="sub-status" class="font-semibold">Loading...</p>
-                </div>
-                <div>
-                    <button id="billing-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale disabled:opacity-50" disabled>
-                        Loading...
+
+                <div class="card rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-white mb-4">Subscription</h2>
+                    <div id="account-status" class="mb-6">
+                        <p class="text-sm text-gray-500">LOAD: Status...</p>
+                    </div>
+                    <button id="manage-subscription-button" class="btn-primary py-3 px-5 rounded-md text-sm hover-scale w-full md:w-auto" disabled>
+                        Manage Subscription
                     </button>
-                    <p id="message" class="mt-4 text-sm text-red-400"></p>
+                </div>
+
+                <div class="card rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-white mb-4">Authentication</h2>
+                    <p class="text-gray-400 mb-6">Sign out of your current session on this device.</p>
+                    <button id="logout-button" class="btn-danger py-3 px-5 rounded-md text-sm hover-scale w-full md:w-auto">
+                        Sign Out
+                    </button>
                 </div>
             </div>
+
         </div>
     </main>
 
     <script>
-        // *** FIX: All broken, hardcoded keys have been removed ***
-        // We now use the global 'supabaseClient', 'apiBaseUrl', 
-        // and 'getSessionOrRedirect' from supabaseClient.js
+        // --- GLOBALS (from supabaseClient.js) ---
+        // - supabaseClient
+        // - apiBaseUrl
+        // - getSessionOrRedirect
         
-        const userEmailEl = document.getElementById('user-email');
-        const subStatusEl = document.getElementById('sub-status');
-        const billingButton = document.getElementById('billing-button');
-        const messageEl = document.getElementById('message');
-        const logoutButton = document.getElementById('logout-button');
+        // --- API ENDPOINTS ---
+        const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
+        const PORTAL_API_ENDPOINT = `${apiBaseUrl}/create-customer-portal-session`;
 
+        // --- DOM ELEMENTS ---
+        const userEmailEl = document.getElementById('user-email');
+        const accountStatusEl = document.getElementById('account-status');
+        const logoutButton = document.getElementById('logout-button');
+        const logoutButtonHeader = document.getElementById('logout-button-header');
+        const manageSubButton = document.getElementById('manage-subscription-button');
+
+        // --- STATE ---
         let userToken = null;
 
+        // --- API HELPER ---
+        async function fetchApi(endpoint, options = {}) {
+            if (!userToken) throw new Error("Authentication token is missing.");
+            
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            const mergedOptions = { ...defaultOptions, ...options, headers: { ...defaultOptions.headers, ...options.headers } };
+
+            const response = await fetch(endpoint, mergedOptions);
+            
+            if (!response.ok) {
+                let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorDetail = errorData.detail || errorDetail;
+                } catch (e) {}
+                throw new Error(errorDetail);
+            }
+            return response.json();
+        }
+
+        // --- INITIALIZATION ---
         async function initializeAccount() {
-            // 'getSessionOrRedirect' is now available from supabaseClient.js
-            const session = await getSessionOrRedirect(); 
-            if (!session) return; // Redirect will happen inside helper
+            const session = await getSessionOrRedirect();
+            if (!session) return; 
 
             userToken = session.access_token;
             userEmailEl.textContent = session.user.email;
-            fetchSubscriptionStatus();
+
+            setupListeners();
+            
+            try {
+                await fetchSubscriptionStatus();
+            } catch (error) {
+                console.error("Fetch Account Data Error:", error);
+                accountStatusEl.innerHTML = `<p class="text-sm text-red-400">Error loading subscription status.</p>`;
+            }
+        }
+        
+        function setupListeners() {
+            const doSignOut = async () => {
+                await supabaseClient.auth.signOut(); 
+                window.location.href = '/login.html'; 
+            };
+            
+            logoutButton.addEventListener('click', doSignOut);
+            logoutButtonHeader.addEventListener('click', doSignOut);
+            manageSubButton.addEventListener('click', handleManageSubscription);
         }
 
+        // --- DATA FETCHING & RENDERING ---
         async function fetchSubscriptionStatus() {
-            try {
-                // 'apiBaseUrl' is now available from supabaseClient.js
-                const res = await fetch(`${apiBaseUrl}/subscription-status`, { headers: { 'Authorization': `Bearer ${userToken}` } });
-                if (!res.ok) throw new Error('Could not load subscription status.');
-                
-                const data = await res.json();
-                
-                billingButton.disabled = false;
+            const data = await fetchApi(STATUS_API_ENDPOINT);
+            renderSubscriptionStatus(data.is_pro);
+        }
 
-                if (data.is_pro) {
-                    subStatusEl.textContent = 'Pro Plan';
-                    subStatusEl.classList.add('text-green-400');
-                    billingButton.textContent = 'Manage Subscription';
-                    billingButton.addEventListener('click', manageSubscription);
+        function renderSubscriptionStatus(isPro) {
+            let statusHTML = '';
+            if (isPro) {
+                statusHTML = `
+                    <p class="text-sm font-semibold accent-secondary">PLAN: PRO</p>
+                    <p class="text-gray-400 text-sm mt-1">You have full access to all features.</p>
+                `;
+                manageSubButton.disabled = false;
+            } else {
+                statusHTML = `
+                    <p class="text-sm font-semibold text-gray-400">PLAN: FREE</p>
+                    <p class="text-gray-400 text-sm mt-1">Upgrade to Pro to unlock unlimited Knowledge Nodes and Artifacts.</p>
+                `;
+                manageSubButton.textContent = 'Upgrade to Pro';
+                manageSubButton.disabled = false;
+            }
+            accountStatusEl.innerHTML = statusHTML;
+        }
+
+        async function handleManageSubscription() {
+            manageSubButton.disabled = true;
+            manageSubButton.textContent = "Loading Portal...";
+            
+            // Check if user is Pro. If not, send to pricing.
+            const statusData = await fetchApi(STATUS_API_ENDPOINT);
+            if (!statusData.is_pro) {
+                window.location.href = '/pricing.html';
+                return;
+            }
+
+            // If they are Pro, send to customer portal
+            try {
+                const data = await fetchApi(PORTAL_API_ENDPOINT, { method: 'POST' });
+                if (data.url) {
+                    window.location.href = data.url;
                 } else {
-                    subStatusEl.textContent = 'Free Plan';
-                    subStatusEl.classList.add('text-gray-400');
-                    billingButton.textContent = 'Upgrade to Pro';
-                    billingButton.addEventListener('click', () => {
-                        window.location.href = '/pricing.html';
-                    });
+                    throw new Error("No portal URL returned.");
                 }
-            } catch (err) {
-                subStatusEl.textContent = 'Error';
-                subStatusEl.classList.add('text-red-400');
-                billingButton.textContent = 'Retry';
-                billingButton.disabled = false;
-                billingButton.addEventListener('click', fetchSubscriptionStatus);
+            } catch (error) {
+                console.error("Error creating portal session:", error);
+                alert("Could not load billing portal. Please try again.");
+                manageSubButton.disabled = false;
+                manageSubButton.textContent = "Manage Subscription";
             }
         }
         
-        async function manageSubscription() {
-            messageEl.textContent = 'Redirecting to billing portal...';
-            billingButton.disabled = true;
-            try {
-                const response = await fetch(`${apiBaseUrl}/create-customer-portal-session`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({detail: 'Could not create portal session.'}));
-                    throw new Error(err.detail);
-                }
-                const { url } = await response.json();
-                window.location.href = url;
-            } catch (err) {
-                messageEl.textContent = `Error: ${err.message}`;
-                billingButton.disabled = false;
-            }
-        }
-        
-        logoutButton.addEventListener('click', async () => { 
-            // 'supabaseClient' is now available from supabaseClient.js
-            await supabaseClient.auth.signOut(); 
-            window.location.href = '/'; 
-        });
-
-        // Run initialization
+        // --- RUN INITIALIZATION ---
         initializeAccount();
+
     </script>
 </body>
 </html>

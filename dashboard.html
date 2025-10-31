@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Knowledge Nodes - Cogmatiq</title>
-    <meta name="description" content="Your central hub for managing your AI-powered knowledge nodes.">
+    <meta name="description" content="Manage your AI-powered Knowledge Nodes. Create, organize, and query documents for actionable insights.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -22,11 +23,51 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        /* 1. Global Reset & New Palette */
+        body {
+            background-color: #151D2A;
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00;
+            color: #151D2A;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700; /* Make button text bolder */
+        }
+        .btn-primary:hover {
+            background-color: transparent;
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+        .btn-secondary {
+            background-color: #293345;
+            color: #E0E6E9;
+            border: 1px solid #00F0FF;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-secondary:hover {
+            background-color: #1F2A44;
+            color: #00F0FF;
+        }
+
+        /* 4. Cards and Panels */
+        .card {
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+        
+        /* 5. Utility Classes */
         .hover-scale { transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.03); }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
@@ -51,11 +92,11 @@
             cursor: pointer;
         }
         .modal-tab:hover {
-            color: #E5E7EB;
+            color: #E0E6E9;
         }
         .modal-tab.active {
-            color: #00B5AD;
-            border-bottom-color: #00B5AD;
+            color: #FF8C00; /* Use primary accent */
+            border-bottom-color: #FF8C00;
         }
         .modal-panel { display: none; }
         .modal-panel.active { display: block; }
@@ -63,15 +104,14 @@
 </head>
 <body class="w-full min-h-screen">
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm">
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg flex-shrink-0 border-b border-[#00F0FF]/30">
         <a href="/synthesist.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
             <a href="/synthesist.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Synthesist</a>
-            <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
-            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
+            <a href="/dashboard.html" class="text-white font-medium hover:text-white transition-colors text-sm">Nodes</a> <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
             <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a>
             <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
@@ -83,23 +123,23 @@
             
             <div class="mb-8 p-6 card rounded-lg flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-4 md:mb-0">
-                    <p class="text-sm font-semibold text-gray-400">Account</p>
-                    <p id="user-email" class="font-semibold text-white">Loading...</p>
+                    <p class="text-sm font-semibold text-gray-400">ACCOUNT</p>
+                    <p id="user-email" class="font-semibold text-white">LOAD: User...</p>
                 </div>
                 <div id="account-status" class="text-center md:text-right">
-                    <p class="text-sm text-gray-500">Loading subscription...</p>
+                    <p class="text-sm text-gray-500">LOAD: Status...</p>
                 </div>
             </div>
 
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold">My Knowledge Nodes</h1>
-                <button id="create-node-button" class="accent-bg text-white font-semibold py-3 px-5 rounded-md text-sm hover-scale">
+                <h1 class="text-3xl font-bold accent-primary">My Knowledge Nodes</h1>
+                <button id="create-node-button" class="btn-primary py-3 px-5 rounded-md text-sm hover-scale">
                     + New Node
                 </button>
             </div>
             
-            <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5 mb-4">
-                <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
+            <div id="progress-container" class="hidden w-full bg-[#293345] rounded-full h-2.5 mb-4 border border-[#00F0FF]/30">
+                <div id="progress-bar" class="bg-[#FF8C00] h-2 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
             </div>
             <p id="progress-text" class="text-center text-sm text-gray-400 mb-4 hidden"></p>
 
@@ -116,28 +156,28 @@
         </div>
     </main>
     
-    <div id="node-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="node-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="modal-content">
-            <h2 id="modal-title" class="text-xl font-semibold mb-6 px-6 pt-6 text-white">Create New Knowledge Node</h2>
+            <h2 id="modal-title" class="text-xl font-semibold mb-6 px-6 pt-6 accent-primary">Create New Knowledge Node</h2>
             
              <div class="px-6 pb-6">
                 <label for="node-name-input" class="text-sm font-semibold text-gray-400 mb-2 block">Node Name</label>
-                <input type="text" id="node-name-input" placeholder="e.g., 'Project Titan' or 'Philosophy Notes'" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                <input type="text" id="node-name-input" placeholder="e.g., 'Project Titan' or 'Philosophy Notes'" class="w-full p-3 bg-[#151D2A] border border-[#00F0FF]/50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8C00]">
                 <p id="modal-message" class="text-sm text-red-400 mt-2 h-4"></p>
                 <div class="flex justify-end gap-4 mt-6">
-                    <button type="button" id="modal-cancel-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                    <button type="button" id="modal-create-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50">Create</button> 
+                    <button type="button" id="modal-cancel-button" class="btn-secondary py-2 px-4 rounded-md">Cancel</button>
+                    <button type="button" id="modal-create-button" class="btn-primary py-2 px-4 rounded-md disabled:opacity-50" disabled>Create</button> 
                 </div>
             </div>
         </div>
     </div>
 
     <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.txt,.md,.epub">
-    <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="add-modal-title" role="dialog" aria-modal="true">
+    <div id="add-doc-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="add-modal-title" role="dialog" aria-modal="true">
         <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="add-modal-content">
-            <h2 id="add-modal-title" class="text-xl font-semibold mb-4 px-6 pt-6 text-white">Add Artifacts to Node</h2>
+            <h2 id="add-modal-title" class="text-xl font-semibold mb-4 px-6 pt-6 accent-primary">Add Artifacts to Node</h2>
             
-            <div class="border-b border-gray-700">
+            <div class="border-b border-[#00F0FF]/30">
                 <nav class="flex -mb-px px-6" aria-label="Tabs">
                     <button id="modal-tab-library" role="tab" aria-controls="modal-panel-library" aria-selected="true" class="modal-tab active">From Library</button>
                     <button id="modal-tab-upload" role="tab" aria-controls="modal-panel-upload" aria-selected="false" class="modal-tab">Upload New</button>
@@ -148,33 +188,33 @@
              <div class="modal-panels-container max-h-[70vh] overflow-y-auto">
                 <div id="modal-panel-library" role="tabpanel" class="modal-panel active p-6">
                     <p class="text-gray-400 text-sm mb-4">Select existing artifacts from your library to link to this Node.</p>
-                    <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border border-gray-700 rounded-md p-3 bg-gray-800/50 mb-4">
+                    <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border border-[#00F0FF]/50 rounded-md p-3 bg-[#151D2A]/50 mb-4">
                         <p class="text-gray-500 italic">Loading library...</p> 
                     </div>
                     <div class="flex justify-end gap-4">
-                        <button type="button" id="modal-cancel-button-library" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                        <button type="button" id="modal-add-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Add Selected</button> 
+                        <button type="button" id="modal-cancel-button-library" class="btn-secondary py-2 px-4 rounded-md">Cancel</button>
+                        <button type="button" id="modal-add-button" class="btn-primary py-2 px-4 rounded-md disabled:opacity-50" disabled>Add Selected</button> 
                     </div>
                 </div>
 
                 <div id="modal-panel-upload" role="tabpanel" class="modal-panel p-6">
                     <p class="text-gray-400 text-sm mb-4">Upload a new PDF, DOCX, TXT, MD, or EPUB file. It will be added to your library and this Node.</p>
-                    <button type="button" id="modal-upload-trigger-button" class="w-full text-center accent-text font-semibold p-8 rounded-md border-2 border-dashed border-gray-600 hover:border-accent-text hover:bg-gray-700/50 transition-colors">
+                    <button type="button" id="modal-upload-trigger-button" class="w-full text-center accent-primary font-semibold p-8 rounded-md border-2 border-dashed border-[#00F0FF]/50 hover:border-[#FF8C00] hover:bg-[#293345]/50 transition-colors">
                         Click or Drag File Here
                     </button>
                      <p class="text-xs text-center text-gray-500 mt-2">Max file size: 100MB</p> 
                      <div class="flex justify-end gap-4 mt-6">
-                        <button type="button" id="modal-cancel-button-upload" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
+                        <button type="button" id="modal-cancel-button-upload" class="btn-secondary py-2 px-4 rounded-md">Cancel</button>
                     </div>
                 </div>
 
                 <div id="modal-panel-url" role="tabpanel" class="modal-panel p-6">
                     <p class="text-gray-400 text-sm mb-4">Add a single webpage. We'll scrape its content and add it as a document to your library and this Node.</p>
-                    <input type="url" id="modal-url-input" placeholder="https://example.com/article" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                    <input type="url" id="modal-url-input" placeholder="https://example.com/article" class="w-full p-3 bg-[#151D2A] border border-[#00F0FF]/50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8C00]">
                     <p id="modal-url-message" class="text-sm text-red-400 mt-2 h-4"></p>
                     <div class="flex justify-end gap-4 mt-2">
-                        <button type="button" id="modal-cancel-button-url" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                        <button type="button" id="modal-add-url-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Add Webpage</button> 
+                        <button type="button" id="modal-cancel-button-url" class="btn-secondary py-2 px-4 rounded-md">Cancel</button>
+                        <button type="button" id="modal-add-url-button" class="btn-primary py-2 px-4 rounded-md disabled:opacity-50" disabled>Add Webpage</button> 
                     </div>
                 </div>
             </div>
@@ -183,15 +223,10 @@
 
 
     <script>
-        // --- GLOBALS (from supabaseClient.js) ---
-        // - supabaseClient
-        // - apiBaseUrl
-        // - getSessionOrRedirect
-        
-        // --- API ENDPOINTS ---
-        const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`; // API still uses /cortices
+        // --- GLOBALS ---
+        const CORTICES_API_ENDPOINT = `${apiBaseUrl}/cortices`;
         const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
-        const DOCS_API_ENDPOINT = `${apiBaseUrl}/documents`; // <-- NEW for library
+        const DOCS_API_ENDPOINT = `${apiBaseUrl}/documents`;
 
         // --- DOM ELEMENTS ---
         const userEmailEl = document.getElementById('user-email');
@@ -200,7 +235,7 @@
         const nodeListContainer = document.getElementById('node-list-container');
         const nodeLoader = document.getElementById('node-loader');
         
-        // Create Node Modal Elements
+        // Create Node Modal
         const nodeModal = document.getElementById('node-modal');
         const modalContent = document.getElementById('modal-content');
         const createNodeButton = document.getElementById('create-node-button');
@@ -209,7 +244,7 @@
         const nodeNameInput = document.getElementById('node-name-input');
         const modalMessage = document.getElementById('modal-message');
 
-        // --- NEW: Add Artifact Modal Elements ---
+        // Add Artifact Modal
         const fileInput = document.getElementById('file-input');
         const progressContainer = document.getElementById('progress-container');
         const progressBar = document.getElementById('progress-bar');
@@ -241,34 +276,20 @@
         // --- STATE ---
         let userToken = null;
         let allKnowledgeNodes = [];
-        let allLibraryDocs = []; // <-- NEW
-        let isLibraryLoaded = false; // <-- NEW
-        let currentCortexId = null; // <-- NEW
-        const activePolls = {}; // <-- NEW
+        let allLibraryDocs = [];
+        let isLibraryLoaded = false;
+        let currentCortexId = null;
+        const activePolls = {};
 
         // --- API HELPER ---
         async function fetchApi(endpoint, options = {}) {
             if (!userToken) throw new Error("Authentication token is missing.");
             
-            const defaultOptions = {
-                headers: {
-                    'Authorization': `Bearer ${userToken}`,
-                    'Content-Type': 'application/json'
-                }
-            };
+            const defaultOptions = { headers: { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' } };
+            const mergedOptions = { ...defaultOptions, ...options, headers: { ...defaultOptions.headers, ...options.headers } };
             
-            const mergedOptions = {
-                ...defaultOptions,
-                ...options,
-                headers: {
-                    ...defaultOptions.headers,
-                    ...options.headers
-                }
-            };
-            
-            // --- FIX: Need to handle non-JSON responses from file uploads ---
             if (options.body instanceof FormData) {
-                delete mergedOptions.headers['Content-Type']; // Let browser set multipart header
+                delete mergedOptions.headers['Content-Type'];
             }
 
             const response = await fetch(endpoint, mergedOptions);
@@ -298,9 +319,7 @@
             setupListeners();
             
             try {
-                // Fetch critical data first
                 await fetchSubscriptionAndNodes();
-                // Fetch non-critical data in background
                 fetchLibraryDocumentsInBackground();
             } catch (error) {
                 console.error("Fetch Critical Data Error:", error);
@@ -320,7 +339,6 @@
                 window.location.href = '/login.html'; 
             });
             
-            // Create Node Modal Listeners
             createNodeButton.addEventListener('click', openCreateModal);
             modalCancelButton.addEventListener('click', closeCreateModal);
             nodeModal.addEventListener('click', (e) => {
@@ -334,7 +352,6 @@
             
             modalCreateButton.addEventListener('click', createNode);
 
-            // --- NEW: Add Artifact Modal Listeners ---
             Object.keys(modalTabs).forEach(key => {
                 modalTabs[key].addEventListener('click', () => switchModalTab(key));
             });
@@ -361,7 +378,7 @@
             fileInput.addEventListener('change', () => {
                 const targetCortexId = fileInput.dataset.cortexId;
                 if (fileInput.files.length && targetCortexId) {
-                     if (fileInput.files[0].size > 100 * 1024 * 1024) { // 100MB check
+                     if (fileInput.files[0].size > 100 * 1024 * 1024) {
                          alert('File is too large. The maximum upload size is 100MB.');
                          fileInput.value = ''; 
                          delete fileInput.dataset.cortexId;
@@ -390,7 +407,6 @@
             renderNodeList();
         }
 
-        // --- NEW: Fetch library in background ---
         async function fetchLibraryDocumentsInBackground() {
             isLibraryLoaded = false;
             try {
@@ -413,13 +429,13 @@
             let statusHTML = '';
             if (isPro) {
                 statusHTML = `
-                    <p class="text-sm font-semibold text-green-400">Pro Plan</p>
-                    <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
+                    <p class="text-sm font-semibold accent-secondary">PLAN: PRO</p>
+                    <a href="/account.html" class="text-xs text-gray-400 hover:text-[#FF8C00] hover:underline">ACCESS: FULL</a>
                 `;
             } else {
                 statusHTML = `
-                    <p class="text-sm font-semibold text-gray-400">Free Plan</p>
-                    <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
+                    <p class="text-sm font-semibold text-gray-400">PLAN: FREE</p>
+                    <a href="/pricing.html" class="text-sm font-semibold accent-primary hover:underline">ACTION: UPGRADE</a>
                 `;
             }
             accountStatusEl.innerHTML = statusHTML;
@@ -431,9 +447,9 @@
             if (allKnowledgeNodes.length === 0) {
                 nodeListContainer.innerHTML = `
                     <div class="card rounded-lg p-8 text-center col-span-1 md:col-span-2 lg:col-span-3">
-                        <h3 class="text-xl font-bold mb-2">Welcome to Cogmatiq</h3>
-                        <p class="text-gray-400 mb-6">You don't have any Knowledge Nodes yet. A Node is a dedicated, AI-powered knowledge container.</p>
-                        <button onclick="openCreateModal()" class="accent-bg text-white font-semibold py-3 px-6 rounded-md hover-scale">
+                        <h3 class="text-xl font-bold mb-2 accent-primary">Welcome to Cogmatiq</h3>
+                        <p class="text-gray-400 mb-6">You don't have any Knowledge Nodes. A Node is a dedicated, AI-powered knowledge container.</p>
+                        <button onclick="openCreateModal()" class="btn-primary py-3 px-6 rounded-md hover-scale">
                             Create Your First Node
                         </button>
                     </div>
@@ -451,7 +467,6 @@
                         let statusIndicator = '';
                         if (doc.status === 'processing') {
                             statusIndicator = '<span class="text-yellow-400 ml-1">(Processing...)</span>';
-                            // Start polling
                             pollDocumentStatus(doc.id, node.id);
                         } else if (doc.status === 'error') {
                             statusIndicator = '<span class="text-red-400 ml-1">(Error)</span>';
@@ -470,18 +485,18 @@
                 }
 
                 return `
-                    <div id="node-card-${node.id}" class="card p-6 rounded-lg flex flex-col justify-between shadow-lg transition-all duration-300 hover:shadow-cyan-500/10 relative">
+                    <div id="node-card-${node.id}" class="card p-6 rounded-lg flex flex-col justify-between shadow-lg transition-all duration-300 relative">
                         
                         <button onclick="deleteNode('${node.id}', '${node.name}')" title="Delete Node" class="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd"></path></svg>
                         </button>
                         
                         <div class="flex-grow">
-                            <h3 class="text-xl font-bold truncate mb-2 pr-8" title="${node.name}">${node.name}</h3>
+                            <h3 class="text-xl font-bold truncate mb-2 pr-8 accent-primary" title="${node.name}">${node.name}</h3>
                             <p id="artifact-count-${node.id}" class="text-sm text-gray-400 mb-4">${docText}</p>
 
-                            <div class="border-t border-gray-700 pt-4 mt-4">
-                                <button onclick="toggleCollapse(event)" data-target="artifact-list-${node.id}" class="flex justify-between items-center w-full text-xs font-semibold text-gray-500 uppercase mb-2">
+                            <div class="border-t border-[#00F0FF]/30 pt-4 mt-4">
+                                <button onclick="toggleCollapse(event)" data-target="artifact-list-${node.id}" class="flex justify-between items-center w-full text-xs font-semibold text-gray-400 uppercase mb-2">
                                     <span>Artifacts</span>
                                     <svg class="w-4 h-4 toggle-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </button>
@@ -492,10 +507,10 @@
                         </div>
                         
                         <div class="flex items-center gap-2 mt-6">
-                            <a href="/chat.html?cortex_id=${node.id}" class="block text-center w-full accent-bg text-white font-semibold py-3 px-4 rounded-md text-sm hover-scale">
+                            <a href="/chat.html?cortex_id=${node.id}" class="block text-center w-full btn-primary py-3 px-4 rounded-md text-sm hover-scale">
                                 Open Node
                             </a>
-                            <button onclick="openAddDocumentModal('${node.id}')" title="Add Source" class="flex-shrink-0 bg-gray-600 hover:bg-gray-500 text-white font-semibold p-3 rounded-md text-sm hover-scale">
+                            <button onclick="openAddDocumentModal('${node.id}')" title="Add Source" class="flex-shrink-0 btn-secondary p-3 rounded-md text-sm hover-scale">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                             </button>
                         </div>
@@ -633,9 +648,9 @@
             }
         }
         
-        // --- NEW: ADD ARTIFACT MODAL FUNCTIONS ---
+        // --- ADD ARTIFACT MODAL FUNCTIONS ---
         function openAddDocumentModal(cortexIdToAddTo) { 
-            currentCortexId = cortexIdToAddTo; // Set the node we're adding to
+            currentCortexId = cortexIdToAddTo;
             switchModalTab('library'); 
             renderLibraryModal(); 
             
@@ -680,7 +695,7 @@
                     const isLinked = existingDocIds.includes(doc.id);
                     const isDisabled = isLinked || (doc.status !== 'ready' && doc.status !== 'ready_no_graph');
                     const disabledAttr = isDisabled ? 'disabled' : '';
-                    const labelClass = isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700/50 cursor-pointer';
+                    const labelClass = isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#293345]/50 cursor-pointer';
                     
                     let statusIndicator = '';
                     if (doc.status === 'processing') statusIndicator = '<span class="text-xs text-yellow-400 ml-1">(Processing...)</span>';
@@ -688,7 +703,7 @@
 
                     return `
                     <label class="flex items-center gap-3 p-2 rounded-md ${labelClass}">
-                        <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text focus:ring-offset-0 focus:ring-1" ${disabledAttr}>
+                        <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-[#FF8C00] focus:ring-[#FF8C00] focus:ring-offset-0 focus:ring-1" ${disabledAttr}>
                         <span class="truncate" title="${doc.file_name}">${doc.file_name}${statusIndicator}</span>
                         ${isLinked ? '<span class="text-xs text-gray-500 ml-auto">(Already Added)</span>' : ''}
                     </label>
@@ -802,7 +817,7 @@
                     body: formData,
                 });
                 
-                const newDoc = await response.json(); // Get new doc data from response
+                const newDoc = await response.json();
 
                 progressBar.style.width = '100%';
 
@@ -821,15 +836,15 @@
                 if(node) {
                     node.documents.push(newDoc);
                 }
-                renderNodeList();
-                fetchLibraryDocumentsInBackground();
+                renderNodeList(); // Re-render to show new doc
+                fetchLibraryDocumentsInBackground(); // Re-sync library
                 
                 setTimeout(resetUploadUI, 2000); 
 
             } catch (error) {
                 console.error("Upload Error:", error);
                 progressBar.style.width = '100%';
-                progressBar.classList.add('bg-red-500');
+                progressBar.classList.add('bg-red-500'); // Use a red bar for error
                 progressText.textContent = error.message;
                 if (error.message.includes('Limit reached')) {
                     setTimeout(() => window.location.href = '/pricing.html', 2000);
@@ -846,7 +861,6 @@
             fileInput.value = ''; 
         }
 
-        // --- NEW: POLLING FUNCTION ---
         async function pollDocumentStatus(docId, nodeId) {
             if (activePolls[docId]) return; 
             console.log(`Polling status for doc: ${docId} in node ${nodeId}`);
@@ -881,14 +895,13 @@
                 }
             }, 5000); 
         }
-
         
         // --- Global functions (for inline HTML) ---
         window.openCreateModal = openCreateModal;
         window.deleteNode = deleteNode;
         window.unlinkArtifact = unlinkArtifact;
         window.toggleCollapse = toggleCollapse;
-        window.openAddDocumentModal = openAddDocumentModal; // <-- NEW
+        window.openAddDocumentModal = openAddDocumentModal;
 
         // --- RUN INITIALIZATION ---
         initializeDashboard();

@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Synthesist - Cogmatiq</title>
+    <meta name="description" content="Cogmatiq is an AI-powered knowledge platform. Chat with the Synthesist to find, connect, and generate new insights from all your documents, notes, and data.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -23,191 +24,210 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        /* 1. Global Reset & New Palette */
+        body {
+            /* Deep slate background */
+            background-color: #151D2A;
+            color: #E0E6E9; /* Light text for readability */
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif; /* Maintain retro-tech font vibe */
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange for Titles/Emphasis */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal for Structure/Borders */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00; /* Code Orange CTA buttons */
+            color: #151D2A; /* High contrast dark text */
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4); /* Subtle orange glow */
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: transparent; /* Invert colors on hover */
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+
+        /* 4. Cards and Panels (Essential for Neural Map feel) */
+        .card {
+            background: #293345; /* Deeper dark blue-gray */
+            border: 1px solid #00F0FF; /* Electric Teal border */
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2); /* Subtle teal inner glow */
+        }
         
+        /* 5. Utility Classes */
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.03); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* SCROLL BARS */
+        #chat-container::-webkit-scrollbar { width: 8px; }
+        #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
+        #chat-container::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 4px; border: 2px solid #293345; }
         .sidebar-scroll-container::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 2px; }
         .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
 
-        .prose { color: #E5E7EB; }
+        /* PROSE STYLING */
+        .prose { color: #E0E6E9; }
         .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
         .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
-        .prose strong { font-weight: 800; }
-        .prose a { color: #00B5AD; text-decoration: underline; } 
-        .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } 
-        .prose code { font-family: monospace; }
-        .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
+        .prose strong { font-weight: 700; color: #FF8C00; } 
+        .prose a { color: #00F0FF; text-decoration: underline; } 
+        .prose pre { background-color: #0A111A; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; border: 1px solid #00F0FF; } 
+        .prose code { font-family: 'Share Tech Mono', monospace; }
+        .prose blockquote { border-left: 4px solid #FF8C00; padding-left: 1em; color: #9CA3AF; }
 
-        /* Node List Item */
-        .node-link {
+        /* SIDEBAR & CHAT ELEMENTS */
+        .sidebar-button, .node-link {
             display: flex;
             align-items: center;
             width: 100%;
             padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            color: #9CA3AF;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            color: #A0AEC0; 
             transition: background-color 0.2s, color 0.2s;
         }
-        .node-link:hover {
-            background-color: #2D3748;
-            color: #E5E7EB;
+        .sidebar-button:hover, .node-link:hover {
+            background-color: #1F2A44;
+            color: #E0E6E9;
         }
-        
+        .ai-message {
+            background: #293345;
+            border: 1px solid rgba(0, 240, 255, 0.1);
+        }
+        .user-message {
+            background-color: #FF8C00;
+            color: #151D2A;
+            font-weight: 700;
+        }
+
         /* Mobile Sidebar */
-        #mobile-sidebar-overlay {
-            transition: opacity 0.3s ease-in-out;
-        }
-        #mobile-sidebar {
-            transition: transform 0.3s ease-in-out;
+        #mobile-sidebar-overlay { transition: opacity 0.3s ease-in-out; }
+        #mobile-sidebar { 
+            transition: transform 0.3s ease-in-out; 
             transform: translateX(-100%);
-        }
-
-        /* Chat panel layout */
-        #chat-panel {
-            flex-direction: column;
-            height: 100%;
-        }
-        #chat-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            min-height: 0;
-            padding-bottom: 2rem;
-        }
-        #chat-form-container {
-            position: sticky;
-            bottom: 0;
-            background: #1A2533;
-            padding: 1rem;
-            z-index: 10;
-        }
-
-        @media (max-width: 767px) {
-            #chat-container {
-                padding-bottom: 11rem;
-            }
-            #chat-form-container {
-                padding: 0.75rem;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-                z-index: 20;
-            }
+            background-color: #151D2A;
         }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden"> 
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm flex-shrink-0">
-    <div class="flex items-center gap-3">
-        <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-            <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
-        </a>
-    </div>
-    <div class="flex items-center gap-4">
-        <span id="cortex-name" class="text-gray-300 font-semibold text-sm md:text-base">The Synthesist</span>
-        <a href="/integrations.html" class="text-sm font-semibold accent-text hover:underline whitespace-nowrap">
-            + Manage Integrations
-        </a>
-        <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
-        <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
-        <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
-    </div>
-</header>
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg flex-shrink-0 border-b border-[#00F0FF]/30">
+        <div class="flex items-center gap-3">
+            <button id="mobile-menu-open-button" class="md:hidden p-1 text-[#00F0FF] hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+                <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="cortex-name" class="text-[#00F0FF] font-semibold text-sm md:text-base">The Synthesist</span>
+            <a href="/integrations.html" class="text-sm font-semibold accent-primary hover:underline whitespace-nowrap">
+                + Tools
+            </a>
+            <a href="/dashboard.html" class="text-[#A0AEC0] font-medium hover:text-white transition-colors text-sm">Nodes</a>
+            <a href="/library.html" class="text-[#A0AEC0] font-medium hover:text-white transition-colors text-sm">Library</a>
+            <a href="/account.html" class="text-[#A0AEC0] font-medium hover:text-white transition-colors text-sm">Account</a>
+        </div>
+    </header>
 
     <div class="flex flex-grow pt-24 overflow-hidden"> 
         
-        <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
-            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+        <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-[#00F0FF]/30 bg-[#151D2A]">
+            
+            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30">
                 <div id="account-status-desktop">
-                    <p class="text-sm text-gray-500">Loading account...</p>
+                    <p class="text-sm text-gray-500">INIT: Account Status</p>
                 </div>
             </div>
 
             <div class="flex-shrink-0 pt-4">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Interface</h3>
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold px-4 mb-2">Interface</h3>
                 <nav class="flex flex-col space-y-2">
-                    <a href="/synthesist.html" class="node-link" style="background-color: #1F2A44; color: #E5E7EB;">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-                        Synthesist
+                    <a href="/synthesist.html" class="node-link" style="background-color: #293345; color: #E0E6E9; border-left: 2px solid #FF8C00;">
+                        <svg class="w-5 h-5 mr-3 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                        SYNTHESIST
                     </a>
                 </nav>
             </div>
             
-            <div class="border-t border-gray-700 my-4"></div>
+            <div class="border-t border-[#00F0FF]/30 my-4"></div>
             
             <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold">Knowledge Nodes</h3>
-                <a href="/dashboard.html" title="Manage Nodes" class="text-gray-400 hover:text-white">
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold">Knowledge Nodes</h3>
+                <a href="/dashboard.html" title="Manage Nodes" class="text-[#00F0FF] hover:text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </a>
             </div>
             <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">Loading Nodes...</p>
+                <p class="text-gray-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p>
             </nav>
         </aside>
 
         <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
-        <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-gray-700 bg-[#1A2533] z-50 flex flex-col">
-            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-gray-400 hover:text-white">
+        <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-[#00F0FF]/30 bg-[#151D2A] z-50 flex flex-col">
+            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-[#00F0FF] hover:text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             
-            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30">
                 <div id="account-status-mobile">
-                    <p class="text-sm text-gray-500">Loading account...</p>
+                    <p class="text-sm text-gray-500">INIT: Account Status</p>
                 </div>
             </div>
 
             <div class="flex-shrink-0 mt-6">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Interface</h3>
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold px-4 mb-2">Interface</h3>
                 <nav class="flex flex-col space-y-2">
-                    <a href="/synthesist.html" class="node-link" style="background-color: #1F2A44; color: #E5E7EB;">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-                        Synthesist
+                    <a href="/synthesist.html" class="node-link" style="background-color: #293345; color: #E0E6E9; border-left: 2px solid #FF8C00;">
+                        <svg class="w-5 h-5 mr-3 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                        SYNTHESIST
                     </a>
                 </nav>
             </div>
             
-            <div class="border-t border-gray-700 my-4"></div>
+            <div class="border-t border-[#00F0FF]/30 my-4"></div>
             
             <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold">Knowledge Nodes</h3>
-                <a href="/dashboard.html" title="Manage Nodes" class="text-gray-400 hover:text-white">
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold">Knowledge Nodes</h3>
+                <a href="/dashboard.html" title="Manage Nodes" class="text-[#00F0FF] hover:text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </a>
             </div>
             <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">Loading Nodes...</p>
+                <p class="text-gray-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p>
             </nav>
         </aside>
 
         <main class="flex flex-col w-full md:pl-64 h-full" onclick="closeMobileMenu()">
-            <div id="chat-panel" class="panel active flex flex-col h-full">
-                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6"></div>
-                <div id="chat-form-container" class="flex-shrink-0">
+            
+            <div id="chat-panel" class="panel active flex-col h-full">
+            
+                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6 pb-16 md:pb-0">
+                    </div>
+                
+                <div class="flex-shrink-0 p-4 md:p-8 border-t border-[#00F0FF]/30 bg-[#151D2A] fixed bottom-0 left-0 md:relative w-full md:pl-72"> 
                     <form id="chat-form" class="flex items-center gap-4">
-                        <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
+                        <input type="text" id="message-input" placeholder="Ask the Synthesist..." required autocomplete="off" class="flex-grow p-4 bg-[#293345] border border-[#00F0FF]/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
+                        <button type="submit" id="submit-button" class="btn-primary text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                         </button>
                     </form>
                 </div>
             </div>
+
         </main>
     </div>
-
+    
     <script>
         // --- apiBaseUrl and supabaseClient are loaded from supabaseClient.js ---
         
@@ -265,7 +285,7 @@
         // Utility to scroll chat container to bottom
         function scrollChatToBottom() {
             requestAnimationFrame(() => {
-                const chatFormContainer = document.getElementById('chat-form-container');
+                const chatFormContainer = document.querySelector('#chat-form-container');
                 const extraOffset = chatFormContainer ? chatFormContainer.offsetHeight : 0;
                 chatContainer.scrollTo({ 
                     top: chatContainer.scrollHeight + extraOffset, 
@@ -277,13 +297,12 @@
         // --- 8. FETCH LOGIC ---
         async function fetchChatHistory() {
             if (!userToken) {
-                console.warn('Cannot fetch chat history: Missing token');
                 chatContainer.innerHTML = '';
                 addMessageToUI("I am the Synthesist. Ask me anything, and I will query all your Knowledge Nodes to find an answer.", 'ai');
                 return;
             }
             
-            chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
+            chatContainer.innerHTML = '<p id="history-loading" class="text-gray-500 text-center italic mt-10">LOAD: Fetching Chat History...</p>';
             
             try {
                 const data = await fetchApi(HISTORY_API_ENDPOINT);
@@ -302,7 +321,7 @@
             } catch (error) {
                 console.error('Error fetching chat history:', error);
                 document.getElementById('history-loading')?.remove();
-                addMessageToUI(`Error loading chat history: ${error.message}. You can still chat.`, 'ai');
+                addMessageToUI(`ERR: Could not load history. ${error.message}. You can still chat.`, 'ai');
                 scrollChatToBottom();
             }
         }
@@ -313,7 +332,7 @@
                 renderNodeSidebarList();
             } catch (error) {
                 console.error("Error fetching nodes:", error);
-                const errorHTML = `<p class="text-red-400 text-sm px-4 py-2">Error loading Nodes</p>`;
+                const errorHTML = `<p class="text-red-400 text-sm px-4 py-2">ERR: Failed to load Nodes</p>`;
                 desktopCortexList.innerHTML = errorHTML;
                 mobileCortexList.innerHTML = errorHTML;
             }
@@ -324,7 +343,6 @@
                 const data = await fetchApi(STATUS_API_ENDPOINT);
                 renderSubscriptionStatus(data.is_pro);
             } catch (error) {
-                console.error("Error fetching subscription status:", error);
                 renderSubscriptionStatus(null, true); 
             }
         }
@@ -333,7 +351,7 @@
         
         function renderNodeSidebarList() {
             if (!allKnowledgeNodes || allKnowledgeNodes.length === 0) {
-                const emptyHTML = `<p class="text-gray-500 text-sm px-4 py-2">No Knowledge Nodes found. <a href="/dashboard.html" class="accent-text hover:underline">Create one</a> or <a href="/integrations.html" class="accent-text hover:underline">connect one</a>.</p>`;
+                const emptyHTML = `<p class="text-gray-500 text-sm px-4 py-2">NODES: None found. <a href="/dashboard.html" class="accent-secondary hover:underline">Create one</a> or <a href="/integrations.html" class="accent-secondary hover:underline">connect one</a>.</p>`;
                 desktopCortexList.innerHTML = emptyHTML;
                 mobileCortexList.innerHTML = emptyHTML;
                 return;
@@ -346,12 +364,12 @@
                     icon = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"></path></svg>`;
                 } else {
                     // Globe icon for integrations
-                    icon = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 9.8l.22.22M12 6v.01M16.2 9.8l-.22.22M18.945 11H19a2 2 0 012 2v1a2 2 0 01-2 2h-1M5.055 11H5a2 2 0 00-2 2v1a2 2 0 002 2h1m0-6a9 9 0 0118 0v0"></path></svg>`;
+                    icon = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 9.8l.22.22M12 6v.01M16.2 9.8l-.22.22M18.945 11H19a2 2 0 012 2v1a2 2 0 01-2 2h-1M5.055 11H5a2 2 0 00-2 2v1a2 2 0 002 2h1m0-6a9 9 0 0118 0v0"></path></svg>`;
                 }
 
                 return `
-                    <div class="node-link" title="${node.name} (Type: ${node.node_type})">
-                        ${icon}
+                    <div class="node-link" title="${node.description}">
+                        <span class="accent-secondary">${icon}</span>
                         <span class="truncate">${node.name}</span>
                     </div>
                 `;
@@ -365,19 +383,19 @@
             let statusHTML = '';
 
             if (isError) {
-                statusHTML = `<p class="text-sm text-red-400">Error loading status.</p>`;
+                statusHTML = `<p class="text-sm text-red-400">STATUS: FAILED</p>`;
             } else if (isPro) {
                 statusHTML = `
                     <div>
-                        <p class="text-sm font-semibold text-green-400">Pro Plan</p>
-                        <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
+                        <p class="text-sm font-semibold accent-secondary">PLAN: PRO</p>
+                        <a href="/account.html" class="text-xs text-[#FF8C00] hover:underline">ACCESS: FULL</a>
                     </div>
                 `;
             } else {
                 statusHTML = `
                     <div>
-                        <p class="text-sm font-semibold text-gray-400">Free Plan</p>
-                        <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
+                        <p class="text-sm font-semibold text-[#A0AEC0]">PLAN: FREE</p>
+                        <a href="/pricing.html" class="text-sm font-semibold accent-primary hover:underline">ACTION: UPGRADE</a>
                     </div>
                 `;
             }
@@ -388,13 +406,8 @@
 
         // --- 10. INITIALIZE CHAT ---
         function initializeChat() {
-            console.log("Synthesist page loaded. Setting up auth listener...");
-            
             supabaseClient.auth.onAuthStateChange((event, session) => {
-                console.log(`Auth Event: ${event}`);
-
                 if (event === 'SIGNED_OUT') {
-                    console.warn("Auth state: SIGNED_OUT. Redirecting to login.");
                     window.location.href = '/login.html';
                     return;
                 }
@@ -402,14 +415,12 @@
                 if (session && session.access_token) {
                     if (userToken !== session.access_token) {
                         userToken = session.access_token;
-                        console.log("Token set/updated. Initializing listeners and fetching data...");
                         initializeListeners();
                         fetchChatHistory();
                         fetchAndRenderNodes();
                         fetchAndRenderSubscriptionStatus();
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
-                    console.warn("Auth state: No session on load. Redirecting to login.");
                     window.location.href = '/login.html';
                 }
             });
@@ -450,7 +461,6 @@
             formData.append('chat_history_json', JSON.stringify(historyToSend));
 
             try {
-                // Use standard fetch for streaming, not our custom fetchApi wrapper
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userToken}` },
@@ -482,8 +492,7 @@
                 chatHistory.push({ role: 'ai', content: fullResponse });
 
             } catch (error) {
-                console.error("Chat Stream API Error:", error);
-                const errorMessage = `Sorry, something went wrong: ${error.message}. Please try again.`;
+                const errorMessage = `ERROR: Process terminated. ${error.message}. Please check your Knowledge Nodes.`;
                 updateAIMessage(aiMessageElement, errorMessage); // Final update with error
                 chatHistory.push({ role: 'ai', content: errorMessage });
             } finally {
@@ -522,34 +531,34 @@
             if (sender === 'user') {
                 messageWrapper.classList.add('justify-end');
                 const userMessageDiv = document.createElement('div');
-                userMessageDiv.className = 'accent-bg rounded-lg p-4 max-w-lg';
+                userMessageDiv.className = 'user-message rounded-lg p-4 max-w-lg';
                 const p = document.createElement('p');
                 p.textContent = text;
                 userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>');
                 messageWrapper.appendChild(userMessageDiv);
             } else {
                 const aiIconDiv = document.createElement('div');
-                aiIconDiv.className = 'bg-gray-700/50 p-2 rounded-full flex-shrink-0';
-                aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>`;
+                aiIconDiv.className = 'bg-[#293345] p-2 rounded-full flex-shrink-0 border border-[#00F0FF]';
+                aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>`;
 
                 const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full';
+                aiMessageDiv.className = 'ai-message rounded-lg p-4 max-w-lg w-full';
                 
                 if (text === '') { // This is a new "typing..." message
                     aiMessageDiv.innerHTML = `
                         <div class="typing-indicator flex items-center space-x-1">
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                         </div>
                         <div class="prose max-w-none response-content hidden"></div>
-                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>
                     `;
                 } else { // This is a message from history
-                    aiMessageDiv.innerHTML = `
+                     aiMessageDiv.innerHTML = `
                         <div class="typing-indicator hidden"></div>
                         <div class="prose max-w-none response-content"></div> 
-                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>
                     `;
                     aiMessageDiv.querySelector('.response-content').innerHTML = marked.parse(text, { sanitize: false });
                 }
@@ -568,26 +577,21 @@
             const copyButton = element.querySelector('.copy-button');
 
             if (isStreamChunk) {
-                // This is a streaming chunk
                 if (typingIndicator) typingIndicator.classList.add('hidden');
                 if (responseContent) {
                     responseContent.classList.remove('hidden');
-                    // Set the full text content so far
                     element.dataset.content = text; 
                     responseContent.innerHTML = marked.parse(text);
                 }
             } else if (isFinalize) {
-                // This is the end of the stream
                 if (typingIndicator) typingIndicator.classList.add('hidden');
                 if (copyButton) copyButton.classList.remove('hidden');
                 
-                // Final parse of the full content stored in the element
                 const fullText = element.dataset.content || "No response received.";
                 if (responseContent) {
                     responseContent.innerHTML = marked.parse(fullText);
                 }
             } else {
-                // This is the original logic (e.g., for history or a non-streamed error)
                 element.dataset.content = text;
                 if (typingIndicator) typingIndicator.classList.add('hidden');
                 if (responseContent) {
@@ -604,15 +608,12 @@
             if (contentElement) {
                 const textToCopy = contentElement.innerText || contentElement.textContent;
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    buttonElement.textContent = 'Copied!';
+                    buttonElement.textContent = 'COPIED!';
                     setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
                 }).catch(err => {
-                    console.error('Failed to copy text: ', err);
-                    buttonElement.textContent = 'Copy Failed';
+                    buttonElement.textContent = 'COPY FAILED';
                     setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
                 });
-            } else {
-                console.error('Could not find content element to copy.');
             }
         }
         
@@ -623,6 +624,7 @@
         window.openMobileMenu = openMobileMenu;
         window.closeMobileMenu = closeMobileMenu;
         window.copyToClipboard = copyToClipboard;
+        
     </script>
 </body>
 </html>

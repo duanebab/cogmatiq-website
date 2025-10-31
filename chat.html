@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - Cogmatiq</title>
+    <meta name="description" content="Chat with your AI-powered Knowledge Node.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -26,74 +28,115 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        /* 1. Global Reset & New Palette */
+        body {
+            background-color: #151D2A;
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00;
+            color: #151D2A;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            background-color: transparent;
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+        .btn-secondary {
+            background-color: #293345;
+            color: #E0E6E9;
+            border: 1px solid #00F0FF;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-secondary:hover {
+            background-color: #1F2A44;
+            color: #00F0FF;
+        }
+
+        /* 4. Cards and Panels */
+        .card {
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
         
+        /* 5. Utility Classes */
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.03); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* SCROLL BARS */
         #chat-container::-webkit-scrollbar { width: 8px; }
         #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
-        #chat-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        #chat-container::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 4px; border: 2px solid #293345; }
         .sidebar-scroll-container::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #4f6a85; border-radius: 4px; }
+        .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 2px; }
         .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
 
-        .prose { color: #E5E7EB; }
+        /* PROSE STYLING */
+        .prose { color: #E0E6E9; }
         .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
         .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
-        .prose strong { font-weight: 800; }
-        .prose a { color: #00B5AD; text-decoration: underline; } 
-        .prose pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; } 
-        .prose code { font-family: monospace; }
-        .prose blockquote { border-left-color: #00B5AD; color: #9CA3AF; }
+        .prose strong { font-weight: 700; color: #FF8C00; } 
+        .prose a { color: #00F0FF; text-decoration: underline; } 
+        .prose pre { background-color: #0A111A; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; border: 1px solid #00F0FF; } 
+        .prose code { font-family: 'Share Tech Mono', monospace; }
+        .prose blockquote { border-left: 4px solid #FF8C00; padding-left: 1em; color: #9CA3AF; }
 
-        /* Sidebar Button */
-        .sidebar-button {
+        /* SIDEBAR & CHAT ELEMENTS */
+        .sidebar-button, .cortex-link {
             display: flex;
             align-items: center;
             width: 100%;
             padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            color: #9CA3AF;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            color: #A0AEC0;
             transition: background-color 0.2s, color 0.2s;
         }
-        .sidebar-button:hover {
-            background-color: #2D3748;
-            color: #E5E7EB;
+        .sidebar-button:hover, .cortex-link:hover {
+            background-color: #1F2A44;
+            color: #E0E6E9;
         }
         .sidebar-button.active {
-            background-color: #1F2A44;
-            color: #E5E7EB;
-        }
-
-        /* Cortex List Link */
-        .cortex-link {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            color: #9CA3AF;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .cortex-link:hover {
-            background-color: #2D3748;
-            color: #E5E7EB;
+            background-color: #293345;
+            color: #E0E6E9;
+            border-left: 2px solid #FF8C00;
         }
         .cortex-link.active {
-            background-color: #1F2A44;
-            color: #E5E7EB;
+            background-color: #293345;
+            color: #E0E6E9;
+            border-left: 2px solid #FF8C00;
+        }
+        
+        .ai-message {
+            background: #293345;
+            border: 1px solid rgba(0, 240, 255, 0.1);
+        }
+        .user-message {
+            background-color: #FF8C00;
+            color: #151D2A;
+            font-weight: 700;
         }
         
         .panel { display: none; }
         .panel.active { display: flex; }
         
-        #graph-container { width: 100%; height: 100%; min-height: 500px; background-color: #111827; }
+        #graph-container { width: 100%; height: 100%; min-height: 500px; background-color: #0A111A; border: 1px solid #00F0FF; }
         
         [title]:hover::after {
             content: attr(title);
@@ -102,7 +145,7 @@
             left: 50%;
             transform: translateX(-50%);
             margin-bottom: 5px;
-            background-color: #111827;
+            background-color: #0A111A;
             color: #fff;
             padding: 4px 8px;
             border-radius: 4px;
@@ -113,12 +156,11 @@
         [title] { position: relative; }
 
         /* Mobile Sidebar */
-        #mobile-sidebar-overlay {
-            transition: opacity 0.3s ease-in-out;
-        }
+        #mobile-sidebar-overlay { transition: opacity 0.3s ease-in-out; }
         #mobile-sidebar {
             transition: transform 0.3s ease-in-out;
             transform: translateX(-100%);
+            background-color: #151D2A;
         }
 
         /* Chat panel layout */
@@ -135,7 +177,7 @@
         #chat-form-container {
             position: sticky;
             bottom: 0;
-            background: #1A2533;
+            background: #151D2A;
             padding: 1rem;
             z-index: 10;
         }
@@ -154,129 +196,151 @@
                 z-index: 20; 
             }
         }
+        
+        /* Modal Tabs */
+        .modal-tab {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: -1px;
+            font-weight: 600;
+            color: #9CA3AF;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .modal-tab:hover {
+            color: #E0E6E9;
+        }
+        .modal-tab.active {
+            color: #FF8C00; /* Use primary accent */
+            border-bottom-color: #FF8C00;
+        }
+        .modal-panel { display: none; }
+        .modal-panel.active { display: block; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden"> 
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm flex-shrink-0">
-    <div class="flex items-center gap-3">
-        <button id="mobile-menu-open-button" class="md:hidden p-1 text-gray-400 hover:text-white">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-        <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-            <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
-        </a>
-    </div>
-    <div class="flex items-center gap-4">
-        <span id="cortex-name" class="text-gray-300 font-semibold text-sm md:text-base truncate max-w-[150px] md:max-w-xs">Loading...</span>
-        <button id="add-source-header-button" class="text-sm font-semibold accent-text hover:underline whitespace-nowrap">
-            + Add Source
-        </button>
-        <a href="/synthesist.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Synthesist</a>
-        <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
-        <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
-    </div>
-</header>
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg flex-shrink-0 border-b border-[#00F0FF]/30">
+        <div class="flex items-center gap-3">
+            <button id="mobile-menu-open-button" class="md:hidden p-1 text-[#00F0FF] hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+                <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="cortex-name" class="text-[#00F0FF] font-semibold text-sm md:text-base truncate max-w-[150px] md:max-w-xs">Loading...</span>
+            <button id="add-source-header-button" class="text-sm font-semibold accent-primary hover:underline whitespace-nowrap">
+                + Add Source
+            </button>
+            <a href="/synthesist.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Synthesist</a>
+            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
+            <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
+        </div>
+    </header>
+    
     <div class="flex flex-grow pt-24 h-full overflow-hidden"> 
         
-        <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-gray-700 bg-gray-900/30">
-            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+        <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-[#00F0FF]/30 bg-[#151D2A]">
+            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30">
                 <div id="account-status-desktop">
-                    <p class="text-sm text-gray-500">Loading account...</p>
+                    <p class="text-sm text-gray-500">INIT: Account Status</p>
                 </div>
             </div>
             <div class="flex-shrink-0 pt-4">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold px-4 mb-2">Views</h3>
                 <nav class="flex flex-col space-y-2">
                     <button id="chat-tab-button" class="sidebar-button active">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                         Chat
                     </button>
                     <button id="graph-tab-button" class="sidebar-button">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4"></path></svg>
                         Neural Map
                     </button>
                 </nav>
             </div>
-            <div class="border-t border-gray-700 my-4"></div>
+            <div class="border-t border-[#00F0FF]/30 my-4"></div>
             <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold">Your Nodes</h3>
-                <button id="create-cortex-sidebar-button" title="Create New Node" class="text-gray-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                </button>
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold">Your Nodes</h3>
+                <a href="/dashboard.html" title="Manage Nodes" id="create-cortex-sidebar-button" class="text-[#00F0FF] hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </a>
             </div>
             <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
+                <p class="text-gray-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p>
             </nav>
         </aside>
 
         <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
-        <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-gray-700 bg-[#1A2533] z-50 flex flex-col">
-            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-gray-400 hover:text-white">
+        <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-[#00F0FF]/30 bg-[#151D2A] z-50 flex flex-col">
+            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-[#00F0FF] hover:text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <div class="flex-shrink-0 p-4 border-b border-gray-700">
+            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30">
                 <div id="account-status-mobile">
-                    <p class="text-sm text-gray-500">Loading account...</p>
+                    <p class="text-sm text-gray-500">INIT: Account Status</p>
                 </div>
             </div>
             <div class="flex-shrink-0 mt-6">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold px-4 mb-2">Views</h3>
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold px-4 mb-2">Views</h3>
                 <nav class="flex flex-col space-y-2">
                     <button id="mobile-chat-tab-button" class="sidebar-button active">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 21l1.949-4.255A9.863 9.863 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                         Chat
                     </button>
                     <button id="mobile-graph-tab-button" class="sidebar-button">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3 3m0 0l-3-3m3 3v6m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg> 
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4"></path></svg> 
                         Neural Map
                     </button>
                 </nav>
             </div>
-            <div class="border-t border-gray-700 my-4"></div>
+            <div class="border-t border-[#00F0FF]/30 my-4"></div>
             <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold">Your Nodes</h3>
-                <button id="create-cortex-sidebar-button-mobile" title="Create New Node" class="text-gray-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                </button>
+                <h3 class="text-xs uppercase text-[#FF8C00] font-semibold">Your Nodes</h3>
+                <a href="/dashboard.html" title="Manage Nodes" id="create-cortex-sidebar-button-mobile" class="text-[#00F0FF] hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </a>
             </div>
             <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">Loading...</p>
+                <p class="text-gray-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p>
             </nav>
         </aside>
 
         <main class="flex flex-col w-full md:pl-64 h-full">
             <div id="chat-panel" class="panel active flex-col h-full">
                 <div class="flex-shrink-0 p-4 md:p-8 md:pb-4">
-                    <div id="progress-container" class="hidden w-full bg-gray-700 rounded-full h-2.5">
-                        <div id="progress-bar" class="accent-bg h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
+                    <div id="progress-container" class="hidden w-full bg-[#293345] rounded-full h-2.5 border border-[#00F0FF]/30">
+                        <div id="progress-bar" class="bg-[#FF8C00] h-2 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
                     </div>
                     <p id="progress-text" class="text-center text-sm text-gray-400 mt-2 hidden"></p>
                 </div>
                 <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6"></div>
-                <div id="chat-form-container" class="flex-shrink-0">
+                <div id="chat-form-container" class="flex-shrink-0 border-t border-[#00F0FF]/30 bg-[#151D2A]">
                     <form id="chat-form" class="flex items-center gap-4">
-                        <input type="text" id="message-input" placeholder="Ask a question..." required autocomplete="off" class="flex-grow p-4 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                        <button type="submit" id="submit-button" class="accent-bg text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
+                        <input type="text" id="message-input" placeholder="Ask this Node..." required autocomplete="off" class="flex-grow p-4 bg-[#293345] border border-[#00F0FF]/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
+                        <button type="submit" id="submit-button" class="btn-primary p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                         </button>
                     </form>
                 </div>
             </div>
-            <div id="graph-panel" class="panel flex-col h-full card rounded-lg overflow-hidden">
-                <div id="graph-container" class="flex-grow overflow-y-auto">
-                    <p id="graph-loading-text" class="text-gray-400 text-center p-10">Loading Neural Map...</p>
+            <div id="graph-panel" class="panel flex-col h-full p-4 md:p-0">
+                <div id="graph-container" class="flex-grow overflow-y-auto rounded-lg">
+                    <p id="graph-loading-text" class="text-gray-400 text-center p-10">LOAD: Building Neural Map...</p>
                 </div>
             </div>
         </main>
     </div>
 <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.txt,.md,.epub">
 
-    <div id="add-doc-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="add-doc-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300 ease-out opacity-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="card rounded-lg shadow-xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 opacity-0" id="modal-content">
-            <h2 id="modal-title" class="text-xl font-semibold mb-4 px-6 pt-6 text-white">Add Sources to Node</h2>
-            <div class="border-b border-gray-700">
+            <h2 id="modal-title" class="text-xl font-semibold mb-4 px-6 pt-6 accent-primary">Add Artifacts to Node</h2>
+            
+            <div class="border-b border-[#00F0FF]/30">
                 <nav class="flex -mb-px px-6" aria-label="Tabs">
                     <button id="modal-tab-library" role="tab" aria-controls="modal-panel-library" aria-selected="true" class="modal-tab active">From Library</button>
                     <button id="modal-tab-upload" role="tab" aria-controls="modal-panel-upload" aria-selected="false" class="modal-tab">Upload New</button>
@@ -285,32 +349,32 @@
             </div>
             <div class="modal-panels-container max-h-[70vh] overflow-y-auto">
                 <div id="modal-panel-library" role="tabpanel" class="modal-panel active p-6">
-                    <p class="text-gray-400 text-sm mb-4">Select existing documents from your library to link to this Knowledge Node.</p>
-                    <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border border-gray-700 rounded-md p-3 bg-gray-800/50 mb-4">
+                    <p class="text-gray-400 text-sm mb-4">Select existing artifacts from your library to link to this Knowledge Node.</p>
+                    <div id="modal-doc-list" class="space-y-2 max-h-64 overflow-y-auto border border-[#00F0FF]/50 rounded-md p-3 bg-[#151D2A]/50 mb-4">
                         <p class="text-gray-500 italic">Loading library...</p> 
                     </div>
                     <div class="flex justify-end gap-4">
-                        <button type="button" id="modal-cancel-button-library" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                        <button type="button" id="modal-add-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Add Selected</button> 
+                        <button type="button" id="modal-cancel-button-library" class="btn-secondary py-2 px-4 rounded-md">Cancel</button>
+                        <button type="button" id="modal-add-button" class="btn-primary py-2 px-4 rounded-md disabled:opacity-50" disabled>Add Selected</button> 
                     </div>
                 </div>
                 <div id="modal-panel-upload" role="tabpanel" class="modal-panel p-6">
                     <p class="text-gray-400 text-sm mb-4">Upload a new PDF, DOCX, TXT, MD, or EPUB file. It will be added to your library and this Node.</p>
-                    <button type="button" id="modal-upload-trigger-button" class="w-full text-center accent-text font-semibold p-8 rounded-md border-2 border-dashed border-gray-600 hover:border-accent-text hover:bg-gray-700/50 transition-colors">
+                    <button type="button" id="modal-upload-trigger-button" class="w-full text-center accent-primary font-semibold p-8 rounded-md border-2 border-dashed border-[#00F0FF]/50 hover:border-[#FF8C00] hover:bg-[#293345]/50 transition-colors">
                         Click or Drag File Here
                     </button>
                     <p class="text-xs text-center text-gray-500 mt-2">Max file size: 100MB</p> 
                     <div class="flex justify-end gap-4 mt-6">
-                        <button type="button" id="modal-cancel-button-upload" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
+                        <button type="button" id="modal-cancel-button-upload" class="btn-secondary py-2 px-4 rounded-md">Cancel</button>
                     </div>
                 </div>
                 <div id="modal-panel-url" role="tabpanel" class="modal-panel p-6">
                     <p class="text-gray-400 text-sm mb-4">Add a single webpage. We'll scrape its content and add it as a document to your library and this Node.</p>
-                    <input type="url" id="modal-url-input" placeholder="https://example.com/article" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
+                    <input type="url" id="modal-url-input" placeholder="https://example.com/article" class="w-full p-3 bg-[#151D2A] border border-[#00F0FF]/50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8C00]">
                     <p id="modal-url-message" class="text-sm text-red-400 mt-2 h-4"></p>
                     <div class="flex justify-end gap-4 mt-2">
-                        <button type="button" id="modal-cancel-button-url" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-500 transition-colors">Cancel</button>
-                        <button type="button" id="modal-add-url-button" class="accent-bg text-white font-semibold py-2 px-4 rounded-md hover-scale disabled:opacity-50" disabled>Add Webpage</button> 
+                        <button type="button" id="modal-cancel-button-url" class="btn-secondary py-2 px-4 rounded-md">Cancel</button>
+                        <button type="button" id="modal-add-url-button" class="btn-primary py-2 px-4 rounded-md disabled:opacity-50" disabled>Add Webpage</button> 
                     </div>
                 </div>
             </div>
@@ -428,13 +492,24 @@
                 ...options.headers,
                 'Authorization': `Bearer ${userToken}`
             };
+            
+            // Handle FormData for file uploads
+            if (options.body instanceof FormData) {
+                // let fetch handle the content-type
+            } else {
+                headers['Content-Type'] = 'application/json';
+            }
+
             const response = await fetch(endpoint, { ...options, headers });
+            
             if (!response.ok) {
                 let errorDetail = `API Error: ${response.status} ${response.statusText}`;
                 try {
                     const errorData = await response.json();
                     errorDetail = errorData.detail || errorDetail;
-                } catch (e) {}
+                } catch (e) {
+                    errorDetail = await response.text();
+                }
                 throw new Error(errorDetail);
             }
             if (response.status === 202 || response.status === 204) return null;
@@ -450,7 +525,7 @@
                 return;
             }
             
-            chatContainer.innerHTML = '<p id="history-loading" class="text-gray-400 text-center italic">Loading chat history...</p>';
+            chatContainer.innerHTML = '<p id="history-loading" class="text-gray-500 text-center italic">LOAD: Fetching Chat History...</p>';
             
             try {
                 const data = await fetchApi(`${HISTORY_API_ENDPOINT}/${cortexId}/history`);
@@ -469,7 +544,7 @@
             } catch (error) {
                 console.error('Error fetching chat history:', error);
                 document.getElementById('history-loading')?.remove();
-                addMessageToUI(`Error loading chat history: ${error.message}. You can still chat.`, 'ai');
+                addMessageToUI(`ERR: Could not load history. ${error.message}. You can still chat.`, 'ai');
                 scrollChatToBottom();
             }
         }
@@ -480,8 +555,8 @@
                 renderCortexSidebarList();
             } catch (error) {
                 console.error("Error fetching cortices:", error);
-                desktopCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">Error loading</p>`;
-                mobileCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">Error loading</p>`;
+                desktopCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">ERR: Failed to load Nodes</p>`;
+                mobileCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">ERR: Failed to load Nodes</p>`;
             }
         }
         
@@ -551,19 +626,19 @@
         function renderSubscriptionStatus(isPro, isError = false) {
             let statusHTML = '';
             if (isError) {
-                statusHTML = `<p class="text-sm text-red-400">Error loading status.</p>`;
+                statusHTML = `<p class="text-sm text-red-400">STATUS: FAILED</p>`;
             } else if (isPro) {
                 statusHTML = `
                     <div>
-                        <p class="text-sm font-semibold text-green-400">Pro Plan</p>
-                        <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
+                        <p class="text-sm font-semibold accent-secondary">PLAN: PRO</p>
+                        <a href="/account.html" class="text-xs text-[#FF8C00] hover:underline">ACCESS: FULL</a>
                     </div>
                 `;
             } else {
                 statusHTML = `
                     <div>
-                        <p class="text-sm font-semibold text-gray-400">Free Plan</p>
-                        <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
+                        <p class="text-sm font-semibold text-[#A0AEC0]">PLAN: FREE</p>
+                        <a href="/pricing.html" class="text-sm font-semibold accent-primary hover:underline">ACTION: UPGRADE</a>
                     </div>
                 `;
             }
@@ -573,18 +648,14 @@
 
         // --- INITIALIZE CHAT ---
         function initializeChat() {
-            console.log("Chat page loaded. Setting up auth listener...");
             supabaseClient.auth.onAuthStateChange((event, session) => {
-                console.log(`Auth Event: ${event}`);
                 if (event === 'SIGNED_OUT') {
-                    console.warn("Auth state: SIGNED_OUT. Redirecting to login.");
                     window.location.href = '/login.html';
                     return;
                 }
                 if (session && session.access_token) {
                     if (userToken !== session.access_token) {
                         userToken = session.access_token;
-                        console.log("Token set/updated. Initializing listeners and fetching data...");
                         initializeListeners();
                         fetchChatHistory();
                         fetchAndRenderCortices();
@@ -592,7 +663,6 @@
                         fetchLibraryDocumentsInBackground(); 
                     }
                 } else if (!session && event === 'INITIAL_SESSION') { 
-                    console.warn("Auth state: No session on load. Redirecting to login.");
                     window.location.href = '/login.html';
                 }
             });
@@ -600,7 +670,6 @@
 
         // --- INITIALIZE LISTENERS ---
         function initializeListeners() {
-            // Check if listeners are already attached
             if (document.body.dataset.listener) return; 
             document.body.dataset.listener = 'true';
 
@@ -653,7 +722,6 @@
             });
         }
         
-        // *** STREAMING CHAT SUBMIT ***
         async function handleChatSubmit(e) {
             e.preventDefault();
             const question = messageInput.value.trim();
@@ -669,7 +737,6 @@
             const historyToSend = chatHistory.slice(0, -1).slice(-10);
             formData.append('chat_history_json', JSON.stringify(historyToSend));
             try {
-                // Use standard fetch for streaming
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userToken}` },
@@ -692,7 +759,6 @@
                     const chunk = decoder.decode(value);
                     fullResponse += chunk;
                     
-                    // Update the UI element with the new chunk
                     updateAIMessage(aiMessageElement, fullResponse, true);
                 }
                 
@@ -706,7 +772,6 @@
             } finally {
                 submitButton.disabled = false;
                 messageInput.focus();
-                // Finalize the message in the UI (show copy button, etc.)
                 updateAIMessage(aiMessageElement, null, false, true);
             }
         }
@@ -751,35 +816,37 @@
                 return;
             }
             graphLoaded = true;
-            graphLoadingText.textContent = 'Loading Neural Map...';
+            graphLoadingText.textContent = 'LOAD: Building Neural Map...';
             graphLoadingText.classList.remove('hidden', 'text-red-400');
             try {
                 const data = await fetchApi(`${GRAPH_API_ENDPOINT}/${cortexId}`);
                 if (!data.nodes || data.nodes.length === 0) {
-                    graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Node yet. Add more artifacts or wait for processing to complete.</p>';
+                    graphContainer.innerHTML = '<p class="text-gray-400 text-center p-10">No graph data found for this Node. Add artifacts to build the map.</p>';
                     graphLoadingText.classList.add('hidden');
                     return;
                 }
                 graphLoadingText.classList.add('hidden');
                 graphContainer.innerHTML = '';
+                
+                // *** NEW GRAPH STYLES ***
                 const options = {
                     nodes: {
                         shape: "dot",
                         size: 16,
-                        font: { color: "#E5E7EB", size: 14, face: 'Manrope' },
+                        font: { color: "#E0E6E9", size: 14, face: 'Share Tech Mono' },
                         borderWidth: 2,
                         color: {
-                            background: '#2D3748',
-                            border: '#00B5AD',
-                            highlight: { background: '#00B5AD', border: '#E5E7EB' },
-                            hover: { background: '#009A94', border: '#E5E7EB' }
+                            border: '#00F0FF',
+                            background: '#293345',
+                            highlight: { background: '#FF8C00', border: '#E0E6E9' },
+                            hover: { background: '#00F0FF', border: '#E0E6E9', color: '#151D2A' }
                         }
                     },
                     edges: {
                         width: 1,
-                        color: { color: "#4B5563", highlight: "#00B5AD", hover: "#00B5AD" },
+                        color: { color: "#00F0FF", highlight: "#FF8C00", hover: "#FF8C00", opacity: 0.4 },
                         arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-                        font: { color: "#9CA3AF", size: 10, strokeWidth: 0, align: 'top', face: 'Manrope' },
+                        font: { color: "#E0E6E9", size: 10, strokeWidth: 0, align: 'top', face: 'Share Tech Mono' },
                         smooth: { enabled: true, type: "continuous" }
                     },
                     physics: {
@@ -815,11 +882,11 @@
                     network = new vis.Network(graphContainer, data, options);
                 } else {
                     console.error("vis.js library not loaded!");
-                    graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">Error: Could not load the graph visualization library.</p>';
+                    graphContainer.innerHTML = '<p class="text-red-400 text-center p-10">ERR: Could not load graph library.</p>';
                 }
             } catch (error) {
                 console.error("Graph API Error:", error);
-                graphLoadingText.textContent = `Error loading Neural Map: ${error.message}`;
+                graphLoadingText.textContent = `ERR: Failed to load Neural Map: ${error.message}`;
                 graphLoadingText.classList.remove('hidden');
                 graphLoadingText.classList.add('text-red-400');
             }
@@ -831,35 +898,36 @@
             messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4', 'message-wrapper');
             messageWrapper.dataset.role = sender;
             messageWrapper.dataset.content = text; 
+            
             if (sender === 'user') {
                 messageWrapper.classList.add('justify-end');
                 const userMessageDiv = document.createElement('div');
-                userMessageDiv.className = 'accent-bg rounded-lg p-4 max-w-lg';
+                userMessageDiv.className = 'user-message rounded-lg p-4 max-w-lg';
                 const p = document.createElement('p');
                 p.textContent = text;
                 userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>');
                 messageWrapper.appendChild(userMessageDiv);
             } else {
                 const aiIconDiv = document.createElement('div');
-                aiIconDiv.className = 'bg-gray-700/50 p-2 rounded-full flex-shrink-0';
-                aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
+                aiIconDiv.className = 'bg-[#293345] p-2 rounded-full flex-shrink-0 border border-[#00F0FF]';
+                aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
                 const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'bg-gray-700/50 rounded-lg p-4 max-w-lg w-full';
+                aiMessageDiv.className = 'ai-message rounded-lg p-4 max-w-lg w-full';
                 if (text === '') {
                     aiMessageDiv.innerHTML = `
                         <div class="typing-indicator flex items-center space-x-1">
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                         </div>
                         <div class="prose max-w-none response-content hidden"></div>
-                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>
                     `;
                 } else {
                     aiMessageDiv.innerHTML = `
                         <div class="typing-indicator hidden"></div>
                         <div class="prose max-w-none response-content"></div> 
-                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-white font-semibold" onclick="copyToClipboard(this)">Copy</button>
+                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>
                     `;
                     aiMessageDiv.querySelector('.response-content').innerHTML = marked.parse(text, { sanitize: false });
                 }
@@ -907,11 +975,11 @@
             if (contentElement) {
                 const textToCopy = contentElement.innerText || contentElement.textContent;
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    buttonElement.textContent = 'Copied!';
+                    buttonElement.textContent = 'COPIED!';
                     setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
-                    buttonElement.textContent = 'Copy Failed';
+                    buttonElement.textContent = 'COPY FAILED';
                     setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
                 });
             } else {
@@ -962,13 +1030,13 @@
                     const isLinked = existingDocIds.includes(doc.id);
                     const isDisabled = isLinked || (doc.status !== 'ready' && doc.status !== 'ready_no_graph');
                     const disabledAttr = isDisabled ? 'disabled' : '';
-                    const labelClass = isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700/50 cursor-pointer';
+                    const labelClass = isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#293345]/50 cursor-pointer';
                     let statusIndicator = '';
                     if (doc.status === 'processing') statusIndicator = '<span class="text-xs text-yellow-400 ml-1">(Processing...)</span>';
                     else if (doc.status === 'error') statusIndicator = '<span class="text-xs text-red-400 ml-1">(Error)</span>';
                     return `
                         <label class="flex items-center gap-3 p-2 rounded-md ${labelClass}">
-                            <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-accent-text focus:ring-accent-text focus:ring-offset-0 focus:ring-1" ${disabledAttr}>
+                            <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 rounded bg-gray-600 border-gray-500 text-[#FF8C00] focus:ring-[#FF8C00] focus:ring-offset-0 focus:ring-1" ${disabledAttr}>
                             <span class="truncate" title="${doc.file_name}">${doc.file_name}${statusIndicator}</span>
                             ${isLinked ? '<span class="text-xs text-gray-500 ml-auto">(Already Added)</span>' : ''}
                         </label>

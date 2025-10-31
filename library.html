@@ -8,7 +8,8 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -22,11 +23,41 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background-color: #1A2533; color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
-        .card { background: #1F2A44; border: 1px solid #2D3748; }
+        /* 1. Global Reset & New Palette */
+        body {
+            background-color: #151D2A;
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00;
+            color: #151D2A;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700; 
+        }
+        .btn-primary:hover {
+            background-color: transparent;
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+
+        /* 4. Cards and Panels */
+        .card {
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+        
+        /* 5. Utility Classes */
         .hover-scale { transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.03); }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
@@ -35,16 +66,15 @@
 </head>
 <body class="w-full min-h-screen">
 
-    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-gray-900/70 backdrop-blur-md fixed w-full top-0 z-30 shadow-sm">
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg flex-shrink-0 border-b border-[#00F0FF]/30">
         <a href="/synthesist.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+            <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
         <div class="flex items-center gap-6">
             <a href="/synthesist.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Synthesist</a>
             <a href="/dashboard.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Nodes</a>
-            <a href="/library.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Library</a>
-            <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a>
+            <a href="/library.html" class="text-white font-medium hover:text-white transition-colors text-sm">Library</a> <a href="/integrations.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Integrations</a>
             <a href="/account.html" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Account</a>
             <button id="logout-button" class="text-gray-400 font-medium hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
@@ -55,34 +85,34 @@
             
             <div class="mb-8 p-6 card rounded-lg flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-4 md:mb-0">
-                    <p class="text-sm font-semibold text-gray-400">Account</p>
-                    <p id="user-email" class="font-semibold text-white">Loading...</p>
+                    <p class="text-sm font-semibold text-gray-400">ACCOUNT</p>
+                    <p id="user-email" class="font-semibold text-white">LOAD: User...</p>
                 </div>
                 <div id="account-status" class="text-center md:text-right">
-                    <p class="text-sm text-gray-500">Loading subscription...</p>
+                    <p class="text-sm text-gray-500">LOAD: Status...</p>
                 </div>
             </div>
 
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold">My Library</h1>
+                <h1 class="text-3xl font-bold accent-primary">My Library</h1>
                 <p class="text-gray-400">All artifacts you have uploaded or synced.</p>
             </div>
             
             <div id="document-list-container" class="card rounded-lg overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-gray-800/50 border-b border-gray-700">
+                        <thead class="bg-[#151D2A]/50 border-b border-[#00F0FF]/30">
                             <tr>
-                                <th class="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
-                                <th class="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Created</th>
-                                <th class="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                                <th class="px-6 py-3 text-xs font-semibold accent-primary uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-xs font-semibold accent-primary uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-xs font-semibold accent-primary uppercase tracking-wider">Created</th>
+                                <th class="px-6 py-3 text-xs font-semibold accent-primary uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="document-list-body" class="divide-y divide-gray-700">
+                        <tbody id="document-list-body" class="divide-y divide-[#00F0FF]/20">
                             <tr id="doc-loader">
                                 <td colspan="4" class="p-6 text-center text-gray-500">
-                                    Loading your library...
+                                    LOAD: Fetching Library...
                                 </td>
                             </tr>
                         </tbody>
@@ -197,16 +227,15 @@
             let statusHTML = '';
             if (isPro) {
                 statusHTML = `
-                    <p class="text-sm font-semibold text-green-400">Pro Plan</p>
-                    <a href="/account.html" class="text-xs text-gray-400 hover:text-white hover:underline">Manage Subscription</a>
+                    <p class="text-sm font-semibold accent-secondary">PLAN: PRO</p>
+                    <a href="/account.html" class="text-xs text-gray-400 hover:text-[#FF8C00] hover:underline">ACCESS: FULL</a>
                 `;
             } else {
                 statusHTML = `
-                    <p class="text-sm font-semibold text-gray-400">Free Plan</p>
-                    <a href="/pricing.html" class="text-sm font-semibold accent-text hover:underline">Upgrade to Pro</a>
+                    <p class="text-sm font-semibold text-gray-400">PLAN: FREE</p>
+                    <a href="/pricing.html" class="text-sm font-semibold accent-primary hover:underline">ACTION: UPGRADE</a>
                 `;
             }
-            // This element exists now, so the error is fixed
             accountStatusEl.innerHTML = statusHTML;
         }
 
@@ -244,7 +273,7 @@
                 const createdDate = new Date(doc.created_at).toLocaleDateString();
 
                 return `
-                    <tr class="hover:bg-gray-800/30">
+                    <tr class="hover:bg-[#293345]/50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <p class="text-sm font-semibold text-white truncate" title="${doc.file_name}">${doc.file_name}</p>
                         </td>

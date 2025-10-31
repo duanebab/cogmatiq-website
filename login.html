@@ -3,163 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Cogmatiq</title>
-    <meta name="description" content="Sign in to your Cogmatiq account to access your AI-powered knowledge bases.">
-
+    <title>Log In - Cogmatiq</title>
+    <meta name="description" content="Log in to your Cogmatiq account to access your Synthesist.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="msapplication-TileColor" content="#1A2533">
     <meta name="theme-color" content="#1A2533">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabaseClient.js"></script>
 
     <style>
-        body { font-family: 'Manrope', sans-serif; background: linear-gradient(to bottom, #1A2533, #111827); color: #E5E7EB; }
-        .accent-text { color: #00B5AD; }
-        .accent-bg { background-color: #00B5AD; }
-        .accent-bg:hover { background-color: #009A94; }
-        .card { background: #1F2A44; border: 1px solid #2D3748; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); }
+        /* 1. Global Reset & New Palette */
+        body {
+            background-color: #151D2A;
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* 2. Core Accents */
+        .accent-primary { color: #FF8C00; } /* Code Orange */
+        .accent-secondary { color: #00F0FF; } /* Electric Teal */
+
+        /* 3. Buttons and Backgrounds */
+        .btn-primary {
+            background-color: #FF8C00;
+            color: #151D2A;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700; 
+        }
+        .btn-primary:hover {
+            background-color: transparent;
+            color: #FF8C00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: #00F0FF;
+            border: 2px solid #00F0FF;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+            transition: all 0.2s ease-in-out;
+            font-weight: 700;
+        }
+        .btn-outline:hover {
+            background-color: #00F0FF;
+            color: #151D2A;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
+        }
+
+
+        /* 4. Cards and Panels */
+        .card {
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+        
+        /* 5. Utility Classes */
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none; }
+        .bg-gradient-dark { background: linear-gradient(to bottom, #151D2A, #0A111A); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4 animate-fade-in">
+<body class="w-full min-h-screen bg-gradient-dark">
 
-    <div class="w-full max-w-md">
-        <a href="/" class="flex items-center justify-center gap-3 mb-8 transition-opacity hover:opacity-90">
-            <svg class="w-8 h-8 accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+    <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg border-b border-[#00F0FF]/30">
+        <a href="/" class="flex items-center gap-3 transition-opacity hover:opacity-90">
+            <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             <span class="text-2xl font-bold text-white">Cogmatiq</span>
         </a>
-
-        <div class="card">
-            <h1 class="text-2xl font-bold text-center mb-6">Welcome Back</h1>
-            <form id="login-form" class="space-y-6">
-                <div>
-                    <label for="email" class="block text-sm font-semibold text-gray-400">Email</label>
-                    <input type="email" id="email" required class="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-semibold text-gray-400">Password</label>
-                    <input type="password" id="password" required class="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B5AD]">
-                </div>
-                <div>
-                    <button type="submit" id="login-button" class="w-full accent-bg text-white font-bold py-3 px-4 rounded-md hover-scale transition-all duration-300 disabled:opacity-50">Log In</button>
-                </div>
-            </form>
-            <p id="message" class="mt-4 text-center text-sm h-5"></p>
-            
-            <div id="resend-email" class="hidden mt-4 text-center">
-                <p class="text-sm text-gray-400">Didn't receive a confirmation email?</p>
-                <button id="resend-button" class="mt-2 accent-bg text-white font-semibold py-1 px-3 rounded-md hover:opacity-90 transition-colors duration-300 disabled:opacity-50">Resend Confirmation</button>
-            </div>
-            
-            <p class="mt-6 text-center text-sm text-gray-400">
-                Don't have an account? <a href="/signup.html" class="accent-text font-semibold hover:underline">Sign Up</a>
-            </p>
-            <p class="mt-2 text-center text-sm text-gray-400">
-                Forgot your password? <a href="/reset-password.html" class="accent-text font-semibold hover:underline">Reset Password</a>
-            </p>
+        <div class="flex items-center gap-6">
+            <a href="/signup.html" class="btn-outline py-2 px-5 rounded-md text-sm">Sign Up</a>
         </div>
-    </div>
+    </header>
+
+    <main class="pt-32 pb-12 px-4 md:px-8 animate-fade-in flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md">
+            <div class="card rounded-lg p-8 md:p-10 shadow-xl">
+                <h1 class="text-3xl font-bold text-center mb-2 accent-primary">Log In</h1>
+                <p class="text-center text-gray-400 mb-8">Access your Synthesist.</p>
+                
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-300 mb-2">Email</label>
+                        <input type="email" id="email" name="email" required 
+                               class="w-full p-3 bg-[#151D2A] border border-[#00F0FF]/50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="password" class="block text-sm font-semibold text-gray-300">Password</label>
+                            <a href="/reset-password.html" class="text-xs accent-secondary hover:underline">Forgot password?</a>
+                        </div>
+                        <input type="password" id="password" name="password" required
+                               class="w-full p-3 bg-[#151D2A] border border-[#00F0FF]/50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
+                    </div>
+
+                    <p id="error-message" class="text-red-400 text-sm hidden"></p>
+                    
+                    <div>
+                        <button type="submit" id="login-button" class="w-full btn-primary py-3 px-5 rounded-md text-lg hover-scale">
+                            Log In
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-gray-400">
+                        Don't have an account? 
+                        <a href="/signup.html" class="font-semibold accent-secondary hover:underline">Sign Up</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        // *** FIX: Removed the entire broken <script> block ***
-        // We can now safely use the 'supabaseClient' variable defined in /supabaseClient.js
-        
-        const form = document.getElementById('login-form');
-        const messageEl = document.getElementById('message');
+        // const supabaseClient is loaded from /supabaseClient.js
+        const loginForm = document.getElementById('login-form');
         const loginButton = document.getElementById('login-button');
-        const resendEmailDiv = document.getElementById('resend-email');
-        const resendButton = document.getElementById('resend-button');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('error-message');
 
-        // Re-enable button on page load
-        loginButton.disabled = false;
-
-        form.addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            messageEl.textContent = '';
-            messageEl.classList.remove('text-red-400', 'text-green-400', 'text-yellow-400');
-            resendEmailDiv.classList.add('hidden');
+            
             loginButton.disabled = true;
-            loginButton.textContent = 'Logging In...';
+            loginButton.textContent = 'Authenticating...';
+            errorMessage.classList.add('hidden');
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-                if (error) {
-                    if (error.message === 'Email not confirmed') {
-                        messageEl.textContent = 'Please check your email to confirm your account.';
-                        messageEl.classList.add('text-yellow-400');
-                        resendEmailDiv.classList.remove('hidden');
-                        resendButton.disabled = false;
-                    } else {
-                        messageEl.textContent = 'Invalid email or password.';
-                        messageEl.classList.add('text-red-400');
-                    }
-                    loginButton.disabled = false;
-                    loginButton.textContent = 'Log In';
-                    return;
-                }
-
-                window.location.href = '/dashboard.html';
-            } catch (err) {
-                console.error('Unexpected Error:', err);
-                messageEl.textContent = 'An unexpected error occurred. Please try again later.';
-                messageEl.classList.add('text-red-400');
-                loginButton.disabled = false;
-                loginButton.textContent = 'Log In';
-            }
-        });
-
-        resendButton.addEventListener('click', async () => {
-            const email = document.getElementById('email').value.trim();
-            if (!email) {
-                messageEl.textContent = 'Please enter your email to resend the confirmation.';
-                messageEl.classList.add('text-red-400');
-                return;
-            }
-
-            resendButton.disabled = true;
-            resendButton.textContent = 'Sending...';
-            messageEl.textContent = 'Sending confirmation email...';
-            messageEl.classList.remove('text-red-400', 'text-green-400', 'text-yellow-400');
-            messageEl.classList.add('text-gray-400');
-
+            const email = emailInput.value;
+            const password = passwordInput.value;
 
             try {
-                const { data, error } = await supabaseClient.auth.resend({
-                    type: 'signup',
-                    email: email
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
                 });
 
                 if (error) {
                     throw error;
                 }
 
-                messageEl.textContent = 'Confirmation email sent! Please check your inbox.';
-                messageEl.classList.remove('text-red-400', 'text-gray-400');
-                messageEl.classList.add('text-green-400');
-                resendButton.textContent = 'Resend Confirmation';
-                resendButton.disabled = false;
-            } catch (err) {
-                console.error('Resend Confirmation Error:', err);
-                messageEl.textContent = `Error: ${err.message}`;
-                messageEl.classList.add('text-red-400');
-                resendButton.textContent = 'Resend Confirmation';
-                resendButton.disabled = false;
+                if (data.user) {
+                    window.location.href = '/synthesist.html';
+                }
+
+            } catch (error) {
+                console.error('Login Error:', error);
+                errorMessage.textContent = 'Invalid login credentials. Please try again.';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Log In';
             }
         });
     </script>
