@@ -23,7 +23,6 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        /* [Your existing styles remain unchanged] */
         body {
             background-color: #151D2A;
             color: #E0E6E9;
@@ -71,7 +70,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .bg-gradient-dark { background: linear-gradient(to bottom, #151D2A, #0A111A); }
 
-        /* NEW: Style for the pre/code block */
         .directive-block {
             font-family: 'Share Tech Mono', monospace;
             line-height: 1.6;
@@ -161,17 +159,18 @@
 <code class="text-gray-300">
 <span class="text-[#00F0FF]">> SYNTHESIST_DIRECTIVE:</span>
 
-<span class="text-white">> Goal:</span> Summarize Q4 report for marketing team.
+<span class="text-white">> Goal:</span> Draft research outline for "Project: Aurora".
 
-<span class="text-[#FF8C00]">> Reason:</span> User needs a summary and an email draft.
+<span class="text-[#FF8C00]">> Reason:</span> User needs to synthesize notes on "Quantum Biology" and "Neural Interface Design".
 <span class="text-[#FF8C00]">> Plan:</span>
-<span class="text-gray-400">>  1. </span> <span class="text-white">find_document(</span>"Q4_report_final.pdf"<span class="text-white">)</span>
-<span class="text-gray-400">>  2. </span> <span class="text-white">read_document(</span>doc_id: 12345<span class="text-white">)</span>
-<span class="text-gray-400">>  3. </span> <span class="text-white">summarize(</span>text, target: "marketing team"<span class="text-white">)</span>
-<span class="text-gray-400">>  4. </span> <span class="text-white">draft_email(</span>summary<span class="text-white">)</span>
-<span class="text-gray-400">>  5. </span> <span class="text-white">await_approval()</span>
+<span class="text-gray-400">>  1. </span> <span class="text-white">find_topic(</span>"Quantum Biology"<span class="text-white">)</span>
+<span class="text-gray-400">>  2. </span> <span class="text-white">find_topic(</span>"Neural Interface Design"<span class="text-white">)</span>
+<span class="text-gray-400">>  3. </span> <span class="text-white">query_knowledge_graph(</span>topic1, topic2, "find_overlapping_concepts"<span class="text-white">)</span>
+<span class="text-gray-400">>  4. </span> <span class="text-white">read_documents(</span>concept_matches<span class="text-white">)</span>
+<span class="text-gray-400">>  5. </span> <span class="text-white">generate_synthesis(</span>outline_format<span class="text-white">)</span>
+<span class="text-gray-400">>  6. </span> <span class="text-white">create_document(</span>"Project_Aurora_Outline.md"<span class="text-white">)</span>
 
-<span class="text-[#00F0FF]">> STATUS: Awaiting Directive...</span>
+<span class="text-[#00F0FF]">> STATUS: Synthesizing...</span>
 </code>
                     </pre>
                 </div>
