@@ -23,19 +23,15 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        /* 1. Global Reset & New Palette */
+        /* [Your existing styles remain unchanged] */
         body {
             background-color: #151D2A;
             color: #E0E6E9;
             font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
             letter-spacing: 0.02em;
         }
-
-        /* 2. Core Accents */
-        .accent-primary { color: #FF8C00; } /* Code Orange */
-        .accent-secondary { color: #00F0FF; } /* Electric Teal */
-
-        /* 3. Buttons and Backgrounds */
+        .accent-primary { color: #FF8C00; }
+        .accent-secondary { color: #00F0FF; }
         .btn-primary {
             background-color: #FF8C00;
             color: #151D2A;
@@ -62,15 +58,11 @@
             color: #151D2A;
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
         }
-
-        /* 4. Cards and Panels */
         .card {
             background: #293345;
             border: 1px solid #00F0FF;
             box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
         }
-        
-        /* 5. Utility Classes */
         .section-padding { padding: 5rem 2rem; }
         @media (min-width: 768px) { .section-padding { padding: 7rem 3rem; } }
         .hover-scale { transition: transform 0.3s ease; }
@@ -78,6 +70,13 @@
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .bg-gradient-dark { background: linear-gradient(to bottom, #151D2A, #0A111A); }
+
+        /* NEW: Style for the pre/code block */
+        .directive-block {
+            font-family: 'Share Tech Mono', monospace;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body class="w-full min-h-screen bg-gradient-dark">
@@ -102,7 +101,7 @@
                     Boot The Synthesist.
                 </h1>
                 <p class="text-lg md:text-xl text-gray-300 mb-10">
-                    Cogmatiq is a next-generation reasoning engine. A true digital co-processor. It ingests your scattered data streams—documents, files, and future integrations—to build a <strong>Synaptic Knowledge Graph</strong>. This is not just search. This is synthesis.
+                    Cogmatiq is a next-generation reasoning engine. A true digital co-processor. It ingests your scattered data streams to build a <strong>Synaptic Knowledge Graph</strong>. This is not just search. This is the foundation for <strong>true autonomy</strong>.
                 </p>
                 <div class="flex justify-center gap-6">
                     <a href="/signup.html" class="btn-primary py-3 px-8 rounded-md text-lg hover-scale">
@@ -121,7 +120,7 @@
                         <svg class="w-12 h-12 accent-primary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         <h3 class="text-2xl font-bold text-white mb-3">1. Interface Your Data</h3>
                         <p class="text-gray-400">
-                            Stop scattering your data. Your Synthesist interfaces with your digital life. Upload your documents, PDFs, and research files. Connect your Google Drive. We build the central <strong>Knowledge Matrix</strong> for all your data.
+                            Stop scattering your data. Upload your documents, PDFs, and research files. The system is built to expand, interfacing with all your data streams to build a central <strong>Knowledge Matrix</strong>.
                         </p>
                     </div>
 
@@ -129,7 +128,7 @@
                         <svg class="w-12 h-12 accent-primary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         <h3 class="text-2xl font-bold text-white mb-3">2. Construct the Graph</h3>
                         <p class="text-gray-400">
-                            This is not simple search. As data is ingested, we build a <strong>Synaptic Knowledge Graph</strong>. The AI actively extracts all entities: people, projects, and key concepts, mapping the explicit relationships <strong>between</strong> them. It learns your world model.
+                            As data is ingested, we build a <strong>Synaptic Knowledge Graph</strong>. The AI maps entities, concepts, and relationships, learning your <strong>World Model</strong>. This becomes the agent's long-term memory.
                         </p>
                     </div>
 
@@ -137,14 +136,57 @@
                         <svg class="w-12 h-12 accent-primary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.015a11.955 11.955 0 01-6.618 1.98S4.47 6.655 4.26 8.5C4.08 10.15 4 11.7 4 12.5s.08 2.35.26 3.999c.21 1.845.34 2.98.34 2.98s1.13 1.98 2.618 1.98a11.955 11.955 0 006.782 0c1.488 0 2.618-1.98 2.618-1.98.18-1.645.26-3.155.26-3.999s-.08-2.35-.26-4.001c-.21-1.845-.34-2.98-.34-2.98s-1.13-1.98-2.618-1.98z"></path></svg>
                         <h3 class="text-2xl font-bold text-white mb-3">3. Activate the Synthesist</h3>
                         <p class="text-gray-400">
-                            Ask complex questions to achieve high-level goals. The Synthesist reasons across your entire graph to find connections you missed, generate new logic, and provide answers built from <strong>deep synthesis</strong>, not just keyword matching.
+                            The Synthesist reasons across your graph to find deep connections. This is <strong>Phase 1</strong>: a perfect retrieval system. <strong>Phase 2</strong> awakens the agent to execute your goals.
                         </p>
                     </div>
                 </div>
             </div>
         </section>
 
-    </main>
+        <section class="section-padding text-center bg-[#0A111A]/60 my-12 rounded-lg mx-4 md:mx-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold accent-secondary mb-6">
+                    The Horizon: The Autonomous Agent
+                </h2>
+                <p class="text-lg md:text-xl text-gray-300 mb-8">
+                    A knowledge base is passive. It waits for your questions. The Cogmatiq roadmap is built for something more: <strong>agency</strong>.
+                </p>
+                <p class="text-lg md:text-xl text-gray-300 mb-12">
+                    We are building the Autonomous Synthesist. An agent that <strong>plans, reasons, and acts</strong>. It will not just find information. It will understand your goal, formulate a multi-step plan, and execute it on your behalf.
+                </p>
+
+                <div class="max-w-2xl mx-auto text-left">
+                    <pre class="directive-block bg-[#0A111A] border-2 border-[#FF8C00]/50 rounded-lg p-6 shadow-lg"
+                         style="box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);">
+<code class="text-gray-300">
+<span class="text-[#00F0FF]">> SYNTHESIST_DIRECTIVE:</span>
+
+<span class="text-white">> Goal:</span> Summarize Q4 report for marketing team.
+
+<span class="text-[#FF8C00]">> Reason:</span> User needs a summary and an email draft.
+<span class="text-[#FF8C00]">> Plan:</span>
+<span class="text-gray-400">>  1. </span> <span class="text-white">find_document(</span>"Q4_report_final.pdf"<span class="text-white">)</span>
+<span class="text-gray-400">>  2. </span> <span class="text-white">read_document(</span>doc_id: 12345<span class="text-white">)</span>
+<span class="text-gray-400">>  3. </span> <span class="text-white">summarize(</span>text, target: "marketing team"<span class="text-white">)</span>
+<span class="text-gray-400">>  4. </span> <span class="text-white">draft_email(</span>summary<span class="text-white">)</span>
+<span class="text-gray-400">>  5. </span> <span class="text-white">await_approval()</span>
+
+<span class="text-[#00F0FF]">> STATUS: Awaiting Directive...</span>
+</code>
+                    </pre>
+                </div>
+
+                <p class="text-lg md:text-xl text-gray-300 mt-12 mb-10">
+                    By building your knowledge graph today, you are training your personal agent for tomorrow. The future of cognition is not just access. It is execution.
+                </p>
+                <div class="flex justify-center gap-6">
+                    <a href="/signup.html" class="btn-primary py-3 px-8 rounded-md text-lg hover-scale">
+                        Build Your Mind. Be Ready.
+                    </a>
+                </div>
+            </div>
+        </section>
+        </main>
 
     <footer class="py-8 px-4 md:px-8 border-t border-[#00F0FF]/30">
         <div class="max-w-7xl mx-auto text-center">
