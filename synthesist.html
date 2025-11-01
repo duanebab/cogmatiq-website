@@ -24,47 +24,38 @@
     <script src="/supabaseClient.js"></script>
 
     <style>
-        /* 1. Global Reset & New Palette */
+        /* ──────────────────────── 1. Global Reset & Palette ──────────────────────── */
         body {
-            /* Deep slate background */
             background-color: #151D2A;
-            color: #E0E6E9; /* Light text for readability */
-            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif; /* Maintain retro-tech font vibe */
+            color: #E0E6E9;
+            font-family: 'Share Tech Mono', monospace, 'Manrope', sans-serif;
             letter-spacing: 0.02em;
         }
+        .accent-primary { color: #FF8C00; }
+        .accent-secondary { color: #00F0FF; }
 
-        /* 2. Core Accents */
-        .accent-primary { color: #FF8C00; } /* Code Orange for Titles/Emphasis */
-        .accent-secondary { color: #00F0FF; } /* Electric Teal for Structure/Borders */
-
-        /* 3. Buttons and Backgrounds */
+        /* ──────────────────────── 2. Buttons ──────────────────────── */
         .btn-primary {
-            background-color: #FF8C00; /* Code Orange CTA buttons */
-            color: #151D2A; /* High contrast dark text */
+            background-color: #FF8C00;
+            color: #151D2A;
             border: 2px solid #FF8C00;
-            box-shadow: 0 0 10px rgba(255, 140, 0, 0.4); /* Subtle orange glow */
+            box-shadow: 0 0 10px rgba(255,140,0,0.4);
             transition: all 0.2s ease-in-out;
         }
         .btn-primary:hover {
-            background-color: transparent; /* Invert colors on hover */
+            background-color: transparent;
             color: #FF8C00;
-            box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+            box-shadow: 0 0 15px rgba(255,140,0,0.7);
         }
 
-        /* 4. Cards and Panels (Essential for Neural Map feel) */
+        /* ──────────────────────── 3. Cards ──────────────────────── */
         .card {
-            background: #293345; /* Deeper dark blue-gray */
-            border: 1px solid #00F0FF; /* Electric Teal border */
-            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2); /* Subtle teal inner glow */
+            background: #293345;
+            border: 1px solid #00F0FF;
+            box-shadow: 0 0 8px rgba(0,240,255,0.2);
         }
-        
-        /* 5. Utility Classes */
-        .hover-scale { transition: transform 0.3s ease; }
-        .hover-scale:hover { transform: scale(1.03); }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SCROLL BARS */
+        /* ──────────────────────── 4. Scrollbars ──────────────────────── */
         #chat-container::-webkit-scrollbar { width: 8px; }
         #chat-container::-webkit-scrollbar-track { background: #1F2A44; }
         #chat-container::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 4px; border: 2px solid #293345; }
@@ -72,7 +63,7 @@
         .sidebar-scroll-container::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 2px; }
         .sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
 
-        /* PROSE STYLING */
+        /* ──────────────────────── 5. Prose ──────────────────────── */
         .prose { color: #E0E6E9; }
         .prose p { margin-top: 0.5em; margin-bottom: 0.5em; } 
         .prose ul { list-style-type: disc; margin-left: 1.5rem; }
@@ -83,336 +74,233 @@
         .prose code { font-family: 'Share Tech Mono', monospace; }
         .prose blockquote { border-left: 4px solid #FF8C00; padding-left: 1em; color: #9CA3AF; }
 
-        /* SIDEBAR & CHAT ELEMENTS */
+        /* ──────────────────────── 6. Sidebar / Nodes ──────────────────────── */
         .sidebar-button, .node-link {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.25rem;
-            font-weight: 500;
-            color: #A0AEC0; 
+            display: flex; align-items: center; width: 100%; padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem; font-weight: 500; color: #A0AEC0;
             transition: background-color 0.2s, color 0.2s;
         }
         .sidebar-button:hover, .node-link:hover {
-            background-color: #1F2A44;
-            color: #E0E6E9;
+            background-color: #1F2A44; color: #E0E6E9;
         }
-        .ai-message {
-            background: #293345;
-            border: 1px solid rgba(0, 240, 255, 0.1);
-        }
-        .user-message {
-            background-color: #FF8C00;
-            color: #151D2A;
-            font-weight: 700;
-        }
+        .ai-message { background: #293345; border: 1px solid rgba(0,240,255,0.1); }
+        .user-message { background-color: #FF8C00; color: #151D2A; font-weight: 700; }
 
-        /* Mobile Sidebar */
+        /* ──────────────────────── 7. Mobile Sidebar ──────────────────────── */
         #mobile-sidebar-overlay { transition: opacity 0.3s ease-in-out; }
-        #mobile-sidebar { 
-            transition: transform 0.3s ease-in-out; 
-            transform: translateX(-100%);
-            background-color: #151D2A;
+        #mobile-sidebar { transition: transform 0.3s ease-in-out; transform: translateX(-100%); background:#151D2A; }
+
+        /* ──────────────────────── 8. Chat Layout (critical) ──────────────────────── */
+        #chat-panel { display:flex; flex-direction:column; height:100%; }
+        #chat-container { flex-grow:1; overflow-y:auto; min-height:0; padding-bottom:2rem; }
+        #chat-form-container { 
+            position:sticky; bottom:0; background:#151D2A; padding:1rem; z-index:10;
+        }
+        @media (max-width:767px){
+            #chat-container{padding-bottom:11rem;}
+            #chat-form-container{
+                position:fixed; bottom:0; left:0; right:0;
+                padding:0.75rem; box-shadow:0 -2px 4px rgba(0,0,0,0.1); z-index:20;
+            }
         }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden"> 
 
+    <!-- ==================== HEADER ==================== -->
     <header class="py-6 px-4 md:px-8 flex justify-between items-center bg-[#151D2A]/90 backdrop-blur-sm fixed w-full top-0 z-30 shadow-lg flex-shrink-0 border-b border-[#00F0FF]/30">
         <div class="flex items-center gap-3">
             <button id="mobile-menu-open-button" class="md:hidden p-1 text-[#00F0FF] hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
             <a href="/dashboard.html" class="flex items-center gap-3 transition-opacity hover:opacity-90">
-                <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                <svg class="w-8 h-8 accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"/></svg>
                 <span class="hidden md:block text-2xl font-bold text-white">Cogmatiq</span>
             </a>
         </div>
         <div class="flex items-center gap-4">
             <span id="cortex-name" class="text-[#00F0FF] font-semibold text-sm md:text-base">The Synthesist</span>
-            <a href="/integrations.html" class="text-sm font-semibold accent-primary hover:underline whitespace-nowrap">
-                + Tools
-            </a>
+            <a href="/integrations.html" class="text-sm font-semibold accent-primary hover:underline whitespace-nowrap">+ Tools</a>
             <a href="/dashboard.html" class="text-[#A0AEC0] font-medium hover:text-white transition-colors text-sm">Nodes</a>
             <a href="/library.html" class="text-[#A0AEC0] font-medium hover:text-white transition-colors text-sm">Library</a>
             <a href="/account.html" class="text-[#A0AEC0] font-medium hover:text-white transition-colors text-sm">Account</a>
         </div>
     </header>
 
+    <!-- ==================== MAIN LAYOUT ==================== -->
     <div class="flex flex-grow pt-24 overflow-hidden"> 
         
+        <!-- ==== DESKTOP SIDEBAR ==== -->
         <aside class="hidden md:flex flex-col w-64 fixed h-full pt-6 px-4 border-r border-[#00F0FF]/30 bg-[#151D2A]">
-            
-            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30">
-                <div id="account-status-desktop">
-                    <p class="text-sm text-gray-500">INIT: Account Status</p>
-                </div>
-            </div>
-
+            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30"><div id="account-status-desktop"><p class="text-sm text-gray-500">INIT: Account Status</p></div></div>
             <div class="flex-shrink-0 pt-4">
                 <h3 class="text-xs uppercase text-[#FF8C00] font-semibold px-4 mb-2">Interface</h3>
                 <nav class="flex flex-col space-y-2">
-                    <a href="/synthesist.html" class="node-link" style="background-color: #293345; color: #E0E6E9; border-left: 2px solid #FF8C00;">
-                        <svg class="w-5 h-5 mr-3 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                    <a href="/synthesist.html" class="node-link" style="background:#293345;color:#E0E6E9;border-left:2px solid #FF8C00;">
+                        <svg class="w-5 h-5 mr-3 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"/></svg>
                         SYNTHESIST
                     </a>
                 </nav>
             </div>
-            
             <div class="border-t border-[#00F0FF]/30 my-4"></div>
-            
             <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
                 <h3 class="text-xs uppercase text-[#FF8C00] font-semibold">Knowledge Nodes</h3>
-                <a href="/dashboard.html" title="Manage Nodes" class="text-[#00F0FF] hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </a>
+                <a href="/dashboard.html" title="Manage Nodes" class="text-[#00F0FF] hover:text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></a>
             </div>
-            <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p>
-            </nav>
+            <nav id="cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container"><p class="text-gray-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p></nav>
         </aside>
 
-        <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden" aria-hidden="true"></div>
+        <!-- ==== MOBILE SIDEBAR ==== -->
+        <div id="mobile-sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 opacity-0 hidden"></div>
         <aside id="mobile-sidebar" class="md:hidden fixed inset-y-0 left-0 w-64 h-full pt-24 p-4 border-r border-[#00F0FF]/30 bg-[#151D2A] z-50 flex flex-col">
-            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-[#00F0FF] hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30">
-                <div id="account-status-mobile">
-                    <p class="text-sm text-gray-500">INIT: Account Status</p>
-                </div>
-            </div>
-
+            <button id="mobile-menu-close-button" class="absolute top-6 right-4 p-2 text-[#00F0FF] hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <div class="flex-shrink-0 p-4 border-b border-[#00F0FF]/30"><div id="account-status-mobile"><p class="text-sm text-gray-500">INIT: Account Status</p></div></div>
             <div class="flex-shrink-0 mt-6">
                 <h3 class="text-xs uppercase text-[#FF8C00] font-semibold px-4 mb-2">Interface</h3>
                 <nav class="flex flex-col space-y-2">
-                    <a href="/synthesist.html" class="node-link" style="background-color: #293345; color: #E0E6E9; border-left: 2px solid #FF8C00;">
-                        <svg class="w-5 h-5 mr-3 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                    <a href="/synthesist.html" class="node-link" style="background:#293345;color:#E0E6E9;border-left:2px solid #FF8C00;">
+                        <svg class="w-5 h-5 mr-3 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"/></svg>
                         SYNTHESIST
                     </a>
                 </nav>
             </div>
-            
             <div class="border-t border-[#00F0FF]/30 my-4"></div>
-            
             <div class="flex justify-between items-center flex-shrink-0 px-4 mb-2">
                 <h3 class="text-xs uppercase text-[#FF8C00] font-semibold">Knowledge Nodes</h3>
-                <a href="/dashboard.html" title="Manage Nodes" class="text-[#00F0FF] hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </a>
+                <a href="/dashboard.html" title="Manage Nodes" class="text-[#00F0FF] hover:text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></a>
             </div>
-            <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container">
-                <p class="text-gray-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p>
-            </nav>
+            <nav id="mobile-cortex-list-sidebar" class="flex-grow overflow-y-auto space-y-1 sidebar-scroll-container"><p class="text-sky-500 text-sm px-4 py-2">LOAD: Fetching Nodes...</p></nav>
         </aside>
 
+        <!-- ==== MAIN CHAT AREA ==== -->
         <main class="flex flex-col w-full md:pl-64 h-full" onclick="closeMobileMenu()">
-            
-            <div id="chat-panel" class="panel active flex-col h-full">
-            
-                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6 pb-16 md:pb-0">
-                    </div>
-                
-                <div class="flex-shrink-0 p-4 md:p-8 border-t border-[#00F0FF]/30 bg-[#151D2A] fixed bottom-0 left-0 md:relative w-full md:pl-72"> 
+            <div id="chat-panel" class="flex flex-col h-full">
+                <div id="chat-container" class="flex-grow overflow-y-auto px-4 md:px-8 space-y-6"></div>
+
+                <!-- INPUT FORM (sticky on desktop, fixed on mobile) -->
+                <div id="chat-form-container" class="flex-shrink-0">
                     <form id="chat-form" class="flex items-center gap-4">
-                        <input type="text" id="message-input" placeholder="Ask the Synthesist..." required autocomplete="off" class="flex-grow p-4 bg-[#293345] border border-[#00F0FF]/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
+                        <input type="text" id="message-input" placeholder="Ask the Synthesist..." required autocomplete="off"
+                               class="flex-grow p-4 bg-[#293345] border border-[#00F0FF]/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C00] text-white">
                         <button type="submit" id="submit-button" class="btn-primary text-white p-4 rounded-lg transition-colors duration-300 disabled:opacity-50 flex-shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                         </button>
                     </form>
                 </div>
             </div>
-
         </main>
     </div>
-    
+
+    <!-- ==================== JAVASCRIPT ==================== -->
     <script>
-        // --- apiBaseUrl and supabaseClient are loaded from supabaseClient.js ---
-        
-        // --- 4. Define API endpoints ---
-        const API_ENDPOINT = `${apiBaseUrl}/synthesist/query`;
-        const NODES_API_ENDPOINT = `${apiBaseUrl}/synthesist/nodes`;
-        const HISTORY_API_ENDPOINT = `${apiBaseUrl}/synthesist/history`; 
-        const STATUS_API_ENDPOINT = `${apiBaseUrl}/subscription-status`;
+        // apiBaseUrl & supabaseClient come from /supabaseClient.js
+        const API_ENDPOINT          = `${apiBaseUrl}/synthesist/query`;
+        const NODES_API_ENDPOINT    = `${apiBaseUrl}/synthesist/nodes`;
+        const HISTORY_API_ENDPOINT  = `${apiBaseUrl}/synthesist/history`;
+        const STATUS_API_ENDPOINT   = `${apiBaseUrl}/subscription-status`;
 
-        // --- 5. DOM ELEMENTS ---
-        const chatContainer = document.getElementById('chat-container');
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
-        const submitButton = document.getElementById('submit-button');
-        const cortexNameEl = document.getElementById('cortex-name');
-        
-        // Desktop elements
-        const desktopCortexList = document.getElementById('cortex-list-sidebar');
-        const desktopAccountStatus = document.getElementById('account-status-desktop');
-        
-        // Mobile menu elements
-        const mobileMenuOpenButton = document.getElementById('mobile-menu-open-button');
-        const mobileMenuCloseButton = document.getElementById('mobile-menu-close-button');
-        const mobileSidebar = document.getElementById('mobile-sidebar');
-        const mobileSidebarOverlay = document.getElementById('mobile-sidebar-overlay');
-        const mobileCortexList = document.getElementById('mobile-cortex-list-sidebar');
-        const mobileAccountStatus = document.getElementById('account-status-mobile');
+        // DOM
+        const chatContainer      = document.getElementById('chat-container');
+        const chatForm           = document.getElementById('chat-form');
+        const messageInput       = document.getElementById('message-input');
+        const submitButton       = document.getElementById('submit-button');
+        const desktopCortexList  = document.getElementById('cortex-list-sidebar');
+        const desktopAccount     = document.getElementById('account-status-desktop');
+        const mobileCortexList   = document.getElementById('mobile-cortex-list-sidebar');
+        const mobileAccount      = document.getElementById('account-status-mobile');
+        const mobileMenuOpenBtn  = document.getElementById('mobile-menu-open-button');
+        const mobileMenuCloseBtn = document.getElementById('mobile-menu-close-button');
+        const mobileSidebar      = document.getElementById('mobile-sidebar');
+        const mobileOverlay      = document.getElementById('mobile-sidebar-overlay');
 
-        // --- 6. STATE VARIABLES ---
+        // State
         let userToken = null;
-        let chatHistory = []; 
+        let chatHistory = [];
         let allKnowledgeNodes = [];
-        
-        // --- 7. FUNCTIONS ---
-        
-        async function fetchApi(endpoint, options = {}) {
-            if (!userToken) throw new Error("Authentication token is missing.");
-            const headers = {
-                ...options.headers,
-                'Authorization': `Bearer ${userToken}`
-            };
-            const response = await fetch(endpoint, { ...options, headers });
-            if (!response.ok) {
-                let errorDetail = `API Error: ${response.status} ${response.statusText}`;
-                try {
-                    const errorData = await response.json();
-                    errorDetail = errorData.detail || errorDetail;
-                } catch (e) {}
-                throw new Error(errorDetail);
+
+        /* ---------- FETCH HELPERS ---------- */
+        async function fetchApi(endpoint, opts = {}) {
+            if (!userToken) throw new Error("Auth token missing");
+            const headers = { ...opts.headers, Authorization: `Bearer ${userToken}` };
+            const res = await fetch(endpoint, { ...opts, headers });
+            if (!res.ok) {
+                let msg = `API Error ${res.status}`;
+                try { const j = await res.json(); msg = j.detail || msg; } catch {}
+                throw new Error(msg);
             }
-            if (response.status === 202 || response.status === 204) return null;
-            return response.json();
+            return res.status >= 200 && res.status < 300 ? res.json() : null;
         }
 
-        // Utility to scroll chat container to bottom
+        /* ---------- SCROLL ---------- */
         function scrollChatToBottom() {
             requestAnimationFrame(() => {
-                const chatFormContainer = document.querySelector('#chat-form-container');
-                const extraOffset = chatFormContainer ? chatFormContainer.offsetHeight : 0;
-                chatContainer.scrollTo({ 
-                    top: chatContainer.scrollHeight + extraOffset, 
-                    behavior: 'smooth' 
-                });
+                const form = document.getElementById('chat-form-container');
+                const extra = form ? form.offsetHeight : 0;
+                chatContainer.scrollTo({ top: chatContainer.scrollHeight + extra, behavior: 'smooth' });
             });
         }
 
-        // --- 8. FETCH LOGIC ---
+        /* ---------- HISTORY ---------- */
         async function fetchChatHistory() {
             if (!userToken) {
-                chatContainer.innerHTML = '';
                 addMessageToUI("I am the Synthesist. Ask me anything, and I will query all your Knowledge Nodes to find an answer.", 'ai');
                 return;
             }
-            
             chatContainer.innerHTML = '<p id="history-loading" class="text-gray-500 text-center italic mt-10">LOAD: Fetching Chat History...</p>';
-            
             try {
                 const data = await fetchApi(HISTORY_API_ENDPOINT);
                 document.getElementById('history-loading')?.remove();
-                
-                chatHistory = data.messages || []; 
-                
-                if (chatHistory.length === 0) {
+                chatHistory = data.messages || [];
+                if (!chatHistory.length) {
                     addMessageToUI("I am the Synthesist. Ask me anything, and I will query all your Knowledge Nodes to find an answer.", 'ai');
                 } else {
-                    chatHistory.forEach(message => {
-                        addMessageToUI(message.content, message.role);
-                    });
+                    chatHistory.forEach(m => addMessageToUI(m.content, m.role));
                 }
                 scrollChatToBottom();
-            } catch (error) {
-                console.error('Error fetching chat history:', error);
-                document.getElementById('history-loading')?.remove();
-                addMessageToUI(`ERR: Could not load history. ${error.message}. You can still chat.`, 'ai');
+            } catch (e) {
+                console.error(e);
+                addMessageToUI(`ERR: Could not load history. ${e.message}. You can still chat.`, 'ai');
                 scrollChatToBottom();
             }
         }
 
+        /* ---------- NODES & STATUS ---------- */
         async function fetchAndRenderNodes() {
-            try {
-                allKnowledgeNodes = await fetchApi(NODES_API_ENDPOINT);
-                renderNodeSidebarList();
-            } catch (error) {
-                console.error("Error fetching nodes:", error);
-                const errorHTML = `<p class="text-red-400 text-sm px-4 py-2">ERR: Failed to load Nodes</p>`;
-                desktopCortexList.innerHTML = errorHTML;
-                mobileCortexList.innerHTML = errorHTML;
-            }
+            try { allKnowledgeNodes = await fetchApi(NODES_API_ENDPOINT); renderNodeSidebarList(); }
+            catch (e) { console.error(e); desktopCortexList.innerHTML = mobileCortexList.innerHTML = `<p class="text-red-400 text-sm px-4 py-2">ERR: Failed to load Nodes</p>`; }
         }
-        
         async function fetchAndRenderSubscriptionStatus() {
-            try {
-                const data = await fetchApi(STATUS_API_ENDPOINT);
-                renderSubscriptionStatus(data.is_pro);
-            } catch (error) {
-                renderSubscriptionStatus(null, true); 
-            }
+            try { const d = await fetchApi(STATUS_API_ENDPOINT); renderSubscriptionStatus(d.is_pro); }
+            catch { renderSubscriptionStatus(null, true); }
         }
-        
-        // --- 9. RENDERING FUNCTIONS ---
-        
+
         function renderNodeSidebarList() {
-            if (!allKnowledgeNodes || allKnowledgeNodes.length === 0) {
-                const emptyHTML = `<p class="text-gray-500 text-sm px-4 py-2">NODES: None found. <a href="/dashboard.html" class="accent-secondary hover:underline">Create one</a> or <a href="/integrations.html" class="accent-secondary hover:underline">connect one</a>.</p>`;
-                desktopCortexList.innerHTML = emptyHTML;
-                mobileCortexList.innerHTML = emptyHTML;
+            if (!allKnowledgeNodes?.length) {
+                const html = `<p class="text-gray-500 text-sm px-4 py-2">NODES: None found. <a href="/dashboard.html" class="accent-secondary hover:underline">Create one</a> or <a href="/integrations.html" class="accent-secondary hover:underline">connect one</a>.</p>`;
+                desktopCortexList.innerHTML = mobileCortexList.innerHTML = html;
                 return;
             }
-
-            const listHTML = allKnowledgeNodes.map(node => {
-                let icon;
-                if (node.node_type === 'cortex') {
-                    // Book icon for user-created nodes
-                    icon = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"></path></svg>`;
-                } else {
-                    // Globe icon for integrations
-                    icon = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 9.8l.22.22M12 6v.01M16.2 9.8l-.22.22M18.945 11H19a2 2 0 012 2v1a2 2 0 01-2 2h-1M5.055 11H5a2 2 0 00-2 2v1a2 2 0 002 2h1m0-6a9 9 0 0118 0v0"></path></svg>`;
-                }
-
-                return `
-                    <div class="node-link" title="${node.description}">
-                        <span class="accent-secondary">${icon}</span>
-                        <span class="truncate">${node.name}</span>
-                    </div>
-                `;
+            const list = allKnowledgeNodes.map(node => {
+                const icon = node.node_type === 'cortex'
+                    ? `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"/></svg>`
+                    : `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 9.8l.22.22M12 6v.01M16.2 9.8l-.22.22M18.945 11H19a2 2 0 012 2v1a2 2 0 01-2 2h-1M5.055 11H5a2 2 0 00-2 2v1a2 2 0 002 2h1m0-6a9 9 0 0118 0v0"/></svg>`;
+                return `<div class="node-link" title="${node.description || node.name}"><span class="accent-secondary">${icon}</span><span class="truncate">${node.name}</span></div>`;
             }).join('');
-            
-            desktopCortexList.innerHTML = listHTML;
-            mobileCortexList.innerHTML = listHTML;
-        }
-        
-        function renderSubscriptionStatus(isPro, isError = false) {
-            let statusHTML = '';
-
-            if (isError) {
-                statusHTML = `<p class="text-sm text-red-400">STATUS: FAILED</p>`;
-            } else if (isPro) {
-                statusHTML = `
-                    <div>
-                        <p class="text-sm font-semibold accent-secondary">PLAN: PRO</p>
-                        <a href="/account.html" class="text-xs text-[#FF8C00] hover:underline">ACCESS: FULL</a>
-                    </div>
-                `;
-            } else {
-                statusHTML = `
-                    <div>
-                        <p class="text-sm font-semibold text-[#A0AEC0]">PLAN: FREE</p>
-                        <a href="/pricing.html" class="text-sm font-semibold accent-primary hover:underline">ACTION: UPGRADE</a>
-                    </div>
-                `;
-            }
-            
-            if (desktopAccountStatus) desktopAccountStatus.innerHTML = statusHTML;
-            if (mobileAccountStatus) mobileAccountStatus.innerHTML = statusHTML;
+            desktopCortexList.innerHTML = mobileCortexList.innerHTML = list;
         }
 
-        // --- 10. INITIALIZE CHAT ---
+        function renderSubscriptionStatus(isPro, err = false) {
+            let html = err ? `<p class="text-sm text-red-400">STATUS: FAILED</p>`
+                : isPro ? `<div><p class="text-sm font-semibold accent-secondary">PLAN: PRO</p><a href="/account.html" class="text-xs text-[#FF8C00] hover:underline">ACCESS: FULL</a></div>`
+                : `<div><p class="text-sm font-semibold text-[#A0AEC0]">PLAN: FREE</p><a href="/pricing.html" class="text-sm font-semibold accent-primary hover:underline">ACTION: UPGRADE</a></div>`;
+            desktopAccount.innerHTML = mobileAccount.innerHTML = html;
+        }
+
+        /* ---------- AUTH & INIT ---------- */
         function initializeChat() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_OUT') {
-                    window.location.href = '/login.html';
-                    return;
-                }
-                
-                if (session && session.access_token) {
+                if (event === 'SIGNED_OUT') { window.location.href = '/login.html'; return; }
+                if (session?.access_token) {
                     if (userToken !== session.access_token) {
                         userToken = session.access_token;
                         initializeListeners();
@@ -420,211 +308,158 @@
                         fetchAndRenderNodes();
                         fetchAndRenderSubscriptionStatus();
                     }
-                } else if (!session && event === 'INITIAL_SESSION') { 
-                    window.location.href = '/login.html';
-                }
+                } else if (event === 'INITIAL_SESSION') { window.location.href = '/login.html'; }
             });
         }
 
-        // --- 11. INITIALIZE LISTENERS ---
         function initializeListeners() {
-            if (chatForm.dataset.listener) return; 
-
-            // Mobile Menu Listeners
-            mobileMenuOpenButton.addEventListener('click', openMobileMenu);
-            mobileMenuCloseButton.addEventListener('click', closeMobileMenu);
-            mobileSidebarOverlay.addEventListener('click', closeMobileMenu);
-
-            // Chat Form Listener
+            if (chatForm.dataset.listener) return;
+            mobileMenuOpenBtn.addEventListener('click', openMobileMenu);
+            mobileMenuCloseBtn.addEventListener('click', closeMobileMenu);
+            mobileOverlay.addEventListener('click', closeMobileMenu);
             chatForm.addEventListener('submit', handleChatSubmit);
-
             chatForm.dataset.listener = 'true';
         }
-        
-        // --- 12. STREAMING CHAT SUBMIT ---
+
+        /* ---------- MOBILE MENU ---------- */
+        function openMobileMenu() {
+            mobileOverlay.classList.remove('hidden');
+            requestAnimationFrame(() => { mobileOverlay.classList.remove('opacity-0'); mobileSidebar.style.transform = 'translateX(0)'; });
+        }
+        function closeMobileMenu() {
+            mobileOverlay.classList.add('opacity-0');
+            mobileSidebar.style.transform = 'translateX(-100%)';
+            setTimeout(() => mobileOverlay.classList.add('hidden'), 300);
+        }
+
+        /* ---------- CHAT SUBMIT (streaming) ---------- */
         async function handleChatSubmit(e) {
             e.preventDefault();
-            const question = messageInput.value.trim();
-            if (!question || !userToken) return;
+            const q = messageInput.value.trim();
+            if (!q || !userToken) return;
 
-            addMessageToUI(question, 'user');
-            chatHistory.push({ role: 'user', content: question });
+            addMessageToUI(q, 'user');
+            chatHistory.push({ role: 'user', content: q });
             messageInput.value = '';
             submitButton.disabled = true;
 
-            const aiMessageElement = addMessageToUI('', 'ai'); // Create the empty "typing" bubble
-            
-            const formData = new FormData();
-            formData.append('question', question);
-            
-            const historyToSend = chatHistory.slice(0, -1).slice(-10); // Send last 10 messages, minus the one we just added
-            formData.append('chat_history_json', JSON.stringify(historyToSend));
+            const aiEl = addMessageToUI('', 'ai');
+
+            const fd = new FormData();
+            fd.append('question', q);
+            fd.append('chat_history_json', JSON.stringify(chatHistory.slice(0,-1).slice(-10)));
 
             try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${userToken}` },
-                    body: formData
-                });
+                const res = await fetch(API_ENDPOINT, { method: 'POST', headers: { Authorization: `Bearer ${userToken}` }, body: fd });
+                if (!res.ok) throw new Error(await res.text() || 'Stream failed');
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || 'Failed to fetch stream');
-                }
-
-                const reader = response.body.getReader();
+                const reader = res.body.getReader();
                 const decoder = new TextDecoder();
-                let fullResponse = "";
+                let full = '';
 
-                // Read the stream
                 while (true) {
                     const { value, done } = await reader.read();
-                    if (done) break; // Stream finished
-                    
-                    const chunk = decoder.decode(value);
-                    fullResponse += chunk;
-                    
-                    // Update the AI message bubble in real-time
-                    updateAIMessage(aiMessageElement, fullResponse, true);
+                    if (done) break;
+                    full += decoder.decode(value);
+                    updateAIMessage(aiEl, full, true);
                 }
-                
-                // Add the final full response to our state
-                chatHistory.push({ role: 'ai', content: fullResponse });
-
-            } catch (error) {
-                const errorMessage = `ERROR: Process terminated. ${error.message}. Please check your Knowledge Nodes.`;
-                updateAIMessage(aiMessageElement, errorMessage); // Final update with error
-                chatHistory.push({ role: 'ai', content: errorMessage });
+                chatHistory.push({ role: 'ai', content: full });
+            } catch (err) {
+                const msg = `ERROR: Process terminated. ${err.message}. Please check your Knowledge Nodes.`;
+                updateAIMessage(aiEl, msg);
+                chatHistory.push({ role: 'ai', content: msg });
             } finally {
                 submitButton.disabled = false;
                 messageInput.focus();
-                // Finalize the message in the UI (show copy button, etc.)
-                updateAIMessage(aiMessageElement, null, false, true);
+                updateAIMessage(aiEl, null, false, true);
             }
         }
-        
-        // --- 13. UI/NAV FUNCTIONS ---
-        
-        function openMobileMenu() {
-            mobileSidebarOverlay.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                mobileSidebarOverlay.classList.remove('opacity-0');
-                mobileSidebar.style.transform = 'translateX(0)';
-            });
-        }
 
-        function closeMobileMenu() {
-            mobileSidebarOverlay.classList.add('opacity-0');
-            mobileSidebar.style.transform = 'translateX(-100%)';
-            setTimeout(() => {
-                mobileSidebarOverlay.classList.add('hidden');
-            }, 300); 
-        }
-
-        // --- 14. ADD/UPDATE MESSAGE UI (STREAMING COMPATIBLE) ---
+        /* ---------- MESSAGE UI ---------- */
         function addMessageToUI(text, sender) {
-            const messageWrapper = document.createElement('div');
-            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'mb-4', 'message-wrapper');
-            messageWrapper.dataset.role = sender;
-            messageWrapper.dataset.content = text; 
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex items-start gap-3 mb-4 message-wrapper';
+            wrapper.dataset.role = sender;
+            wrapper.dataset.content = text;
 
             if (sender === 'user') {
-                messageWrapper.classList.add('justify-end');
-                const userMessageDiv = document.createElement('div');
-                userMessageDiv.className = 'user-message rounded-lg p-4 max-w-lg';
-                const p = document.createElement('p');
-                p.textContent = text;
-                userMessageDiv.innerHTML = p.innerHTML.replace(/\n/g, '<br>');
-                messageWrapper.appendChild(userMessageDiv);
+                wrapper.classList.add('justify-end');
+                const div = document.createElement('div');
+                div.className = 'user-message rounded-lg p-4 max-w-lg';
+                div.innerHTML = text.replace(/\n/g, '<br>');
+                wrapper.appendChild(div);
             } else {
-                const aiIconDiv = document.createElement('div');
-                aiIconDiv.className = 'bg-[#293345] p-2 rounded-full flex-shrink-0 border border-[#00F0FF]';
-                aiIconDiv.innerHTML = `<svg class="w-6 h-6 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>`;
+                const icon = document.createElement('div');
+                icon.className = 'bg-[#293345] p-2 rounded-full flex-shrink-0 border border-[#00F0FF]';
+                icon.innerHTML = `<svg class="w-6 h-6 accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.4-8.4h-1m-16 0H3m15.55-5.55l-.71-.71M6.16 17.84l-.71-.71m12.39-.71l-.71.71M6.16 6.16l-.71.71M12 5a7 7 0 100 14 7 7 0 000-14z"/></svg>`;
 
-                const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'ai-message rounded-lg p-4 max-w-lg w-full';
-                
-                if (text === '') { // This is a new "typing..." message
-                    aiMessageDiv.innerHTML = `
+                const msg = document.createElement('div');
+                msg.className = 'ai-message rounded-lg p-4 max-w-lg w-full';
+                if (text === '') {
+                    msg.innerHTML = `
                         <div class="typing-indicator flex items-center space-x-1">
                             <span class="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:-0.3s]"></span>
                             <span class="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:-0.15s]"></span>
                             <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                         </div>
                         <div class="prose max-w-none response-content hidden"></div>
-                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>
-                    `;
-                } else { // This is a message from history
-                     aiMessageDiv.innerHTML = `
+                        <button class="copy-button hidden mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>`;
+                } else {
+                    msg.innerHTML = `
                         <div class="typing-indicator hidden"></div>
-                        <div class="prose max-w-none response-content"></div> 
-                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>
-                    `;
-                    aiMessageDiv.querySelector('.response-content').innerHTML = marked.parse(text, { sanitize: false });
+                        <div class="prose max-w-none response-content"></div>
+                        <button class="copy-button mt-3 text-xs text-gray-400 hover:text-[#00F0FF] font-semibold" onclick="copyToClipboard(this)">Copy</button>`;
+                    msg.querySelector('.response-content').innerHTML = marked.parse(text, { sanitize: false });
                 }
-                
-                messageWrapper.appendChild(aiIconDiv);
-                messageWrapper.appendChild(aiMessageDiv);
+                wrapper.append(icon, msg);
             }
-            chatContainer.appendChild(messageWrapper);
+            chatContainer.appendChild(wrapper);
             scrollChatToBottom();
-            return messageWrapper;
+            return wrapper;
         }
 
-        function updateAIMessage(element, text, isStreamChunk = false, isFinalize = false) {
-            const typingIndicator = element.querySelector('.typing-indicator');
-            const responseContent = element.querySelector('.response-content');
-            const copyButton = element.querySelector('.copy-button');
+        function updateAIMessage(el, txt, streaming = false, finalize = false) {
+            const ti = el.querySelector('.typing-indicator');
+            const rc = el.querySelector('.response-content');
+            const cp = el.querySelector('.copy-button');
 
-            if (isStreamChunk) {
-                if (typingIndicator) typingIndicator.classList.add('hidden');
-                if (responseContent) {
-                    responseContent.classList.remove('hidden');
-                    element.dataset.content = text; 
-                    responseContent.innerHTML = marked.parse(text);
-                }
-            } else if (isFinalize) {
-                if (typingIndicator) typingIndicator.classList.add('hidden');
-                if (copyButton) copyButton.classList.remove('hidden');
-                
-                const fullText = element.dataset.content || "No response received.";
-                if (responseContent) {
-                    responseContent.innerHTML = marked.parse(fullText);
-                }
+            if (streaming) {
+                ti?.classList.add('hidden');
+                rc.classList.remove('hidden');
+                el.dataset.content = txt;
+                rc.innerHTML = marked.parse(txt);
+            } else if (finalize) {
+                ti?.classList.add('hidden');
+                cp?.classList.remove('hidden');
+                rc.innerHTML = marked.parse(el.dataset.content || '');
             } else {
-                element.dataset.content = text;
-                if (typingIndicator) typingIndicator.classList.add('hidden');
-                if (responseContent) {
-                    responseContent.innerHTML = marked.parse(text || "No response received.", { sanitize: false });
-                    responseContent.classList.remove('hidden');
-                }
-                if (copyButton) copyButton.classList.remove('hidden');
+                el.dataset.content = txt;
+                ti?.classList.add('hidden');
+                rc.innerHTML = marked.parse(txt || 'No response received.', { sanitize: false });
+                rc.classList.remove('hidden');
+                cp?.classList.remove('hidden');
             }
             scrollChatToBottom();
         }
 
-        function copyToClipboard(buttonElement) {
-            const contentElement = buttonElement.parentElement.querySelector('.response-content');
-            if (contentElement) {
-                const textToCopy = contentElement.innerText || contentElement.textContent;
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    buttonElement.textContent = 'COPIED!';
-                    setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
-                }).catch(err => {
-                    buttonElement.textContent = 'COPY FAILED';
-                    setTimeout(() => { buttonElement.textContent = 'Copy'; }, 2000);
-                });
-            }
+        function copyToClipboard(btn) {
+            const txt = btn.parentElement.querySelector('.response-content')?.innerText;
+            if (!txt) return;
+            navigator.clipboard.writeText(txt).then(() => {
+                btn.textContent = 'COPIED!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            }).catch(() => {
+                btn.textContent = 'COPY FAILED';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            });
         }
-        
-        // --- 15. RUN INITIALIZATION ---
-        initializeChat();
 
-        // Make functions globally accessible
+        /* ---------- GLOBAL ---------- */
         window.openMobileMenu = openMobileMenu;
         window.closeMobileMenu = closeMobileMenu;
         window.copyToClipboard = copyToClipboard;
-        
+
+        initializeChat();
     </script>
 </body>
 </html>
